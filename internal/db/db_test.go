@@ -1,14 +1,11 @@
-package db
+package db_test
 
 import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"os"
-	"strings"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -16,66 +13,20 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/postgres"
+
+	"github.com/movsesmeliksetyan/sprout-api/internal/db"
+	"github.com/movsesmeliksetyan/sprout-api/internal/testutil"
 )
 
-// adminURL connects to the container's default database; tests create their
-// own databases from it so they never share state.
-var (
-	adminURL  string
-	dbCounter atomic.Int64
-)
+func TestMain(m *testing.M) { os.Exit(testutil.Main(m)) }
 
-func TestMain(m *testing.M) {
-	ctx := context.Background()
-	container, err := postgres.Run(ctx, "postgres:16-alpine",
-		postgres.WithDatabase("postgres"),
-		postgres.WithUsername("sprout"),
-		postgres.WithPassword("sprout"),
-		postgres.BasicWaitStrategies(),
-	)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "start postgres (is Docker running?): %v\n", err)
-		os.Exit(1)
-	}
-	adminURL, err = container.ConnectionString(ctx, "sslmode=disable")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "postgres connection string: %v\n", err)
-		os.Exit(1)
-	}
-
-	code := m.Run()
-
-	if err := testcontainers.TerminateContainer(container); err != nil {
-		fmt.Fprintf(os.Stderr, "stop postgres: %v\n", err)
-	}
-	os.Exit(code)
-}
-
-// newDatabase creates an empty database and returns its URL.
-func newDatabase(t *testing.T) string {
+// newPool returns a pool on a fresh database, migrated when migrated is true.
+func newPool(t *testing.T, migrated bool) *pgxpool.Pool {
 	t.Helper()
-	ctx := context.Background()
-	name := fmt.Sprintf("test_%d", dbCounter.Add(1))
-
-	admin, err := pgx.Connect(ctx, adminURL)
-	require.NoError(t, err)
-	defer admin.Close(ctx)
-	_, err = admin.Exec(ctx, "CREATE DATABASE "+name)
-	require.NoError(t, err)
-
-	return strings.Replace(adminURL, "/postgres?", "/"+name+"?", 1)
-}
-
-// newPool returns a pool on a fresh database, migrated when migrate is true.
-func newPool(t *testing.T, migrate bool) *pgxpool.Pool {
-	t.Helper()
-	url := newDatabase(t)
-	if migrate {
-		require.NoError(t, Migrate(context.Background(), url, MigrateUp, &bytes.Buffer{}))
+	if migrated {
+		return testutil.NewDB(t)
 	}
-	pool, err := Open(context.Background(), url)
+	pool, err := db.Open(context.Background(), testutil.NewEmptyDatabaseURL(t))
 	require.NoError(t, err)
 	t.Cleanup(pool.Close)
 	return pool
@@ -84,37 +35,37 @@ func newPool(t *testing.T, migrate bool) *pgxpool.Pool {
 func migrate(t *testing.T, url, command string) string {
 	t.Helper()
 	var out bytes.Buffer
-	require.NoError(t, Migrate(context.Background(), url, command, &out))
+	require.NoError(t, db.Migrate(context.Background(), url, command, &out))
 	return out.String()
 }
 
 func TestMigrate(t *testing.T) {
-	url := newDatabase(t)
+	url := testutil.NewEmptyDatabaseURL(t)
 
-	assert.Contains(t, migrate(t, url, MigrateStatus), "pending      00001_init.sql")
+	assert.Contains(t, migrate(t, url, db.MigrateStatus), "pending      00001_init.sql")
 
-	assert.Contains(t, migrate(t, url, MigrateUp), "applied      00001_init.sql")
-	assert.Equal(t, "no migrations to apply\n", migrate(t, url, MigrateUp), "up is idempotent")
-	assert.Contains(t, migrate(t, url, MigrateStatus), "applied      00001_init.sql")
+	assert.Contains(t, migrate(t, url, db.MigrateUp), "applied      00001_init.sql")
+	assert.Equal(t, "no migrations to apply\n", migrate(t, url, db.MigrateUp), "up is idempotent")
+	assert.Contains(t, migrate(t, url, db.MigrateStatus), "applied      00001_init.sql")
 
-	assert.Contains(t, migrate(t, url, MigrateDown), "rolled back  00001_init.sql")
-	assert.Contains(t, migrate(t, url, MigrateStatus), "pending      00001_init.sql")
-	assert.Equal(t, "no migrations to roll back\n", migrate(t, url, MigrateDown))
+	assert.Contains(t, migrate(t, url, db.MigrateDown), "rolled back  00001_init.sql")
+	assert.Contains(t, migrate(t, url, db.MigrateStatus), "pending      00001_init.sql")
+	assert.Equal(t, "no migrations to roll back\n", migrate(t, url, db.MigrateDown))
 
-	assert.Contains(t, migrate(t, url, MigrateUp), "applied      00001_init.sql", "down then up round-trips")
+	assert.Contains(t, migrate(t, url, db.MigrateUp), "applied      00001_init.sql", "down then up round-trips")
 }
 
 func TestMigrate_UnknownCommand(t *testing.T) {
-	err := Migrate(context.Background(), "postgres://unused", "redo", &bytes.Buffer{})
+	err := db.Migrate(context.Background(), "postgres://unused", "redo", &bytes.Buffer{})
 
-	assert.ErrorIs(t, err, ErrUnknownMigrateCommand)
+	assert.ErrorIs(t, err, db.ErrUnknownMigrateCommand)
 }
 
 func TestMigrate_UnreachableDatabaseDoesNotLeakPassword(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := Migrate(ctx, "postgres://sprout:hunter2-secret@"+closedAddr(t)+"/sprout?sslmode=disable", MigrateUp, &bytes.Buffer{})
+	err := db.Migrate(ctx, "postgres://sprout:hunter2-secret@"+closedAddr(t)+"/sprout?sslmode=disable", db.MigrateUp, &bytes.Buffer{})
 
 	require.Error(t, err)
 	assert.NotContains(t, err.Error(), "hunter2-secret")
@@ -150,22 +101,22 @@ func TestInitMigration(t *testing.T) {
 func TestPingAndReady(t *testing.T) {
 	pool := newPool(t, false)
 
-	got, err := New(pool).Ping(context.Background())
+	got, err := db.New(pool).Ping(context.Background())
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, got)
 
-	assert.NoError(t, Ready(pool)(context.Background()))
+	assert.NoError(t, db.Ready(pool)(context.Background()))
 }
 
 func TestOpen_MalformedURL(t *testing.T) {
-	_, err := Open(context.Background(), "postgres://sprout:hunter2-secret@localhost:not-a-port/sprout")
+	_, err := db.Open(context.Background(), "postgres://sprout:hunter2-secret@localhost:not-a-port/sprout")
 
 	require.Error(t, err)
 	assert.NotContains(t, err.Error(), "hunter2-secret")
 }
 
 func TestOpen_DoesNotConnect(t *testing.T) {
-	pool, err := Open(context.Background(), "postgres://sprout:sprout@"+closedAddr(t)+"/sprout?sslmode=disable")
+	pool, err := db.Open(context.Background(), "postgres://sprout:sprout@"+closedAddr(t)+"/sprout?sslmode=disable")
 	require.NoError(t, err, "an unreachable database must not stop the process from starting")
 	defer pool.Close()
 
@@ -173,7 +124,7 @@ func TestOpen_DoesNotConnect(t *testing.T) {
 	defer cancel()
 	start := time.Now()
 
-	assert.Error(t, Ready(pool)(ctx))
+	assert.Error(t, db.Ready(pool)(ctx))
 	assert.Less(t, time.Since(start), 3*time.Second)
 }
 
@@ -214,7 +165,7 @@ func TestWithTx(t *testing.T) {
 	t.Run("commits when fn returns nil", func(t *testing.T) {
 		pool := newItemsTable(t)
 
-		err := WithTx(ctx, pool, func(tx pgx.Tx) error { return insertItem(ctx, tx, "kept") })
+		err := db.WithTx(ctx, pool, func(tx pgx.Tx) error { return insertItem(ctx, tx, "kept") })
 
 		require.NoError(t, err)
 		assert.Equal(t, []string{"kept"}, itemNames(t, pool))
@@ -224,7 +175,7 @@ func TestWithTx(t *testing.T) {
 		pool := newItemsTable(t)
 		boom := errors.New("boom")
 
-		err := WithTx(ctx, pool, func(tx pgx.Tx) error {
+		err := db.WithTx(ctx, pool, func(tx pgx.Tx) error {
 			require.NoError(t, insertItem(ctx, tx, "discarded"))
 			return boom
 		})
@@ -237,7 +188,7 @@ func TestWithTx(t *testing.T) {
 		pool := newItemsTable(t)
 
 		assert.PanicsWithValue(t, "kaboom", func() {
-			_ = WithTx(ctx, pool, func(tx pgx.Tx) error {
+			_ = db.WithTx(ctx, pool, func(tx pgx.Tx) error {
 				require.NoError(t, insertItem(ctx, tx, "discarded"))
 				panic("kaboom")
 			})
@@ -250,9 +201,9 @@ func TestWithTx(t *testing.T) {
 	t.Run("a failed nested call undoes only its own work", func(t *testing.T) {
 		pool := newItemsTable(t)
 
-		err := WithTx(ctx, pool, func(tx pgx.Tx) error {
+		err := db.WithTx(ctx, pool, func(tx pgx.Tx) error {
 			require.NoError(t, insertItem(ctx, tx, "outer"))
-			nested := WithTx(ctx, tx, func(inner pgx.Tx) error {
+			nested := db.WithTx(ctx, tx, func(inner pgx.Tx) error {
 				require.NoError(t, insertItem(ctx, inner, "inner"))
 				return errors.New("inner failed")
 			})
@@ -267,8 +218,8 @@ func TestWithTx(t *testing.T) {
 	t.Run("generated queries run inside the transaction", func(t *testing.T) {
 		pool := newItemsTable(t)
 
-		err := WithTx(ctx, pool, func(tx pgx.Tx) error {
-			_, err := New(tx).Ping(ctx)
+		err := db.WithTx(ctx, pool, func(tx pgx.Tx) error {
+			_, err := db.New(tx).Ping(ctx)
 			return err
 		})
 

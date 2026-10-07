@@ -285,6 +285,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-07 · Test harness and CI**
 - Do: `testcontainers` helper that starts Postgres once per package, applies migrations, and gives each test an isolated schema or truncation. Helpers: `NewTestUser`, `AuthedRequest(user)` (bypasses JWT with a test verifier), fixture builders for categories/transactions. GitHub Actions workflow: lint, generate-drift check, tests with race detector (the file and the drift job already exist from BE-06; add the lint and test jobs).
 - Files: `internal/testutil/*`, `.github/workflows/backend.yml`
+- Notes: isolation is a database per test, copied from a template that is migrated once per package, so tests may run in parallel. The helpers that depend on things built later are added by those tasks: the test token verifier and `AuthedRequest` in BE-09, `NewTestUser` in BE-10, the category fixture builder in BE-15 and the transaction fixture builder in BE-17. golangci-lint runs at a pinned version through the Makefile, like the other tools.
 - Done when: a sample integration test hitting `/healthz` and a DB round-trip runs locally and in CI.
 - Needs: BE-05, BE-06
 
@@ -299,13 +300,13 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-09 · Auth0 JWT middleware**
 - Do: Validate RS256 tokens against the tenant JWKS (cached, rotated), check issuer and audience, extract `sub`; reject everything else with `unauthenticated`. Write `docs/auth0-setup.md`: create API (audience), Native application for iOS, enable Sign in with Apple + passwordless email (or database) connections, add an Action that puts `email` and `name` into the access token as namespaced claims, create a Machine-to-Machine app with `delete:users` for account deletion.
 - Files: `internal/auth/middleware.go`, `internal/auth/claims.go`, `docs/auth0-setup.md`
-- Done when: tests with locally signed tokens cover valid, expired, wrong audience, wrong issuer, bad signature, missing header.
+- Done when: tests with locally signed tokens cover valid, expired, wrong audience, wrong issuer, bad signature, missing header. `internal/testutil` gains the test token verifier and `AuthedRequest` (deferred from BE-07).
 - Needs: BE-03
 
 **BE-10 · User provisioning and `GET /me`**
 - Do: `users` migration. Middleware step after JWT: find user by `auth0_sub`, or create it (email/name from claims; timezone default `UTC`, currency default `USD`) inside a transaction that also calls an `OnUserCreated` hook (empty for now; BE-14 plugs category seeding into it); safe under concurrent first requests (unique constraint + retry). Put `User` in request context. Implement `GET /me` (stats stubbed to zeros until BE-20).
 - Files: `migrations/00002_users.sql`, `internal/users/service.go`, `internal/users/handler.go`, `internal/db/queries/users.sql`
-- Done when: first call creates exactly one user even with 10 parallel requests; the hook runs exactly once per user.
+- Done when: first call creates exactly one user even with 10 parallel requests; the hook runs exactly once per user. `internal/testutil` gains `NewTestUser` (deferred from BE-07).
 - Needs: BE-09, BE-07
 
 **BE-11 · `PATCH /me`, preferences, onboarding**
@@ -337,7 +338,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-15 · Categories CRUD, archive, reorder**
 - Do: All category endpoints. Enforce name uniqueness, 30-category cap, valid `icon`/`shade`. `DELETE` only when unused, else `conflict`; archive via `PATCH archived:true` (keeps transactions, hides from lists and pickers). `PUT /categories/order` requires the exact set of active ids.
 - Files: `internal/categories/service.go`, `handler.go`, `internal/db/queries/categories.sql`
-- Done when: integration tests for each endpoint incl. cross-user `404`, duplicate name `422`, reorder with a missing id `422`.
+- Done when: integration tests for each endpoint incl. cross-user `404`, duplicate name `422`, reorder with a missing id `422`. `internal/testutil` gains the category fixture builder (deferred from BE-07).
 - Needs: BE-14, BE-10
 
 **BE-16 · Budgets bulk update**
@@ -351,7 +352,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-17 · Transactions schema and CRUD**
 - Do: Migration with indexes from §3. Create/get/update/delete. Compute `local_date` from the user's timezone, `merchant_key` via the normaliser (stub until BE-29: lower-cased trim), `dedup_hash`. Validation: amount > 0; expense requires an active category owned by the user; income forbids one. Saving a manual expense with a merchant upserts a user merchant rule (hook, no-op until BE-34).
 - Files: `migrations/00006_transactions.sql`, `internal/transactions/service.go`, `handler.go`, `queries/transactions.sql`
-- Done when: integration tests for all four verbs, validation matrix, idempotent create, cross-user isolation.
+- Done when: integration tests for all four verbs, validation matrix, idempotent create, cross-user isolation. `internal/testutil` gains the transaction fixture builder (deferred from BE-07).
 - Needs: BE-13, BE-15
 
 **BE-18 · Transactions list**
