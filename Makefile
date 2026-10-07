@@ -6,6 +6,7 @@ BIN := bin/sprout
 SQLC := go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
 OAPI_CODEGEN := go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.8.0
 VACUUM := go run github.com/daveshanley/vacuum@v0.30.6
+GOLANGCI_LINT := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
 # Paths written by `make generate`.
 GENERATED := internal/db internal/httpx/api_gen.go
@@ -24,11 +25,11 @@ run: ## Run the HTTP API
 worker: ## Run the job worker
 	go run ./cmd/sprout worker
 
-test: ## Run all tests with the race detector
+test: ## Run all tests with the race detector (needs Docker)
 	go test -race ./...
 
 lint: lint-spec ## Run golangci-lint and the OpenAPI linter
-	golangci-lint run ./...
+	$(GOLANGCI_LINT) run ./...
 
 lint-spec: ## Lint api/openapi.yaml
 	$(VACUUM) lint --details --fail-severity error --ruleset api/vacuum.yaml api/openapi.yaml

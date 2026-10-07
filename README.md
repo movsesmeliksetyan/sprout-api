@@ -9,7 +9,6 @@ Go backend for Sprout, an iOS app for tracking spending by category and saving t
 ## Requirements
 
 - Go 1.27 or newer
-- [golangci-lint](https://golangci-lint.run) v2.14 or newer
 - Docker, for local Postgres and MinIO and for the database tests
 
 ## Setup
@@ -43,7 +42,7 @@ Run `make` to list every target.
 | `make run` | Run the HTTP API (`sprout api`) until interrupted |
 | `make worker` | Run the job worker (`sprout worker`) |
 | `make test` | Run all tests with the race detector (needs Docker: database tests start their own Postgres) |
-| `make lint` | Run golangci-lint and lint `api/openapi.yaml` |
+| `make lint` | Run golangci-lint and lint `api/openapi.yaml` (pinned tools; the first run compiles them) |
 | `make generate` | Regenerate the sqlc queries in `internal/db` and the OpenAPI server in `internal/httpx/api_gen.go` (pinned tools; nothing to install) |
 | `make generate-check` | Fail if the committed generated code is out of date (what CI runs) |
 | `make migrate-up` / `make migrate-down` | Apply all pending migrations / roll back the latest one |

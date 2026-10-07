@@ -65,6 +65,7 @@ make eval-llm            # on demand only; calls the real LLM
 ## Testing
 
 - Table tests for pure logic; golden files for parsers; `testcontainers-go` for Postgres/MinIO integration tests.
+- A package that needs a database adds `func TestMain(m *testing.M) { os.Exit(testutil.Main(m)) }` and calls `testutil.NewDB(t)` in each test. Every test gets its own migrated database, so `t.Parallel()` is safe and no cleanup is needed. `internal/testutil` also has the HTTP helpers; add new shared fixtures there, not in individual packages.
 - Tests use the `llm.Fake` and the fake APNs client. Live calls are opt-in behind `-tags=live`.
 - Every endpoint gets a cross-user isolation test (expects `404`).
 - Fixtures in `testdata/` must be anonymised — no real statements, names or account numbers.
