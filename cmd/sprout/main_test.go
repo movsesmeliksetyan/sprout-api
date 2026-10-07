@@ -2,16 +2,31 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"net"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const testSecret = "s3-secret-77c1"
 
-func devEnv() map[string]string {
+// freeAddr returns a loopback address that was free a moment ago. The
+// configuration rejects port 0, so tests cannot ask the kernel to pick one.
+func freeAddr(t *testing.T) string {
+	t.Helper()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	require.NoError(t, ln.Close())
+	return ln.Addr().String()
+}
+
+func devEnv(t *testing.T) map[string]string {
+	t.Helper()
 	return map[string]string{
 		"ENV":                  "dev",
+		"HTTP_ADDR":            freeAddr(t),
 		"DATABASE_URL":         "postgres://sprout:sprout@localhost:5432/sprout",
 		"AUTH0_DOMAIN":         "sprout.eu.auth0.com",
 		"AUTH0_AUDIENCE":       "https://api.sprout.local",
@@ -44,12 +59,14 @@ func TestRun(t *testing.T) {
 			wantStderr: []string{"sprout api: invalid configuration:", "ENV: required", "DATABASE_URL: required"},
 		},
 		{
-			name: "api loads config then stops at the stub", args: []string{"api"}, env: devEnv(), wantCode: exitError,
-			wantStdout: []string{`"msg":"config loaded"`, `"env":"dev"`, `"secret_access_key":"[redacted]"`},
-			wantStderr: []string{"sprout api: not implemented yet"},
+			name: "api serves until asked to stop, then exits cleanly", args: []string{"api"}, env: devEnv(t), wantCode: exitOK,
+			wantStdout: []string{
+				`"msg":"config loaded"`, `"env":"dev"`, `"secret_access_key":"[redacted]"`,
+				`"msg":"listening"`, `"msg":"shutting down"`, `"msg":"shutdown complete"`,
+			},
 		},
 		{
-			name: "worker loads config then stops at the stub", args: []string{"worker"}, env: devEnv(), wantCode: exitError,
+			name: "worker loads config then stops at the stub", args: []string{"worker"}, env: devEnv(t), wantCode: exitError,
 			wantStdout: []string{`"msg":"config loaded"`},
 			wantStderr: []string{"sprout worker: not implemented yet"},
 		},
@@ -64,7 +81,11 @@ func TestRun(t *testing.T) {
 				return v, ok
 			}
 
-			got := run(tt.args, cli{lookup: lookup, stdout: &stdout, stderr: &stderr})
+			// Already cancelled: a command that serves starts up and shuts straight down.
+			ctx, cancel := context.WithCancel(context.Background())
+			cancel()
+
+			got := run(tt.args, cli{ctx: ctx, lookup: lookup, stdout: &stdout, stderr: &stderr})
 
 			assert.Equal(t, tt.wantCode, got, "exit code")
 			for _, want := range tt.wantStdout {
@@ -76,4 +97,24 @@ func TestRun(t *testing.T) {
 			assert.NotContains(t, stdout.String()+stderr.String(), testSecret)
 		})
 	}
+}
+
+func TestRunAPI_AddressInUse(t *testing.T) {
+	taken, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = taken.Close() })
+
+	env := devEnv(t)
+	env["HTTP_ADDR"] = taken.Addr().String()
+	var stdout, stderr bytes.Buffer
+	lookup := func(key string) (string, bool) {
+		v, ok := env[key]
+		return v, ok
+	}
+
+	got := run([]string{"api"}, cli{ctx: context.Background(), lookup: lookup, stdout: &stdout, stderr: &stderr})
+
+	assert.Equal(t, exitError, got)
+	assert.Contains(t, stderr.String(), "sprout api: listen on "+taken.Addr().String())
+	assert.NotContains(t, stdout.String(), `"msg":"listening"`)
 }

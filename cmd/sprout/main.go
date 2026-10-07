@@ -3,12 +3,17 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/movsesmeliksetyan/sprout-api/internal/config"
+	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
 )
 
@@ -20,8 +25,10 @@ const (
 
 var errNotImplemented = errors.New("not implemented yet")
 
-// cli is what a command may touch outside its arguments.
+// cli is what a command may touch outside its arguments. ctx is cancelled
+// when the process is asked to stop.
 type cli struct {
+	ctx    context.Context
 	lookup func(string) (string, bool)
 	stdout io.Writer
 	stderr io.Writer
@@ -34,7 +41,7 @@ type command struct {
 }
 
 var commands = []command{
-	{name: "api", summary: "Serve the HTTP API", run: configuredStub},
+	{name: "api", summary: "Serve the HTTP API", run: runAPI},
 	{name: "worker", summary: "Run background and periodic jobs", run: configuredStub},
 	{name: "migrate", summary: "Apply or inspect database migrations (up, down, status)", run: notImplemented},
 }
@@ -44,7 +51,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "sprout: %v\n", err)
 		os.Exit(exitError)
 	}
-	os.Exit(run(os.Args[1:], cli{lookup: os.LookupEnv, stdout: os.Stdout, stderr: os.Stderr}))
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	code := run(os.Args[1:], cli{ctx: ctx, lookup: os.LookupEnv, stdout: os.Stdout, stderr: os.Stderr})
+	stop()
+	os.Exit(code)
 }
 
 func run(args []string, c cli) int {
@@ -82,8 +93,31 @@ func usage(w io.Writer) {
 	}
 }
 
+// runAPI serves HTTP until the process is asked to stop, then drains
+// in-flight requests.
+func runAPI(c cli, _ []string) error {
+	cfg, err := config.Load(c.lookup)
+	if err != nil {
+		return err
+	}
+	logger := logging.New(c.stdout, cfg.LogLevel)
+	logger.Info("config loaded", "config", cfg)
+
+	ln, err := net.Listen("tcp", cfg.HTTPAddr)
+	if err != nil {
+		return fmt.Errorf("listen on %s: %w", cfg.HTTPAddr, err)
+	}
+	logger.Info("listening", "addr", ln.Addr().String())
+
+	if err := httpx.NewServer(logger).Run(c.ctx, ln); err != nil {
+		return err
+	}
+	logger.Info("shutdown complete")
+	return nil
+}
+
 // configuredStub validates the configuration and sets up logging, which is
-// as far as the api and worker commands go for now.
+// as far as the worker command goes for now.
 func configuredStub(c cli, _ []string) error {
 	cfg, err := config.Load(c.lookup)
 	if err != nil {

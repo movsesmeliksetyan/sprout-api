@@ -18,9 +18,10 @@ Go backend for Sprout, an iOS app for tracking spending by category and saving t
 git clone git@github.com:movsesmeliksetyan/sprout-api.git
 cd sprout-api
 cp .env.example .env
-make build
-./bin/sprout --help
+make run
 ```
+
+The API listens on `HTTP_ADDR` (default `:8080`). `GET /healthz` answers while the process is up and `GET /readyz` once its dependencies are reachable. Stop it with Ctrl-C or SIGTERM; in-flight requests are allowed to finish.
 
 ## Configuration
 
@@ -35,7 +36,7 @@ Run `make` to list every target.
 | Target | What it does |
 |---|---|
 | `make build` | Build `bin/sprout` |
-| `make run` | Run the HTTP API (`sprout api`) |
+| `make run` | Run the HTTP API (`sprout api`) until interrupted |
 | `make worker` | Run the job worker (`sprout worker`) |
 | `make test` | Run all tests with the race detector |
 | `make lint` | Run golangci-lint |
@@ -43,7 +44,7 @@ Run `make` to list every target.
 | `make migrate-up` / `make migrate-down` | Apply or roll back migrations (`sprout migrate`) |
 | `make eval` | Run the deterministic categorisation evaluation |
 
-The `api`, `worker` and `migrate` subcommands are stubs for now: `api` and `worker` load the configuration and log it (secrets redacted), then all three exit with "not implemented yet". They are filled in by later tasks in the PRD, as are code generation and the evaluation set.
+The `worker` and `migrate` subcommands are stubs for now and exit with "not implemented yet". They are filled in by later tasks in the PRD, as are code generation and the evaluation set.
 
 ## Layout
 
