@@ -55,7 +55,7 @@ One binary, three subcommands: `sprout api`, `sprout worker`, `sprout migrate`.
   api/openapi.yaml
   migrations/                 # goose SQL
   internal/
-    config/  httpx/  auth/  storage/  llm/  jobs/
+    config/  logging/  httpx/  auth/  storage/  llm/  jobs/
     db/                       # sqlc output + queries/*.sql
     money/  period/
     users/  categories/  transactions/  summary/  goals/
@@ -251,8 +251,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 - Needs: —
 
 **BE-02 · Configuration and logging**
-- Do: Typed config loaded from env (with `.env` support for local), validated at start-up with a clear error per missing key. `slog` JSON logger with request-scoped fields. Keys: `HTTP_ADDR`, `DATABASE_URL`, `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `S3_*`, `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_MODEL_TEXT`, `LLM_MODEL_VISION`, `APNS_*`, `ENV`.
-- Files: `internal/config/config.go`, `.env.example`
+- Do: Typed config loaded from env (with `.env` support for local), validated at start-up with a clear error per missing key. `slog` JSON logger with request-scoped fields. Keys: `HTTP_ADDR`, `DATABASE_URL`, `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `S3_*`, `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_MODEL_TEXT`, `LLM_MODEL_VISION`, `APNS_*`, `ENV`, `LOG_LEVEL`. `ENV` is `dev`, `staging` or `prod`; `LLM_API_KEY` and `APNS_*` may be empty in `dev` and are required elsewhere.
+- Files: `internal/config/config.go`, `internal/config/secret.go`, `internal/logging/logging.go`, `.env.example`
 - Done when: unit test covers missing/invalid values; secrets never appear in logged config.
 - Needs: BE-01
 
