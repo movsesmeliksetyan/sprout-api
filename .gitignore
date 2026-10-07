@@ -1,0 +1,17 @@
+# Build output
+/bin/
+*.test
+*.out
+
+# Local configuration and secrets
+.env
+.env.local
+*.p8
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+
+# Claude Code per-user settings
+.claude/settings.local.json
