@@ -22,9 +22,10 @@ const (
 // Server is the HTTP API: a router with the standard middleware stack and
 // the health endpoints.
 type Server struct {
-	logger *slog.Logger
-	router chi.Router
-	checks []namedCheck
+	logger    *slog.Logger
+	router    chi.Router
+	responder *Responder
+	checks    []namedCheck
 
 	requestTimeout time.Duration
 	drainTimeout   time.Duration
@@ -60,6 +61,7 @@ func WithMaxBodyBytes(n int64) Option {
 func NewServer(logger *slog.Logger, opts ...Option) *Server {
 	s := &Server{
 		logger:         logger,
+		responder:      NewResponder(logger),
 		requestTimeout: defaultRequestTimeout,
 		checkTimeout:   defaultCheckTimeout,
 		maxBodyBytes:   defaultMaxBodyBytes,
@@ -78,14 +80,14 @@ func NewServer(logger *slog.Logger, opts ...Option) *Server {
 		accessLog(logger),
 		middleware.Compress(gzipLevel, "application/json"),
 		recoverer(logger),
-		timeout(s.requestTimeout),
-		bodyLimit(s.maxBodyBytes),
+		timeout(s.requestTimeout, s.responder),
+		bodyLimit(s.maxBodyBytes, s.responder),
 	)
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		writeError(w, r, http.StatusNotFound, codeNotFound, "The requested resource was not found.")
+		s.responder.Error(w, r, ErrNotFound)
 	})
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-		writeError(w, r, http.StatusMethodNotAllowed, codeBadRequest, "This method is not allowed for the requested resource.")
+		s.responder.Error(w, r, errMethodNotAllowed)
 	})
 	r.Get(healthzPath, handleHealthz)
 	r.Get(readyzPath, s.handleReadyz)
@@ -96,6 +98,9 @@ func NewServer(logger *slog.Logger, opts ...Option) *Server {
 
 // Router exposes the router so feature packages can mount their routes.
 func (s *Server) Router() chi.Router { return s.router }
+
+// Responder returns the error writer shared by every handler on this server.
+func (s *Server) Responder() *Responder { return s.responder }
 
 // Handler returns the server as an http.Handler.
 func (s *Server) Handler() http.Handler { return s.router }

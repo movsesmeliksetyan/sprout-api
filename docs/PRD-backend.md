@@ -263,7 +263,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 - Needs: BE-02
 
 **BE-04 · Error, response and pagination conventions**
-- Do: Typed domain errors (`ErrNotFound`, `ErrConflict`, `ValidationError{Fields}`, …) and one mapper to the envelope in contract §1.1. Opaque cursor encode/decode helper (base64 of `local_date|id`). JSON write helper that emits `null` for nil optionals.
+- Do: Typed domain errors (`ErrNotFound`, `ErrConflict`, `ValidationError{Fields}`, …) and one mapper to the envelope in contract §1.1. The mapper is `httpx.Responder`: `Error` for handler and service errors (unknown → `internal`, logged), `RequestError` for request decoding (unknown → `bad_request`). Opaque cursor encode/decode helper (base64 of `local_date|id`). JSON write helper that emits `null` for nil optionals.
 - Files: `internal/httpx/errors.go`, `internal/httpx/respond.go`, `internal/httpx/cursor.go`
 - Done when: table test maps every error type to the right status + code; cursor round-trips; tampered cursor → `bad_request`.
 - Needs: BE-03
@@ -275,7 +275,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 - Needs: BE-02
 
 **BE-06 · OpenAPI spec and code generation**
-- Do: Transcribe every endpoint and schema in `docs/api-contract.md` into `api/openapi.yaml`. Generate strict server interface + models with `oapi-codegen`. Mount the generated router under `/v1`; unimplemented operations return `501` for now. Serve the spec at `/v1/openapi.yaml` in non-production.
+- Do: Transcribe every endpoint and schema in `docs/api-contract.md` into `api/openapi.yaml`. Generate strict server interface + models with `oapi-codegen`. Mount the generated router under `/v1`; unimplemented operations return `501` for now. Serve the spec at `/v1/openapi.yaml` in non-production. Generate optional response fields without `omitempty` so they are sent as `null` (contract §1), and plug `httpx.Responder` (BE-04) into the strict server's request and response error hooks.
 - Files: `api/openapi.yaml`, `api/codegen.yaml`, `internal/httpx/api_gen.go`
 - Done when: spec validates with an OpenAPI linter; every path in the contract's traceability table exists in the spec; CI fails if generated code is stale.
 - Needs: BE-04
