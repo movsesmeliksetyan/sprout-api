@@ -2,14 +2,34 @@ package main
 
 import (
 	"bytes"
-	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
+
+const testSecret = "s3-secret-77c1"
+
+func devEnv() map[string]string {
+	return map[string]string{
+		"ENV":                  "dev",
+		"DATABASE_URL":         "postgres://sprout:sprout@localhost:5432/sprout",
+		"AUTH0_DOMAIN":         "sprout.eu.auth0.com",
+		"AUTH0_AUDIENCE":       "https://api.sprout.local",
+		"S3_REGION":            "us-east-1",
+		"S3_BUCKET":            "sprout",
+		"S3_ACCESS_KEY_ID":     "minioadmin",
+		"S3_SECRET_ACCESS_KEY": testSecret,
+		"LLM_PROVIDER":         "anthropic",
+		"LLM_MODEL_TEXT":       "text-model",
+		"LLM_MODEL_VISION":     "vision-model",
+	}
+}
 
 func TestRun(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       []string
+		env        map[string]string
 		wantCode   int
 		wantStdout []string
 		wantStderr []string
@@ -19,28 +39,41 @@ func TestRun(t *testing.T) {
 		{name: "help command", args: []string{"help"}, wantCode: exitOK, wantStdout: []string{"Usage:"}},
 		{name: "no arguments", args: nil, wantCode: exitUsage, wantStderr: []string{"Usage:"}},
 		{name: "unknown command", args: []string{"serve"}, wantCode: exitUsage, wantStderr: []string{`unknown command "serve"`, "Usage:"}},
-		{name: "api stub", args: []string{"api"}, wantCode: exitError, wantStderr: []string{"sprout api: not implemented yet"}},
-		{name: "worker stub", args: []string{"worker"}, wantCode: exitError, wantStderr: []string{"sprout worker: not implemented yet"}},
-		{name: "migrate stub", args: []string{"migrate", "up"}, wantCode: exitError, wantStderr: []string{"sprout migrate: not implemented yet"}},
+		{
+			name: "api rejects an empty environment", args: []string{"api"}, wantCode: exitError,
+			wantStderr: []string{"sprout api: invalid configuration:", "ENV: required", "DATABASE_URL: required"},
+		},
+		{
+			name: "api loads config then stops at the stub", args: []string{"api"}, env: devEnv(), wantCode: exitError,
+			wantStdout: []string{`"msg":"config loaded"`, `"env":"dev"`, `"secret_access_key":"[redacted]"`},
+			wantStderr: []string{"sprout api: not implemented yet"},
+		},
+		{
+			name: "worker loads config then stops at the stub", args: []string{"worker"}, env: devEnv(), wantCode: exitError,
+			wantStdout: []string{`"msg":"config loaded"`},
+			wantStderr: []string{"sprout worker: not implemented yet"},
+		},
+		{name: "migrate stub needs no config", args: []string{"migrate", "up"}, wantCode: exitError, wantStderr: []string{"sprout migrate: not implemented yet"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var stdout, stderr bytes.Buffer
-
-			if got := run(tt.args, &stdout, &stderr); got != tt.wantCode {
-				t.Errorf("exit code = %d, want %d", got, tt.wantCode)
+			lookup := func(key string) (string, bool) {
+				v, ok := tt.env[key]
+				return v, ok
 			}
+
+			got := run(tt.args, cli{lookup: lookup, stdout: &stdout, stderr: &stderr})
+
+			assert.Equal(t, tt.wantCode, got, "exit code")
 			for _, want := range tt.wantStdout {
-				if !strings.Contains(stdout.String(), want) {
-					t.Errorf("stdout = %q, want it to contain %q", stdout.String(), want)
-				}
+				assert.Contains(t, stdout.String(), want)
 			}
 			for _, want := range tt.wantStderr {
-				if !strings.Contains(stderr.String(), want) {
-					t.Errorf("stderr = %q, want it to contain %q", stderr.String(), want)
-				}
+				assert.Contains(t, stderr.String(), want)
 			}
+			assert.NotContains(t, stdout.String()+stderr.String(), testSecret)
 		})
 	}
 }

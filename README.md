@@ -17,9 +17,16 @@ Go backend for Sprout, an iOS app for tracking spending by category and saving t
 ```bash
 git clone git@github.com:movsesmeliksetyan/sprout-api.git
 cd sprout-api
+cp .env.example .env
 make build
 ./bin/sprout --help
 ```
+
+## Configuration
+
+Configuration comes from environment variables; [.env.example](.env.example) lists every key. A `.env` file in the working directory is loaded on start-up, and real environment variables win over it.
+
+`sprout api` and `sprout worker` validate the configuration before doing anything else and print one line per missing or invalid key. With `ENV=dev`, `LLM_API_KEY` and the `APNS_*` keys may be left empty; `staging` and `prod` require all of them.
 
 ## Commands
 
@@ -36,7 +43,7 @@ Run `make` to list every target.
 | `make migrate-up` / `make migrate-down` | Apply or roll back migrations (`sprout migrate`) |
 | `make eval` | Run the deterministic categorisation evaluation |
 
-The `api`, `worker` and `migrate` subcommands are stubs for now and exit with "not implemented yet". They are filled in by later tasks in the PRD, as are code generation and the evaluation set.
+The `api`, `worker` and `migrate` subcommands are stubs for now: `api` and `worker` load the configuration and log it (secrets redacted), then all three exit with "not implemented yet". They are filled in by later tasks in the PRD, as are code generation and the evaluation set.
 
 ## Layout
 
