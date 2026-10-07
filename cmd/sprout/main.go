@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	_ "time/tzdata" // users' timezones are resolved by name; the production image has no system database
 
 	"github.com/movsesmeliksetyan/sprout-api/api"
 	"github.com/movsesmeliksetyan/sprout-api/internal/config"

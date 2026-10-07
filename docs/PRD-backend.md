@@ -292,6 +292,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-08 · `money` and `period` packages**
 - Do: `money`: format minor units for server-rendered strings (`$1,842.50`, `$210`), safe percentage helpers (integer rounding, shares that sum to 100 using largest-remainder). `period`: given `(period, offset, timezone, now)` return `Range{Start, End, IsCurrent}`, the previous range, and the bucket list per contract §1.2; budget scaling function.
 - Files: `internal/money/money.go`, `internal/period/period.go`
+- Notes: calendar days are held as midnight UTC (`period.LocalDate`), matching how `DATE` columns are read, so period arithmetic never touches daylight saving; the user's timezone only decides which day "now" is. `money.Format` knows the symbol for USD, EUR, GBP, JPY, CAD, AUD and AMD and writes any other currency as its code (`CHF 12.50`); extend the table when the launch currency list (open question 4) is settled. The binary embeds the timezone database.
 - Done when: table tests cover week boundaries on Monday, month buckets for 28/29/30/31-day months, DST changes, year offsets, leap years; week budget = round(monthly×12/52).
 - Needs: BE-01
 
