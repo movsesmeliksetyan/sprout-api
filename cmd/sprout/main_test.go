@@ -193,10 +193,10 @@ func TestRunAPI_ServesTheSpecOutsideProduction(t *testing.T) {
 				assert.Contains(t, string(body), "openapi: 3.0.3")
 			}
 
-			unimplemented, err := http.Get(baseURL + "/v1/me")
+			anonymous, err := http.Get(baseURL + "/v1/me")
 			require.NoError(t, err)
-			_ = unimplemented.Body.Close()
-			assert.Equal(t, http.StatusNotImplemented, unimplemented.StatusCode)
+			_ = anonymous.Body.Close()
+			assert.Equal(t, http.StatusUnauthorized, anonymous.StatusCode, "the API is behind the token check")
 		})
 	}
 }

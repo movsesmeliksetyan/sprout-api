@@ -25,12 +25,13 @@ const (
 // Server is the HTTP API: a router with the standard middleware stack and
 // the health endpoints.
 type Server struct {
-	logger    *slog.Logger
-	router    chi.Router
-	responder *Responder
-	api       StrictServerInterface
-	spec      []byte
-	checks    []namedCheck
+	logger        *slog.Logger
+	router        chi.Router
+	responder     *Responder
+	api           StrictServerInterface
+	apiMiddleware []func(http.Handler) http.Handler
+	spec          []byte
+	checks        []namedCheck
 
 	requestTimeout time.Duration
 	drainTimeout   time.Duration
@@ -66,6 +67,13 @@ func WithMaxBodyBytes(n int64) Option {
 // every one of them with 501.
 func WithAPI(api StrictServerInterface) Option {
 	return func(s *Server) { s.api = api }
+}
+
+// WithAPIMiddleware runs the given middleware, first one outermost, around
+// every /v1 operation and before its parameters are read. The health
+// endpoints and the OpenAPI document are not covered.
+func WithAPIMiddleware(middleware ...func(http.Handler) http.Handler) Option {
+	return func(s *Server) { s.apiMiddleware = append(s.apiMiddleware, middleware...) }
 }
 
 // WithSpec serves the OpenAPI document at /v1/openapi.yaml. Without it that
@@ -123,10 +131,13 @@ func (s *Server) mountAPI(r chi.Router) {
 		RequestErrorHandlerFunc:  s.responder.RequestError,
 		ResponseErrorHandlerFunc: s.responder.Error,
 	})
-	HandlerWithOptions(strict, ChiServerOptions{
-		BaseURL:          apiBasePath,
-		BaseRouter:       r,
-		ErrorHandlerFunc: s.responder.RequestError,
+	r.Group(func(r chi.Router) {
+		r.Use(s.apiMiddleware...)
+		HandlerWithOptions(strict, ChiServerOptions{
+			BaseURL:          apiBasePath,
+			BaseRouter:       r,
+			ErrorHandlerFunc: s.responder.RequestError,
+		})
 	})
 
 	if s.spec != nil {
