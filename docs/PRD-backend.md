@@ -258,7 +258,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-03 · HTTP server skeleton**
 - Do: `chi` router; middleware for request id, structured access log, panic recovery, 30 s timeout, 1 MB JSON body limit, gzip; graceful shutdown on SIGTERM; `/healthz`, `/readyz`.
-- Files: `internal/httpx/server.go`, `internal/httpx/middleware.go`, `internal/httpx/health.go`
+- Files: `internal/httpx/server.go`, `internal/httpx/middleware.go`, `internal/httpx/health.go`, `internal/httpx/errors.go` (envelope only; BE-04 adds the typed errors and mapper)
 - Done when: `curl /healthz` → 200; a handler that panics returns the `internal` error envelope with a `request_id`; shutdown drains in-flight requests (test).
 - Needs: BE-02
 
