@@ -28,6 +28,8 @@ The API itself needs two values from this setup:
 - *Advanced Settings → Grant Types:* Authorization Code and Refresh Token, plus Passwordless OTP if step 4 uses passwordless.
 - *Advanced Settings → Device Settings → iOS:* the Apple Team ID and the app's bundle identifier. Native Sign in with Apple needs both.
 
+Auth0 enables **every existing connection** for a newly created application, social ones included. On the application's *Connections* tab, switch off everything except the connections from steps 3 and 4.
+
 The iOS app must request the API's audience when it logs in. Without it Auth0 issues an opaque token that this API cannot validate.
 
 ## 3. Sign in with Apple
@@ -53,6 +55,8 @@ Access tokens carry only `sub` by default. The API creates a user on their first
 
 ```js
 exports.onExecutePostLogin = async (event, api) => {
+  // Only for the Sprout API: a tenant may issue tokens for other APIs too.
+  if (event.resource_server?.identifier !== 'https://api.sprout.app') return;
   const namespace = 'https://sprout.app/';
   if (event.user.email) {
     api.accessToken.setCustomClaim(`${namespace}email`, event.user.email);
@@ -92,10 +96,41 @@ The keys are cached for 15 minutes (or for as long as the JWKS response's `Cache
 
 ## Checking the setup
 
-Log in through the iOS app (or any client of the native application that requests the audience) and call the API with the access token:
+With passwordless email, a user token can be had without the iOS app. Ask for a code:
 
 ```
+curl https://<AUTH0_DOMAIN>/passwordless/start -H 'content-type: application/json' \
+  -d '{"client_id":"<native client id>","connection":"email","email":"<you>","send":"code"}'
+```
+
+Exchange the code from the email for an access token, then call the API with it:
+
+```
+curl https://<AUTH0_DOMAIN>/oauth/token -H 'content-type: application/json' \
+  -d '{"grant_type":"http://auth0.com/oauth/grant-type/passwordless/otp","client_id":"<native client id>","username":"<you>","otp":"<code>","realm":"email","audience":"<AUTH0_AUDIENCE>","scope":"openid profile email"}'
+
 curl -i -H "Authorization: Bearer $TOKEN" http://localhost:8080/v1/me
 ```
 
 `401` means the token was rejected; run the API with `LOG_LEVEL=debug` and look for the `token rejected` line, whose `reason` names the failed check. The token on the API's *Test* tab in the dashboard is a machine token and is rejected by design.
+
+## Doing it from the command line
+
+Every step above except the Apple keys can be done with the Auth0 CLI (`brew install auth0/auth0-cli/auth0`, `auth0 login`) through `auth0 api <method> <path> --data '<json>'`, which calls the Management API: `resource-servers` for step 1, `clients` for steps 2 and 6, `connections` for step 4, `actions/actions`, its `/deploy` and `actions/triggers/post-login/bindings` for step 5, `client-grants` for step 6, and `connections/<id>/clients` to switch a connection off for an application. Creating an application twice makes two with the same name; `delete` needs `--force`.
+
+## Dev tenant
+
+Set up on 2026-10-07. None of these values is secret.
+
+| | |
+|---|---|
+| `AUTH0_DOMAIN` | `dev-ryjmw8xnz7n315j0.us.auth0.com` |
+| `AUTH0_AUDIENCE` | `https://api.sprout.app` |
+| Native application (Sprout iOS) client id | `TqzOSbedDJ3OuE2J2y20OcltzUwey7to` |
+| Bundle identifier in the callback URLs | `app.sprout.ios` |
+| Email login | Passwordless, six-digit code |
+| Machine-to-machine application client id | `jV0ji6hmCxyJvZoWkRL89iyB4IXIxbLS` |
+
+- The tenant is shared with another project, so its users and its other applications live alongside Sprout's. The Action only adds claims to tokens whose audience is the Sprout API. Staging and production get tenants of their own.
+- Sign in with Apple is enabled for the application but not configured with Sprout's Apple Developer keys yet (step 3).
+- Emails come from Auth0's built-in test sender, which is for development only.
