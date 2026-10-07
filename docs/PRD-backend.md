@@ -38,7 +38,7 @@ Bank/open-banking sync · multi-currency ledgers and FX · shared/household acco
 | Database | PostgreSQL 16+, `pgx/v5` pool, `sqlc` for queries, `goose` migrations |
 | Jobs | `river` (Postgres-backed queue + periodic jobs), run in a `worker` process |
 | Auth | Auth0. API validates RS256 access tokens via JWKS (`auth0/go-jwt-middleware/v2`) |
-| Object storage | S3-compatible (`aws-sdk-go-v2`); MinIO locally. Presigned PUT uploads |
+| Object storage | S3-compatible (`aws-sdk-go-v2`); MinIO locally (`pgsty/minio` image). Presigned PUT uploads |
 | LLM | Behind an `llm.Client` interface. Default provider: Anthropic Claude (text + vision, structured output). Model ids come from config. The implementing session must check the provider's current Go SDK docs rather than rely on memory |
 | Push | APNs HTTP/2, token-based (`.p8`), `sideshow/apns2` |
 | Logging / metrics | `log/slog` JSON, OpenTelemetry traces, Prometheus metrics |
@@ -270,7 +270,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-05 · Postgres, migrations, sqlc**
 - Do: `docker-compose.yml` with Postgres and MinIO; `pgx` pool with health check wired into `/readyz`; `goose` embedded migrations run by `sprout migrate up|down|status`; `sqlc.yaml` generating into `internal/db`; a transaction helper `db.WithTx`.
-- Files: `docker-compose.yml`, `migrations/00001_init.sql`, `sqlc.yaml`, `internal/db/*`
+- Files: `docker-compose.yml`, `migrations/00001_init.sql`, `migrations/embed.go`, `sqlc.yaml`, `internal/db/*` (hand-written `pool.go`, `tx.go`, `migrate.go`, `queries/*.sql`; the rest is sqlc output)
+- Notes: `sqlc` runs at a pinned version through `make generate`, so no local install is needed. `00001_init.sql` has no tables; it installs `pg_trgm` and the `set_updated_at()` trigger function. MinIO no longer publishes images, so Compose uses the community-maintained build `pgsty/minio`. The pool connects lazily: the API starts without Postgres and reports it through `/readyz`. `sprout migrate` needs only `DATABASE_URL`.
 - Done when: `docker compose up -d && make migrate-up` succeeds from clean; `make generate` is reproducible (no diff on second run).
 - Needs: BE-02
 

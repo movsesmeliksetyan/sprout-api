@@ -27,14 +27,14 @@ One binary, three subcommands: `sprout api`, `sprout worker`, `sprout migrate`.
 
 ## Commands
 
-Make targets are created in BE-01; until then they do not exist.
+`make test` needs Docker running: database tests start their own Postgres with testcontainers.
 
 ```
-docker compose up -d     # postgres + minio
+docker compose up -d --wait   # postgres + minio
 make migrate-up          # goose migrations
 make run                 # API
 make worker              # river worker
-make generate            # sqlc + oapi-codegen; must produce no diff on a second run
+make generate            # sqlc (pinned, via go run) + oapi-codegen; must produce no diff on a second run
 make lint test           # required green before a task is ticked
 make eval                # deterministic categorisation eval (CI-gated)
 make eval-llm            # on demand only; calls the real LLM

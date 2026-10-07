@@ -249,3 +249,29 @@ func TestLoadDotEnv(t *testing.T) {
 		assert.NotContains(t, err.Error(), testLLMKey)
 	})
 }
+
+func TestLoadDatabaseURL(t *testing.T) {
+	t.Run("needs nothing but DATABASE_URL", func(t *testing.T) {
+		url := "postgres://sprout:" + testDBPassword + "@localhost:5432/sprout"
+
+		got, err := LoadDatabaseURL(lookupIn(map[string]string{"DATABASE_URL": url}))
+
+		require.NoError(t, err)
+		assert.Equal(t, url, got.Reveal())
+	})
+
+	t.Run("missing", func(t *testing.T) {
+		_, err := LoadDatabaseURL(lookupIn(map[string]string{}))
+
+		var verr *ValidationError
+		require.ErrorAs(t, err, &verr)
+		assert.Equal(t, []string{"DATABASE_URL"}, verr.Keys())
+	})
+
+	t.Run("invalid value is not echoed", func(t *testing.T) {
+		_, err := LoadDatabaseURL(lookupIn(map[string]string{"DATABASE_URL": "mysql://u:" + testDBPassword + "@h/db"}))
+
+		require.ErrorContains(t, err, "DATABASE_URL: must use the postgres:// or postgresql:// scheme")
+		assert.NotContains(t, err.Error(), testDBPassword)
+	})
+}
