@@ -1,16 +1,15 @@
+version: "2"
+
 run:
   timeout: 5m
 
 linters:
-  disable-all: true
+  default: none
   enable:
     - bodyclose
     - errcheck
     - errorlint
     - gocritic
-    - gofmt
-    - goimports
-    - gosimple
     - govet
     - ineffassign
     - misspell
@@ -21,13 +20,25 @@ linters:
     - staticcheck
     - unconvert
     - unused
+  settings:
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+  exclusions:
+    generated: lax
+    presets:
+      - std-error-handling
 
-linters-settings:
-  goimports:
-    local-prefixes: github.com/movsesmeliksetyan/sprout-api
-  nolintlint:
-    require-explanation: true
-    require-specific: true
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/movsesmeliksetyan/sprout-api
+  exclusions:
+    generated: lax
 
 issues:
   max-issues-per-linter: 0

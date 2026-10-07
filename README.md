@@ -8,8 +8,8 @@ Go backend for Sprout, an iOS app for tracking spending by category and saving t
 
 ## Requirements
 
-- Go 1.22 or newer
-- [golangci-lint](https://golangci-lint.run) v1.57 or newer (v1 configuration format)
+- Go 1.27 or newer
+- [golangci-lint](https://golangci-lint.run) v2.14 or newer
 - Docker, for Postgres and MinIO once they are added in BE-05
 
 ## Setup
