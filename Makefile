@@ -2,6 +2,9 @@
 
 BIN := bin/sprout
 
+# Build tools run at a pinned version so generated code is identical everywhere.
+SQLC := go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
+
 .PHONY: help build run worker test lint generate migrate-up migrate-down eval
 
 help: ## List the available targets
@@ -22,7 +25,8 @@ test: ## Run all tests with the race detector
 lint: ## Run golangci-lint
 	golangci-lint run ./...
 
-generate: ## Regenerate code (sqlc and oapi-codegen are wired in BE-05 and BE-06)
+generate: ## Regenerate code: sqlc queries (oapi-codegen is wired in BE-06)
+	$(SQLC) generate
 	go generate ./...
 
 migrate-up: ## Apply all pending migrations

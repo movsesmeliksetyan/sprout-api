@@ -70,7 +70,13 @@ func TestRun(t *testing.T) {
 			wantStdout: []string{`"msg":"config loaded"`},
 			wantStderr: []string{"sprout worker: not implemented yet"},
 		},
-		{name: "migrate stub needs no config", args: []string{"migrate", "up"}, wantCode: exitError, wantStderr: []string{"sprout migrate: not implemented yet"}},
+		{name: "migrate without a command", args: []string{"migrate"}, wantCode: exitUsage, wantStderr: []string{"sprout migrate: usage: sprout migrate up|down|status"}},
+		{name: "migrate with an unknown command", args: []string{"migrate", "redo"}, wantCode: exitUsage, wantStderr: []string{"usage: sprout migrate up|down|status"}},
+		{name: "migrate with extra arguments", args: []string{"migrate", "up", "now"}, wantCode: exitUsage, wantStderr: []string{"usage: sprout migrate up|down|status"}},
+		{
+			name: "migrate needs only DATABASE_URL", args: []string{"migrate", "up"}, wantCode: exitError,
+			wantStderr: []string{"sprout migrate: invalid configuration:", "DATABASE_URL: required"},
+		},
 	}
 
 	for _, tt := range tests {

@@ -205,6 +205,17 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	return cfg, nil
 }
 
+// LoadDatabaseURL reads and validates only DATABASE_URL, for commands such
+// as migrate that need nothing else.
+func LoadDatabaseURL(lookup func(string) (string, bool)) (Secret, error) {
+	l := &loader{lookup: lookup}
+	databaseURL := l.databaseURL()
+	if len(l.errs) > 0 {
+		return "", &ValidationError{Fields: l.errs}
+	}
+	return databaseURL, nil
+}
+
 type loader struct {
 	lookup func(string) (string, bool)
 	errs   []FieldError
