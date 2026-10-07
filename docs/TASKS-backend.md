@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 0 / 63**
+**Progress: 1 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -15,8 +15,7 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 ## Milestone 1 — Foundation
 
-- [~] BE-01 · Repository scaffold
-  - Scaffold committed; `go build ./...`, `golangci-lint run ./...`, `go test -race ./...` and `sprout --help` pass when run directly. `make lint` not yet run: `/usr/bin/make` refuses to start until the Xcode licence is accepted on the dev machine.
+- [x] BE-01 · Repository scaffold — 2026-10-07, 4d299f2
 - [ ] BE-02 · Configuration and logging
 - [ ] BE-03 · HTTP server skeleton
 - [ ] BE-04 · Error, response and pagination conventions
