@@ -15,7 +15,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 ## Milestone 1 — Foundation
 
-- [ ] BE-01 · Repository scaffold
+- [~] BE-01 · Repository scaffold
+  - Scaffold committed; `go build ./...`, `golangci-lint run ./...`, `go test -race ./...` and `sprout --help` pass when run directly. `make lint` not yet run: `/usr/bin/make` refuses to start until the Xcode licence is accepted on the dev machine.
 - [ ] BE-02 · Configuration and logging
 - [ ] BE-03 · HTTP server skeleton
 - [ ] BE-04 · Error, response and pagination conventions
