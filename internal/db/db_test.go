@@ -4,18 +4,22 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io/fs"
 	"net"
 	"os"
+	"sort"
 	"testing"
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/testutil"
+	"github.com/movsesmeliksetyan/sprout-api/migrations"
 )
 
 func TestMain(m *testing.M) { os.Exit(testutil.Main(m)) }
@@ -39,20 +43,40 @@ func migrate(t *testing.T, url, command string) string {
 	return out.String()
 }
 
+// migrationFiles lists the embedded migrations, oldest first.
+func migrationFiles(t *testing.T) []string {
+	t.Helper()
+	files, err := fs.Glob(migrations.FS, "*.sql")
+	require.NoError(t, err)
+	require.NotEmpty(t, files)
+	sort.Strings(files)
+	return files
+}
+
 func TestMigrate(t *testing.T) {
 	url := testutil.NewEmptyDatabaseURL(t)
+	files := migrationFiles(t)
+	requireAll := func(output, state string) {
+		t.Helper()
+		for _, file := range files {
+			require.Contains(t, output, state+file)
+		}
+	}
 
-	assert.Contains(t, migrate(t, url, db.MigrateStatus), "pending      00001_init.sql")
+	requireAll(migrate(t, url, db.MigrateStatus), "pending      ")
 
-	assert.Contains(t, migrate(t, url, db.MigrateUp), "applied      00001_init.sql")
+	requireAll(migrate(t, url, db.MigrateUp), "applied      ")
 	assert.Equal(t, "no migrations to apply\n", migrate(t, url, db.MigrateUp), "up is idempotent")
-	assert.Contains(t, migrate(t, url, db.MigrateStatus), "applied      00001_init.sql")
+	requireAll(migrate(t, url, db.MigrateStatus), "applied      ")
 
-	assert.Contains(t, migrate(t, url, db.MigrateDown), "rolled back  00001_init.sql")
-	assert.Contains(t, migrate(t, url, db.MigrateStatus), "pending      00001_init.sql")
+	// Down undoes one migration at a time, newest first.
+	for i := len(files) - 1; i >= 0; i-- {
+		assert.Contains(t, migrate(t, url, db.MigrateDown), "rolled back  "+files[i])
+	}
+	requireAll(migrate(t, url, db.MigrateStatus), "pending      ")
 	assert.Equal(t, "no migrations to roll back\n", migrate(t, url, db.MigrateDown))
 
-	assert.Contains(t, migrate(t, url, db.MigrateUp), "applied      00001_init.sql", "down then up round-trips")
+	requireAll(migrate(t, url, db.MigrateUp), "applied      ")
 }
 
 func TestMigrate_UnknownCommand(t *testing.T) {
@@ -224,5 +248,41 @@ func TestWithTx(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
+	})
+}
+
+func TestUsersMigration(t *testing.T) {
+	ctx := context.Background()
+	pool := newPool(t, true)
+	const insert = "INSERT INTO users (id, auth0_sub) VALUES (gen_random_uuid(), $1)"
+
+	_, err := pool.Exec(ctx, insert, "apple|1")
+	require.NoError(t, err)
+
+	t.Run("one user per subject", func(t *testing.T) {
+		_, err := pool.Exec(ctx, insert, "apple|1")
+
+		var pgErr *pgconn.PgError
+		require.ErrorAs(t, err, &pgErr)
+		assert.Equal(t, "23505", pgErr.Code, "unique_violation")
+	})
+
+	t.Run("currency is an ISO 4217 code", func(t *testing.T) {
+		_, err := pool.Exec(ctx, "UPDATE users SET currency = 'usd'")
+
+		var pgErr *pgconn.PgError
+		require.ErrorAs(t, err, &pgErr)
+		assert.Equal(t, "23514", pgErr.Code, "check_violation")
+	})
+
+	t.Run("updated_at follows changes", func(t *testing.T) {
+		_, err := pool.Exec(ctx,
+			"INSERT INTO users (id, auth0_sub, updated_at) VALUES (gen_random_uuid(), 'apple|2', '2000-01-01T00:00:00Z')")
+		require.NoError(t, err)
+
+		var updatedAt time.Time
+		require.NoError(t, pool.QueryRow(ctx,
+			"UPDATE users SET name = 'Daisy' WHERE auth0_sub = 'apple|2' RETURNING updated_at").Scan(&updatedAt))
+		assert.WithinDuration(t, time.Now(), updatedAt, time.Minute)
 	})
 }

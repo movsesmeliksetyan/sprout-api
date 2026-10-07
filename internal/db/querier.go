@@ -9,6 +9,9 @@ import (
 )
 
 type Querier interface {
+	// Returns no row when a user with this auth0_sub already exists.
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
 	Ping(ctx context.Context) (int32, error)
 }
 

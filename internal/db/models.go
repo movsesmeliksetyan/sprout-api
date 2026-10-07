@@ -3,3 +3,26 @@
 //   sqlc v1.31.1
 
 package db
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type User struct {
+	ID                   uuid.UUID
+	Auth0Sub             string
+	Email                string
+	Name                 string
+	AvatarKey            *string
+	Currency             string
+	Timezone             string
+	StartingBalanceMinor int64
+	OnboardingCompleted  bool
+	NotificationsEnabled bool
+	BudgetAlerts         bool
+	WeeklyRecap          bool
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
