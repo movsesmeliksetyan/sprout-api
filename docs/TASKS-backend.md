@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 9 / 63**
+**Progress: 10 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -29,7 +29,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 - [x] BE-09 · Auth0 JWT middleware — 2026-10-07, 65521ba
   - Uses `auth0/go-jwt-middleware/v3`, the current major, where the PRD named v2. A failure to fetch the JWKS answers `503 unavailable` rather than `401`. The PRD records both.
-- [ ] BE-10 · User provisioning and `GET /me`
+- [x] BE-10 · User provisioning and `GET /me` — 2026-10-07, c3fa6bc
+  - A `name` claim that is an email address is not kept as the name; missing `email`/`name` are stored as empty strings. The PRD records both.
 - [ ] BE-11 · `PATCH /me`, preferences, onboarding
 - [ ] BE-12 · Object storage and `POST /uploads`
 - [ ] BE-13 · Idempotency middleware
