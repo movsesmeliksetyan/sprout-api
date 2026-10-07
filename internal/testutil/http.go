@@ -2,6 +2,8 @@ package testutil
 
 import (
 	"bytes"
+	"context"
+	"encoding/base64"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -11,6 +13,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/movsesmeliksetyan/sprout-api/internal/auth"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
 )
 
@@ -56,4 +59,46 @@ func DecodeJSON[T any](t testing.TB, rec *httptest.ResponseRecorder) T {
 	var v T
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &v), "body: %s", rec.Body.String())
 	return v
+}
+
+// testTokenPrefix marks a token minted by Token.
+const testTokenPrefix = "test."
+
+// Token returns an access token for claims that TokenVerifier accepts.
+func Token(t testing.TB, claims auth.Claims) string {
+	t.Helper()
+	encoded, err := json.Marshal(claims)
+	require.NoError(t, err)
+	return testTokenPrefix + base64.RawURLEncoding.EncodeToString(encoded)
+}
+
+// TokenVerifier stands in for the Auth0 verifier in tests: it accepts the
+// tokens minted by Token and rejects everything else.
+func TokenVerifier() auth.Verifier { return tokenVerifier{} }
+
+type tokenVerifier struct{}
+
+func (tokenVerifier) Verify(_ context.Context, token string) (auth.Claims, error) {
+	encoded, ok := strings.CutPrefix(token, testTokenPrefix)
+	if !ok {
+		return auth.Claims{}, auth.ErrInvalidToken
+	}
+	decoded, err := base64.RawURLEncoding.DecodeString(encoded)
+	if err != nil {
+		return auth.Claims{}, auth.ErrInvalidToken
+	}
+	var claims auth.Claims
+	if err := json.Unmarshal(decoded, &claims); err != nil || claims.Subject == "" {
+		return auth.Claims{}, auth.ErrInvalidToken
+	}
+	return claims, nil
+}
+
+// AuthedRequest is JSONRequest carrying a token for claims, for a server
+// whose auth middleware uses TokenVerifier.
+func AuthedRequest(t testing.TB, claims auth.Claims, method, target string, body any) *http.Request {
+	t.Helper()
+	req := JSONRequest(t, method, target, body)
+	req.Header.Set("Authorization", "Bearer "+Token(t, claims))
+	return req
 }

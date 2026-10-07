@@ -155,3 +155,41 @@ func TestDrainTimeoutDefaultsToRequestTimeout(t *testing.T) {
 
 	assert.Equal(t, 7*time.Second, s.drainTimeout)
 }
+
+func TestWithAPIMiddleware(t *testing.T) {
+	var calls []string
+	record := func(name string) func(http.Handler) http.Handler {
+		return func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				calls = append(calls, name)
+				next.ServeHTTP(w, r)
+			})
+		}
+	}
+	s, _ := newTestServer(t, WithAPIMiddleware(record("first"), record("second")), WithSpec([]byte("openapi: 3.0.3\n")))
+
+	t.Run("wraps an operation, first one outermost", func(t *testing.T) {
+		calls = nil
+		rec := get(s, "/v1/me")
+
+		requireEnvelope(t, rec, http.StatusNotImplemented, "not_implemented")
+		assert.Equal(t, []string{"first", "second"}, calls)
+	})
+
+	t.Run("runs before the parameters are read", func(t *testing.T) {
+		calls = nil
+		rec := get(s, "/v1/goals/not-a-uuid")
+
+		requireEnvelope(t, rec, http.StatusBadRequest, "bad_request")
+		assert.Equal(t, []string{"first", "second"}, calls)
+	})
+
+	for _, target := range []string{healthzPath, readyzPath, specPath, "/v1/no-such-route"} {
+		t.Run("does not cover "+target, func(t *testing.T) {
+			calls = nil
+			get(s, target)
+
+			assert.Empty(t, calls)
+		})
+	}
+}

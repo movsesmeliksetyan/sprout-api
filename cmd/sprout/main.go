@@ -14,6 +14,7 @@ import (
 	_ "time/tzdata" // users' timezones are resolved by name; the production image has no system database
 
 	"github.com/movsesmeliksetyan/sprout-api/api"
+	"github.com/movsesmeliksetyan/sprout-api/internal/auth"
 	"github.com/movsesmeliksetyan/sprout-api/internal/config"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
@@ -121,13 +122,21 @@ func runAPI(c cli, _ []string) error {
 	}
 	defer pool.Close()
 
+	verifier, err := auth.NewAuth0Verifier(cfg.Auth0.Domain, cfg.Auth0.Audience)
+	if err != nil {
+		return err
+	}
+
 	ln, err := net.Listen("tcp", cfg.HTTPAddr)
 	if err != nil {
 		return fmt.Errorf("listen on %s: %w", cfg.HTTPAddr, err)
 	}
 	logger.Info("listening", "addr", ln.Addr().String())
 
-	opts := []httpx.Option{httpx.WithReadinessCheck("postgres", db.Ready(pool))}
+	opts := []httpx.Option{
+		httpx.WithReadinessCheck("postgres", db.Ready(pool)),
+		httpx.WithAPIMiddleware(auth.Middleware(verifier, httpx.NewResponder(logger), logger)),
+	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))
 	}

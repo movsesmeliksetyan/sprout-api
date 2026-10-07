@@ -37,7 +37,7 @@ Bank/open-banking sync · multi-currency ledgers and FX · shared/household acco
 | API definition | `api/openapi.yaml` → `oapi-codegen` (strict server + types) |
 | Database | PostgreSQL 16+, `pgx/v5` pool, `sqlc` for queries, `goose` migrations |
 | Jobs | `river` (Postgres-backed queue + periodic jobs), run in a `worker` process |
-| Auth | Auth0. API validates RS256 access tokens via JWKS (`auth0/go-jwt-middleware/v2`) |
+| Auth | Auth0. API validates RS256 access tokens via JWKS (`auth0/go-jwt-middleware/v3`) |
 | Object storage | S3-compatible (`aws-sdk-go-v2`); MinIO locally (`pgsty/minio` image). Presigned PUT uploads |
 | LLM | Behind an `llm.Client` interface. Default provider: Anthropic Claude (text + vision, structured output). Model ids come from config. The implementing session must check the provider's current Go SDK docs rather than rely on memory |
 | Push | APNs HTTP/2, token-based (`.p8`), `sideshow/apns2` |
@@ -301,6 +301,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-09 · Auth0 JWT middleware**
 - Do: Validate RS256 tokens against the tenant JWKS (cached, rotated), check issuer and audience, extract `sub`; reject everything else with `unauthenticated`. Write `docs/auth0-setup.md`: create API (audience), Native application for iOS, enable Sign in with Apple + passwordless email (or database) connections, add an Action that puts `email` and `name` into the access token as namespaced claims, create a Machine-to-Machine app with `delete:users` for account deletion.
 - Files: `internal/auth/middleware.go`, `internal/auth/claims.go`, `docs/auth0-setup.md`
+- Notes: the middleware wraps every `/v1` operation and runs before parameters are read; the health endpoints and `/v1/openapi.yaml` stay open. `email` and `name` are read from `https://sprout.app/email` and `https://sprout.app/name` and are optional. Tokens without `sub` and client-credentials tokens (`sub` ending `@clients`) are rejected. If the JWKS cannot be fetched the answer is `503 unavailable`, not `401`, so an Auth0 outage does not sign users out. Keys are cached for 15 minutes; clock tolerance is 30 s.
 - Done when: tests with locally signed tokens cover valid, expired, wrong audience, wrong issuer, bad signature, missing header. `internal/testutil` gains the test token verifier and `AuthedRequest` (deferred from BE-07).
 - Needs: BE-03
 
