@@ -1,0 +1,2744 @@
+openapi: 3.0.3
+info:
+  title: Sprout API
+  version: 1.0.0
+  description: |
+    Backend for the Sprout iOS app: spending by category, savings goals,
+    statement imports and receipt scanning.
+
+    This file is the machine-readable form of docs/api-contract.md; the two
+    must not disagree.
+
+    Conventions: JSON with snake_case keys. Money is an integer number of
+    minor units in fields suffixed `_minor`, always positive unless the field
+    is documented as signed. Optional response fields are present with `null`,
+    never omitted. Instants are RFC 3339 UTC; calendar days are `YYYY-MM-DD`
+    in the user's timezone.
+  contact:
+    name: Sprout backend
+    url: https://github.com/movsesmeliksetyan/sprout-api
+  license:
+    name: Proprietary
+    url: https://github.com/movsesmeliksetyan/sprout-api
+
+servers:
+  - url: /v1
+    description: Versioned API root
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: health
+    description: Liveness and readiness probes, outside /v1 and unauthenticated.
+  - name: me
+    description: The signed-in user's profile and preferences.
+  - name: uploads
+    description: Presigned uploads for avatars, receipts and statements.
+  - name: categories
+    description: Spending categories and their monthly budgets.
+  - name: transactions
+    description: The ledger of expenses and income.
+  - name: home
+    description: The Home screen in one call.
+  - name: summary
+    description: Pre-aggregated spending for a week, month or year.
+  - name: insights
+    description: Generated insight cards.
+  - name: goals
+    description: Savings goals and contributions to them.
+  - name: categorization
+    description: Category suggestions for manual entry.
+  - name: imports
+    description: Bank statement imports, reviewed before they reach the ledger.
+  - name: receipts
+    description: Receipt scanning, confirmed before it reaches the ledger.
+  - name: notifications
+    description: Push devices and the notification inbox.
+
+paths:
+  /healthz:
+    servers:
+      - url: /
+        description: Server root
+    get:
+      operationId: getHealthz
+      tags: [health]
+      summary: Liveness probe
+      description: Returns 200 whenever the process is up.
+      security: []
+      responses:
+        "200":
+          description: The process is up.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /readyz:
+    servers:
+      - url: /
+        description: Server root
+    get:
+      operationId: getReadyz
+      tags: [health]
+      summary: Readiness probe
+      description: Returns 200 when Postgres and object storage are reachable, 503 otherwise.
+      security: []
+      responses:
+        "200":
+          description: Every dependency is reachable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [me]
+      summary: Get the current user
+      description: The first authenticated call for an unknown identity creates the user and seeds the default categories.
+      responses:
+        "200":
+          description: The current user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateMe
+      tags: [me]
+      summary: Update the current user
+      description: Accepts any subset of the fields. Currency can only change while the user has no transactions.
+      requestBody:
+        description: Any subset of the profile fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMeRequest"
+      responses:
+        "200":
+          description: The updated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteMe
+      tags: [me]
+      summary: Delete the account
+      description: Irreversibly deletes all of the user's data and their identity.
+      responses:
+        "204":
+          description: The account is scheduled for deletion.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /uploads:
+    post:
+      operationId: createUpload
+      tags: [uploads]
+      summary: Request a presigned upload
+      description: The client PUTs the bytes to `upload_url`, then passes `id` to the consuming endpoint.
+      requestBody:
+        description: What the client is about to upload.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUploadRequest"
+      responses:
+        "201":
+          description: Where and how to upload the file.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Upload"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List categories
+      description: Ordered by `sort_order`.
+      parameters:
+        - name: include_archived
+          in: query
+          description: Include archived categories.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: The user's categories.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryList"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create a category
+      description: Names are unique per user, case-insensitively. A user can have at most 30 active categories.
+      requestBody:
+        description: A new category.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+      responses:
+        "201":
+          description: The new category.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /categories/order:
+    put:
+      operationId: reorderCategories
+      tags: [categories]
+      summary: Reorder categories
+      description: The body must list every non-archived category id exactly once.
+      requestBody:
+        description: Every non-archived category id, in the wanted order.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderCategoriesRequest"
+      responses:
+        "200":
+          description: The categories in their new order.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryList"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /categories/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateCategory
+      tags: [categories]
+      summary: Update a category
+      description: Accepts any subset of the fields. Set `archived` to hide a category that has transactions.
+      requestBody:
+        description: Any subset of the category fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCategoryRequest"
+      responses:
+        "200":
+          description: The updated category.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteCategory
+      tags: [categories]
+      summary: Delete a category
+      description: Only a category with no transactions can be deleted; otherwise the response is 409 and the client archives it instead.
+      responses:
+        "204":
+          description: The category is deleted.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /budgets:
+    put:
+      operationId: updateBudgets
+      tags: [categories]
+      summary: Set several budgets at once
+      description: All-or-nothing; one invalid item rejects the whole request.
+      requestBody:
+        description: Budgets to set.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBudgetsRequest"
+      responses:
+        "200":
+          description: The updated categories.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryList"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List transactions
+      description: Newest first. `days` carries the full-day totals for every date on the page.
+      parameters:
+        - name: from
+          in: query
+          description: First calendar day to include.
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          description: Last calendar day to include.
+          schema:
+            type: string
+            format: date
+        - name: category_id
+          in: query
+          description: Only transactions in this category.
+          schema:
+            type: string
+            format: uuid
+        - name: kind
+          in: query
+          description: Only transactions of this kind.
+          schema:
+            $ref: "#/components/schemas/TransactionKind"
+        - name: q
+          in: query
+          description: Only transactions whose merchant or note contains this text.
+          schema:
+            type: string
+        - $ref: "#/components/parameters/LimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          description: A page of transactions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionList"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createTransaction
+      tags: [transactions]
+      summary: Create a transaction
+      description: An expense requires a category; income must not have one.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        description: A new transaction.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransactionRequest"
+      responses:
+        "201":
+          description: The new transaction.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /transactions/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: getTransaction
+      tags: [transactions]
+      summary: Get a transaction
+      description: Returns one transaction owned by the caller.
+      responses:
+        "200":
+          description: The transaction.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateTransaction
+      tags: [transactions]
+      summary: Update a transaction
+      description: Accepts any subset of the create fields.
+      requestBody:
+        description: Any subset of the create fields. Send null to clear `category_id`, `merchant` or `note`.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTransactionRequest"
+      responses:
+        "200":
+          description: The updated transaction.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteTransaction
+      tags: [transactions]
+      summary: Delete a transaction
+      description: Removes the transaction from the ledger.
+      responses:
+        "204":
+          description: The transaction is deleted.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /home:
+    get:
+      operationId: getHome
+      tags: [home]
+      summary: Get the Home screen
+      description: Balance, this month's spending by category, and the ten newest transactions.
+      responses:
+        "200":
+          description: The Home screen data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Home"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /summary/categories:
+    get:
+      operationId: getCategoriesSummary
+      tags: [summary]
+      summary: Spending per category for a period
+      description: Covers every active category, sorted by spend, largest first.
+      parameters:
+        - $ref: "#/components/parameters/PeriodQuery"
+        - $ref: "#/components/parameters/OffsetQuery"
+      responses:
+        "200":
+          description: The categories overview.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoriesSummary"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /summary/categories/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: getCategorySummary
+      tags: [summary]
+      summary: One category's spending and trend for a period
+      description: The transaction list for the same screen is `GET /transactions?category_id=&from=&to=`.
+      parameters:
+        - $ref: "#/components/parameters/PeriodQuery"
+        - $ref: "#/components/parameters/OffsetQuery"
+      responses:
+        "200":
+          description: The category detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategorySummary"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /summary/stats:
+    get:
+      operationId: getStatsSummary
+      tags: [summary]
+      summary: Total spending, series and breakdown for a period
+      description: The breakdown holds the top five categories, then one row with a null category aggregating the rest.
+      parameters:
+        - $ref: "#/components/parameters/PeriodQuery"
+        - $ref: "#/components/parameters/OffsetQuery"
+      responses:
+        "200":
+          description: The stats summary.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsSummary"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /insights:
+    get:
+      operationId: listInsights
+      tags: [insights]
+      summary: Insight cards for a period
+      description: At most five, most relevant first.
+      parameters:
+        - $ref: "#/components/parameters/PeriodQuery"
+        - $ref: "#/components/parameters/OffsetQuery"
+      responses:
+        "200":
+          description: The insight cards.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightList"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /goals:
+    get:
+      operationId: listGoals
+      tags: [goals]
+      summary: List goals
+      description: Active and completed goals, with totals across them.
+      responses:
+        "200":
+          description: The user's goals.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoalList"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createGoal
+      tags: [goals]
+      summary: Create a goal
+      description: A user can have at most 20 active goals.
+      requestBody:
+        description: A new goal.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGoalRequest"
+      responses:
+        "201":
+          description: The new goal.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /goals/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: getGoal
+      tags: [goals]
+      summary: Get a goal
+      description: The goal with its five newest contributions.
+      responses:
+        "200":
+          description: The goal.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoalDetail"
+        default:
+          $ref: "#/components/responses/Error"
+    patch:
+      operationId: updateGoal
+      tags: [goals]
+      summary: Update a goal
+      description: Accepts any subset of the fields.
+      requestBody:
+        description: Any subset of the goal fields. Send null to clear `emoji` or the image.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGoalRequest"
+      responses:
+        "200":
+          description: The updated goal.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteGoal
+      tags: [goals]
+      summary: Delete a goal
+      description: Its contributions are removed and the money returns to the balance.
+      responses:
+        "204":
+          description: The goal is deleted.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /goals/{id}/contributions:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: listContributions
+      tags: [goals]
+      summary: List a goal's contributions
+      description: Newest first.
+      parameters:
+        - $ref: "#/components/parameters/LimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          description: A page of contributions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContributionList"
+        default:
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createContribution
+      tags: [goals]
+      summary: Top up or withdraw from a goal
+      description: A withdrawal cannot exceed the amount saved. The goal completes automatically when it reaches its target.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        description: A top-up or withdrawal.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContributionRequest"
+      responses:
+        "201":
+          description: The new contribution and the goal after it.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContributionCreated"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /goals/{id}/contributions/{cid}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+      - $ref: "#/components/parameters/ContributionIdPath"
+    delete:
+      operationId: deleteContribution
+      tags: [goals]
+      summary: Delete a contribution
+      description: Returns the goal after the contribution is removed.
+      responses:
+        "200":
+          description: The goal after the deletion.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /categorization/suggest:
+    post:
+      operationId: suggestCategory
+      tags: [categorization]
+      summary: Suggest a category for a manual entry
+      description: Deterministic layers only; never waits on a language model.
+      requestBody:
+        description: What the user has typed so far.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SuggestCategoryRequest"
+      responses:
+        "200":
+          description: The suggestion; `category_id` is null when nothing is confident enough.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategorySuggestion"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /imports:
+    post:
+      operationId: createImport
+      tags: [imports]
+      summary: Start a statement import
+      description: Consumes a `statement` upload and processes it in the background. Poll `GET /imports/{id}`.
+      requestBody:
+        description: The statement to import and the window to keep.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateImportRequest"
+      responses:
+        "202":
+          description: The import, in `processing`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Import"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /imports/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: getImport
+      tags: [imports]
+      summary: Get an import
+      description: Poll every 1.5 s while `status` is `processing`.
+      responses:
+        "200":
+          description: The import.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Import"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteImport
+      tags: [imports]
+      summary: Discard an import
+      description: Not allowed once the import is committed.
+      responses:
+        "204":
+          description: The import is discarded.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /imports/{id}/mapping:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    put:
+      operationId: setImportMapping
+      tags: [imports]
+      summary: Supply the column mapping for an import
+      description: Used when `status` is `needs_mapping`. Requires exactly one `date`, at least one `description`, and either one `amount` or a `debit`/`credit` pair.
+      requestBody:
+        description: The user's column mapping.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetImportMappingRequest"
+      responses:
+        "202":
+          description: The import, back in `processing`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Import"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /imports/{id}/rows:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: listImportRows
+      tags: [imports]
+      summary: List an import's rows for review
+      description: Uncategorised rows first, then newest first.
+      parameters:
+        - $ref: "#/components/parameters/LimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          description: A page of rows.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportRowList"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /imports/{id}/rows/{row_id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+      - $ref: "#/components/parameters/RowIdPath"
+    patch:
+      operationId: updateImportRow
+      tags: [imports]
+      summary: Edit an import row
+      description: Changing `category_id` teaches the categoriser for this user.
+      requestBody:
+        description: Any subset of the editable row fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateImportRowRequest"
+      responses:
+        "200":
+          description: The updated row.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportRow"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /imports/{id}/commit:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      operationId: commitImport
+      tags: [imports]
+      summary: Write the included rows to the ledger
+      description: Included expense rows must have a category. After commit the import is read-only.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: How many transactions were created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportCommitResult"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /receipts:
+    post:
+      operationId: createReceipt
+      tags: [receipts]
+      summary: Start a receipt scan
+      description: Consumes a `receipt` upload and extracts it in the background. Poll `GET /receipts/{id}`.
+      requestBody:
+        description: The receipt image to scan.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReceiptRequest"
+      responses:
+        "202":
+          description: The receipt, in `processing`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /receipts/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: getReceipt
+      tags: [receipts]
+      summary: Get a receipt
+      description: Poll every second while `status` is `processing`. Any extracted field may be null.
+      responses:
+        "200":
+          description: The receipt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Receipt"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteReceipt
+      tags: [receipts]
+      summary: Discard a receipt
+      description: Removes the receipt and its image.
+      responses:
+        "204":
+          description: The receipt is discarded.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /receipts/{id}/confirm:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      operationId: confirmReceipt
+      tags: [receipts]
+      summary: Save a receipt as an expense
+      description: Creates the transaction from the values the user confirmed.
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        description: The values the user confirmed for the expense.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmReceiptRequest"
+      responses:
+        "201":
+          description: The transaction created from the receipt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /devices/{device_id}:
+    parameters:
+      - $ref: "#/components/parameters/DeviceIdPath"
+    put:
+      operationId: registerDevice
+      tags: [notifications]
+      summary: Register or refresh a push device
+      description: "`device_id` is a client-generated UUID kept in the Keychain."
+      requestBody:
+        description: A device's push registration.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterDeviceRequest"
+      responses:
+        "204":
+          description: The device is registered.
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      operationId: deleteDevice
+      tags: [notifications]
+      summary: Remove a push device
+      description: Called on logout.
+      responses:
+        "204":
+          description: The device is removed.
+        default:
+          $ref: "#/components/responses/Error"
+
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List notifications
+      description: Newest first.
+      parameters:
+        - $ref: "#/components/parameters/LimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          description: A page of notifications.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationList"
+        default:
+          $ref: "#/components/responses/Error"
+
+  /notifications/read:
+    post:
+      operationId: markNotificationsRead
+      tags: [notifications]
+      summary: Mark notifications as read
+      description: Send either `ids` or `all`.
+      requestBody:
+        description: Either the ids to mark, or `all`.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkNotificationsReadRequest"
+      responses:
+        "204":
+          description: The notifications are marked read.
+        default:
+          $ref: "#/components/responses/Error"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Auth0 access token whose audience is the Sprout API identifier.
+
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      description: Resource id.
+      schema:
+        type: string
+        format: uuid
+    ContributionIdPath:
+      name: cid
+      in: path
+      required: true
+      description: Contribution id.
+      schema:
+        type: string
+        format: uuid
+    RowIdPath:
+      name: row_id
+      in: path
+      required: true
+      description: Import row id.
+      schema:
+        type: string
+        format: uuid
+    DeviceIdPath:
+      name: device_id
+      in: path
+      required: true
+      description: Client-generated device id.
+      schema:
+        type: string
+        format: uuid
+    PeriodQuery:
+      name: period
+      in: query
+      required: true
+      description: The kind of period to summarise.
+      schema:
+        $ref: "#/components/schemas/Period"
+    OffsetQuery:
+      name: offset
+      in: query
+      description: How many periods back; 0 is the current one.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    LimitQuery:
+      name: limit
+      in: query
+      description: Page size.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    CursorQuery:
+      name: cursor
+      in: query
+      description: The `next_cursor` from the previous page.
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      description: Repeating a request with the same key within 24 hours returns the original response.
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    Error:
+      description: Any non-2xx response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    # ---------------------------------------------------------------- errors
+
+    ErrorResponse:
+      description: The envelope of every non-2xx response.
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: "#/components/schemas/ErrorDetail"
+
+    ErrorDetail:
+      description: What went wrong.
+      type: object
+      required: [code, message, fields, request_id]
+      properties:
+        code:
+          $ref: "#/components/schemas/ErrorCode"
+        message:
+          description: Safe to show to the user.
+          type: string
+        fields:
+          description: Per-field problems, set for `validation_failed`.
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
+        request_id:
+          description: Also returned in the `X-Request-Id` header.
+          type: string
+
+    ErrorCode:
+      description: Machine-readable error code.
+      type: string
+      enum:
+        - bad_request
+        - unauthenticated
+        - forbidden
+        - not_found
+        - conflict
+        - payload_too_large
+        - validation_failed
+        - rate_limited
+        - internal
+        - unavailable
+
+    HealthStatus:
+      description: Probe result.
+      type: object
+      required: [status]
+      properties:
+        status:
+          description: Always `ok` on a 200.
+          type: string
+          enum: [ok]
+
+    # ----------------------------------------------------------------- enums
+
+    Period:
+      description: A summary period. Weeks run Monday to Sunday in the user's timezone.
+      type: string
+      enum: [week, month, year]
+
+    ImportPeriod:
+      description: The window of statement transactions to keep.
+      type: string
+      enum: [week, month, year, all]
+
+    BucketUnit:
+      description: What one bucket of a series covers; day for a week, week for a month, month for a year.
+      type: string
+      enum: [day, week, month]
+
+    TransactionKind:
+      description: Direction of a transaction.
+      type: string
+      enum: [expense, income]
+
+    TransactionSource:
+      description: How a transaction entered the ledger.
+      type: string
+      enum: [manual, import, receipt]
+
+    CategoryIcon:
+      description: Icon name known to the client.
+      type: string
+      enum:
+        - utensils
+        - car
+        - house
+        - droplet
+        - bolt
+        - sparkles
+        - heart
+        - cart
+        - bag
+        - plane
+        - gift
+        - book
+        - paw
+        - phone
+        - film
+        - dumbbell
+        - baby
+        - briefcase
+        - tag
+
+    GoalStatus:
+      description: Lifecycle of a goal.
+      type: string
+      enum: [active, completed, archived]
+
+    ContributionKind:
+      description: Money moved into or out of a goal.
+      type: string
+      enum: [topup, withdrawal]
+
+    ImportStatus:
+      description: Lifecycle of a statement import.
+      type: string
+      enum: [processing, needs_mapping, ready, committed, failed]
+
+    ImportRowKind:
+      description: What a statement row represents.
+      type: string
+      enum: [expense, income, transfer]
+
+    ImportRowStatus:
+      description: Whether a statement row can be imported.
+      type: string
+      enum: [ok, duplicate, error]
+
+    ImportFailureCode:
+      description: Why an import failed.
+      type: string
+      enum: [unsupported_format, empty_file, unreadable, too_many_rows, internal]
+
+    MappingSource:
+      description: How the column mapping of a statement was resolved.
+      type: string
+      enum: [template, heuristic, llm, user, native]
+
+    MappingRole:
+      description: What a statement column holds.
+      type: string
+      enum: [date, description, amount, debit, credit, balance, currency, reference, mcc, ignore]
+
+    AmountSign:
+      description: Sign convention of a single amount column.
+      type: string
+      enum: [negative_is_expense, positive_is_expense]
+
+    CategorizationSource:
+      description: Which layer of the categoriser produced a result.
+      type: string
+      enum: [user_rule, dictionary, mcc, keyword, llm, none]
+
+    ReceiptStatus:
+      description: Lifecycle of a receipt scan.
+      type: string
+      enum: [processing, ready, failed, confirmed]
+
+    ReceiptFailureCode:
+      description: Why a receipt scan failed.
+      type: string
+      enum: [not_a_receipt, unreadable, internal]
+
+    InsightKind:
+      description: Which rule produced an insight.
+      type: string
+      enum:
+        - category_spend_down
+        - category_spend_up
+        - category_over_budget
+        - category_near_budget
+        - peak_weekday
+        - total_spend_down
+        - total_spend_up
+        - goal_on_track
+        - goal_almost_there
+        - no_data
+
+    InsightTone:
+      description: Emotional tone of an insight card.
+      type: string
+      enum: [positive, warning, neutral]
+
+    InsightIcon:
+      description: Icon of an insight card.
+      type: string
+      enum: [sparkle, warning, chart, target]
+
+    UploadPurpose:
+      description: What an upload will be used for; decides allowed types and size.
+      type: string
+      enum: [avatar, receipt, statement]
+
+    UploadMethod:
+      description: HTTP method for the presigned upload.
+      type: string
+      enum: [PUT]
+
+    NotificationKind:
+      description: Why a notification was sent.
+      type: string
+      enum: [budget_alert, weekly_recap, goal_completed, import_ready]
+
+    DeviceEnvironment:
+      description: Which APNs environment issued the device token.
+      type: string
+      enum: [sandbox, production]
+
+    # -------------------------------------------------------------------- me
+
+    Me:
+      description: The signed-in user.
+      type: object
+      required:
+        - id
+        - name
+        - first_name
+        - email
+        - avatar_url
+        - currency
+        - timezone
+        - starting_balance_minor
+        - onboarding_completed
+        - preferences
+        - stats
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        first_name:
+          type: string
+        email:
+          type: string
+        avatar_url:
+          description: Presigned URL, valid for an hour.
+          type: string
+          nullable: true
+        currency:
+          description: ISO 4217 code. One currency per user.
+          type: string
+        timezone:
+          description: IANA timezone used for day grouping.
+          type: string
+        starting_balance_minor:
+          type: integer
+          format: int64
+        onboarding_completed:
+          type: boolean
+        preferences:
+          $ref: "#/components/schemas/Preferences"
+        stats:
+          $ref: "#/components/schemas/ProfileStats"
+        created_at:
+          type: string
+          format: date-time
+
+    Preferences:
+      description: Notification preferences.
+      type: object
+      required: [notifications_enabled, budget_alerts, weekly_recap]
+      properties:
+        notifications_enabled:
+          type: boolean
+        budget_alerts:
+          type: boolean
+        weekly_recap:
+          type: boolean
+
+    ProfileStats:
+      description: Figures shown on the profile.
+      type: object
+      required: [categories_count, goals_count, streak_days]
+      properties:
+        categories_count:
+          type: integer
+        goals_count:
+          type: integer
+        streak_days:
+          description: Consecutive local days, ending today or yesterday, with at least one transaction or contribution created.
+          type: integer
+
+    UpdateMeRequest:
+      description: Any subset of the profile fields.
+      type: object
+      properties:
+        name:
+          type: string
+        currency:
+          type: string
+        timezone:
+          type: string
+        starting_balance_minor:
+          type: integer
+          format: int64
+        onboarding_completed:
+          type: boolean
+        avatar_upload_id:
+          description: An `avatar` upload to use, or null to remove the avatar.
+          type: string
+          format: uuid
+          nullable: true
+          x-go-type: nullable.Nullable[openapi_types.UUID]
+          x-go-type-import:
+            path: github.com/oapi-codegen/nullable
+          x-go-type-skip-optional-pointer: true
+        preferences:
+          $ref: "#/components/schemas/UpdatePreferences"
+
+    UpdatePreferences:
+      description: Any subset of the notification preferences.
+      type: object
+      properties:
+        notifications_enabled:
+          type: boolean
+        budget_alerts:
+          type: boolean
+        weekly_recap:
+          type: boolean
+
+    # --------------------------------------------------------------- uploads
+
+    CreateUploadRequest:
+      description: What the client is about to upload.
+      type: object
+      required: [purpose, content_type, size_bytes]
+      properties:
+        purpose:
+          $ref: "#/components/schemas/UploadPurpose"
+        content_type:
+          type: string
+        size_bytes:
+          type: integer
+          format: int64
+        filename:
+          type: string
+
+    Upload:
+      description: A presigned upload slot.
+      type: object
+      required: [id, upload_url, method, headers, expires_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        upload_url:
+          type: string
+        method:
+          $ref: "#/components/schemas/UploadMethod"
+        headers:
+          description: Headers the client must send with the upload.
+          type: object
+          additionalProperties:
+            type: string
+        expires_at:
+          type: string
+          format: date-time
+
+    # ------------------------------------------------------------ categories
+
+    Category:
+      description: A spending category.
+      type: object
+      required: [id, name, icon, shade, sort_order, monthly_budget_minor, archived]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        icon:
+          $ref: "#/components/schemas/CategoryIcon"
+        shade:
+          description: Index into the slate ramp; 0 is lightest.
+          type: integer
+          minimum: 0
+          maximum: 6
+        sort_order:
+          type: integer
+        monthly_budget_minor:
+          type: integer
+          format: int64
+        archived:
+          type: boolean
+
+    CategoryList:
+      description: Categories in display order.
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+
+    CreateCategoryRequest:
+      description: A new category.
+      type: object
+      required: [name, icon]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 24
+        icon:
+          $ref: "#/components/schemas/CategoryIcon"
+        shade:
+          type: integer
+          minimum: 0
+          maximum: 6
+        monthly_budget_minor:
+          type: integer
+          format: int64
+          minimum: 0
+
+    UpdateCategoryRequest:
+      description: Any subset of the category fields.
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 24
+        icon:
+          $ref: "#/components/schemas/CategoryIcon"
+        shade:
+          type: integer
+          minimum: 0
+          maximum: 6
+        monthly_budget_minor:
+          type: integer
+          format: int64
+          minimum: 0
+        archived:
+          type: boolean
+
+    ReorderCategoriesRequest:
+      description: Every non-archived category id, in the wanted order.
+      type: object
+      required: [ids]
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    UpdateBudgetsRequest:
+      description: Budgets to set.
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BudgetItem"
+
+    BudgetItem:
+      description: One category's monthly budget.
+      type: object
+      required: [category_id, monthly_budget_minor]
+      properties:
+        category_id:
+          type: string
+          format: uuid
+        monthly_budget_minor:
+          type: integer
+          format: int64
+          minimum: 0
+
+    # ---------------------------------------------------------- transactions
+
+    Transaction:
+      description: One ledger entry.
+      type: object
+      required:
+        - id
+        - kind
+        - amount_minor
+        - category_id
+        - merchant
+        - note
+        - occurred_at
+        - local_date
+        - source
+        - receipt_id
+        - import_id
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          $ref: "#/components/schemas/TransactionKind"
+        amount_minor:
+          description: Always positive; direction comes from `kind`.
+          type: integer
+          format: int64
+        category_id:
+          description: Null for income.
+          type: string
+          format: uuid
+          nullable: true
+        merchant:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        occurred_at:
+          type: string
+          format: date-time
+        local_date:
+          description: The calendar day in the user's timezone at the time of writing.
+          type: string
+          format: date
+        source:
+          $ref: "#/components/schemas/TransactionSource"
+        receipt_id:
+          type: string
+          format: uuid
+          nullable: true
+        import_id:
+          type: string
+          format: uuid
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    CreateTransactionRequest:
+      description: A new transaction.
+      type: object
+      required: [kind, amount_minor]
+      properties:
+        kind:
+          $ref: "#/components/schemas/TransactionKind"
+        amount_minor:
+          type: integer
+          format: int64
+          minimum: 1
+        category_id:
+          description: Required for an expense, forbidden for income.
+          type: string
+          format: uuid
+        merchant:
+          type: string
+          maxLength: 80
+        note:
+          type: string
+          maxLength: 140
+        occurred_at:
+          description: Defaults to now.
+          type: string
+          format: date-time
+
+    UpdateTransactionRequest:
+      description: Any subset of the create fields. Send null to clear `category_id`, `merchant` or `note`.
+      type: object
+      properties:
+        kind:
+          $ref: "#/components/schemas/TransactionKind"
+        amount_minor:
+          type: integer
+          format: int64
+          minimum: 1
+        category_id:
+          type: string
+          format: uuid
+          nullable: true
+          x-go-type: nullable.Nullable[openapi_types.UUID]
+          x-go-type-import:
+            path: github.com/oapi-codegen/nullable
+          x-go-type-skip-optional-pointer: true
+        merchant:
+          type: string
+          maxLength: 80
+          nullable: true
+          x-go-type: nullable.Nullable[string]
+          x-go-type-import:
+            path: github.com/oapi-codegen/nullable
+          x-go-type-skip-optional-pointer: true
+        note:
+          type: string
+          maxLength: 140
+          nullable: true
+          x-go-type: nullable.Nullable[string]
+          x-go-type-import:
+            path: github.com/oapi-codegen/nullable
+          x-go-type-skip-optional-pointer: true
+        occurred_at:
+          type: string
+          format: date-time
+
+    DayTotal:
+      description: The full-day total for one calendar day, under the request's filters.
+      type: object
+      required: [date, net_minor, count]
+      properties:
+        date:
+          type: string
+          format: date
+        net_minor:
+          description: Signed; income minus expense.
+          type: integer
+          format: int64
+        count:
+          type: integer
+
+    TransactionList:
+      description: A page of transactions with their day totals.
+      type: object
+      required: [items, days, next_cursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        days:
+          description: One entry for every date that appears in `items`.
+          type: array
+          items:
+            $ref: "#/components/schemas/DayTotal"
+        next_cursor:
+          type: string
+          nullable: true
+
+    # ----------------------------------------------------------- periods
+
+    Range:
+      description: The period a summary covers.
+      type: object
+      required: [period, offset, start, end, is_current]
+      properties:
+        period:
+          $ref: "#/components/schemas/Period"
+        offset:
+          type: integer
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        is_current:
+          type: boolean
+
+    Bucket:
+      description: One slice of a period's series.
+      type: object
+      required: [start, end, amount_minor]
+      properties:
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        amount_minor:
+          type: integer
+          format: int64
+
+    # ------------------------------------------------------------------ home
+
+    Home:
+      description: Everything the Home screen shows.
+      type: object
+      required: [balance_minor, month, recent, has_unread_notifications]
+      properties:
+        balance_minor:
+          description: Signed. Starting balance plus income, minus expenses and goal top-ups, plus goal withdrawals.
+          type: integer
+          format: int64
+        month:
+          $ref: "#/components/schemas/HomeMonth"
+        recent:
+          $ref: "#/components/schemas/RecentTransactions"
+        has_unread_notifications:
+          type: boolean
+
+    HomeMonth:
+      description: The current month's spending.
+      type: object
+      required: [range, spent_minor, previous_spent_minor, delta_minor, categories_count, segments]
+      properties:
+        range:
+          $ref: "#/components/schemas/Range"
+        spent_minor:
+          type: integer
+          format: int64
+        previous_spent_minor:
+          type: integer
+          format: int64
+        delta_minor:
+          description: Signed; this month minus the previous one.
+          type: integer
+          format: int64
+        categories_count:
+          type: integer
+        segments:
+          description: Categories with spend this month, largest first.
+          type: array
+          items:
+            $ref: "#/components/schemas/HomeSegment"
+
+    HomeSegment:
+      description: One category's part of the month's spending.
+      type: object
+      required: [category_id, spent_minor, share]
+      properties:
+        category_id:
+          type: string
+          format: uuid
+        spent_minor:
+          type: integer
+          format: int64
+        share:
+          description: Fraction of the month's spending; the shares sum to 1.
+          type: number
+          format: double
+
+    RecentTransactions:
+      description: The ten newest transactions with their day totals.
+      type: object
+      required: [items, days]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/DayTotal"
+
+    # ------------------------------------------------------------- summaries
+
+    CategoriesSummary:
+      description: Spending per category for a period.
+      type: object
+      required: [range, total_spent_minor, total_budget_minor, budget_used_pct, items]
+      properties:
+        range:
+          $ref: "#/components/schemas/Range"
+        total_spent_minor:
+          type: integer
+          format: int64
+        total_budget_minor:
+          type: integer
+          format: int64
+        budget_used_pct:
+          description: Null when the total budget is 0.
+          type: integer
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategorySummaryItem"
+
+    CategorySummaryItem:
+      description: One category's figures for a period.
+      type: object
+      required:
+        - category_id
+        - spent_minor
+        - budget_minor
+        - remaining_minor
+        - over_budget
+        - budget_used_pct
+        - share_pct
+        - txn_count
+        - trend_pct
+      properties:
+        category_id:
+          type: string
+          format: uuid
+        spent_minor:
+          type: integer
+          format: int64
+        budget_minor:
+          description: The monthly budget scaled to the period.
+          type: integer
+          format: int64
+        remaining_minor:
+          description: Signed; negative when over budget.
+          type: integer
+          format: int64
+        over_budget:
+          type: boolean
+        budget_used_pct:
+          description: Null when the budget is 0.
+          type: integer
+          nullable: true
+        share_pct:
+          description: Share of the period's total spending; the shares sum to 100.
+          type: integer
+        txn_count:
+          type: integer
+        trend_pct:
+          description: Signed change against the preceding period; null when that period had no spend.
+          type: integer
+          nullable: true
+
+    CategorySummary:
+      description: One category's figures and trend for a period.
+      type: object
+      required:
+        - range
+        - category_id
+        - spent_minor
+        - budget_minor
+        - remaining_minor
+        - over_budget
+        - budget_used_pct
+        - txn_count
+        - trend
+      properties:
+        range:
+          $ref: "#/components/schemas/Range"
+        category_id:
+          type: string
+          format: uuid
+        spent_minor:
+          type: integer
+          format: int64
+        budget_minor:
+          type: integer
+          format: int64
+        remaining_minor:
+          description: Signed; negative when over budget.
+          type: integer
+          format: int64
+        over_budget:
+          type: boolean
+        budget_used_pct:
+          description: Null when the budget is 0.
+          type: integer
+          nullable: true
+        txn_count:
+          type: integer
+        trend:
+          $ref: "#/components/schemas/Trend"
+
+    Trend:
+      description: Spending across the buckets of a period.
+      type: object
+      required: [unit, buckets, average_minor, peak_minor, peak_index]
+      properties:
+        unit:
+          $ref: "#/components/schemas/BucketUnit"
+        buckets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Bucket"
+        average_minor:
+          type: integer
+          format: int64
+        peak_minor:
+          type: integer
+          format: int64
+        peak_index:
+          description: Index of the highest bucket; the first one on a tie.
+          type: integer
+
+    StatsSummary:
+      description: Total spending for a period with its series and breakdown.
+      type: object
+      required: [range, total_spent_minor, previous_total_minor, delta_minor, delta_pct, series, breakdown]
+      properties:
+        range:
+          $ref: "#/components/schemas/Range"
+        total_spent_minor:
+          type: integer
+          format: int64
+        previous_total_minor:
+          type: integer
+          format: int64
+        delta_minor:
+          description: Signed; this period minus the previous one.
+          type: integer
+          format: int64
+        delta_pct:
+          description: Signed; null when the previous total is 0.
+          type: integer
+          nullable: true
+        series:
+          $ref: "#/components/schemas/Series"
+        breakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/BreakdownItem"
+
+    Series:
+      description: Total spending across the buckets of a period.
+      type: object
+      required: [unit, buckets, peak_index]
+      properties:
+        unit:
+          $ref: "#/components/schemas/BucketUnit"
+        buckets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Bucket"
+        peak_index:
+          type: integer
+
+    BreakdownItem:
+      description: One slice of the period's spending.
+      type: object
+      required: [category_id, amount_minor, share_pct]
+      properties:
+        category_id:
+          description: Null for the "Other" row that aggregates the remaining categories.
+          type: string
+          format: uuid
+          nullable: true
+        amount_minor:
+          type: integer
+          format: int64
+        share_pct:
+          type: integer
+
+    # -------------------------------------------------------------- insights
+
+    Insight:
+      description: One insight card. `title` and `body` are server-rendered English.
+      type: object
+      required: [id, kind, tone, icon, title, body, category_id, goal_id, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          $ref: "#/components/schemas/InsightKind"
+        tone:
+          $ref: "#/components/schemas/InsightTone"
+        icon:
+          $ref: "#/components/schemas/InsightIcon"
+        title:
+          type: string
+        body:
+          type: string
+        category_id:
+          type: string
+          format: uuid
+          nullable: true
+        goal_id:
+          type: string
+          format: uuid
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    InsightList:
+      description: Insight cards, most relevant first.
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/Insight"
+
+    # ----------------------------------------------------------------- goals
+
+    Goal:
+      description: A savings goal. `saved_minor` is the sum of its contributions.
+      type: object
+      required:
+        - id
+        - title
+        - emoji
+        - image_url
+        - target_minor
+        - saved_minor
+        - remaining_minor
+        - pct
+        - monthly_pace_minor
+        - eta_month
+        - status
+        - sort_order
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        emoji:
+          type: string
+          nullable: true
+        image_url:
+          description: Presigned URL, valid for an hour.
+          type: string
+          nullable: true
+        target_minor:
+          type: integer
+          format: int64
+        saved_minor:
+          type: integer
+          format: int64
+        remaining_minor:
+          type: integer
+          format: int64
+        pct:
+          type: integer
+        monthly_pace_minor:
+          description: Average net contributions per month over the last 90 days; 0 if none.
+          type: integer
+          format: int64
+        eta_month:
+          description: Month (`YYYY-MM`) the goal completes at the current pace; null when the pace is 0 or the goal is complete.
+          type: string
+          pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+          nullable: true
+        status:
+          $ref: "#/components/schemas/GoalStatus"
+        sort_order:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    GoalDetail:
+      description: A goal with its newest contributions.
+      allOf:
+        - $ref: "#/components/schemas/Goal"
+        - type: object
+          required: [recent_contributions]
+          properties:
+            recent_contributions:
+              description: The five newest contributions.
+              type: array
+              items:
+                $ref: "#/components/schemas/Contribution"
+
+    GoalList:
+      description: Active and completed goals with totals across them.
+      type: object
+      required: [total_saved_minor, total_target_minor, pct, items]
+      properties:
+        total_saved_minor:
+          type: integer
+          format: int64
+        total_target_minor:
+          type: integer
+          format: int64
+        pct:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Goal"
+
+    CreateGoalRequest:
+      description: A new goal.
+      type: object
+      required: [title, target_minor]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 40
+        emoji:
+          type: string
+        image_upload_id:
+          type: string
+          format: uuid
+        target_minor:
+          type: integer
+          format: int64
+          minimum: 1
+
+    UpdateGoalRequest:
+      description: Any subset of the goal fields. Send null to clear `emoji` or the image.
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 40
+        emoji:
+          type: string
+          nullable: true
+          x-go-type: nullable.Nullable[string]
+          x-go-type-import:
+            path: github.com/oapi-codegen/nullable
+          x-go-type-skip-optional-pointer: true
+        image_upload_id:
+          type: string
+          format: uuid
+          nullable: true
+          x-go-type: nullable.Nullable[openapi_types.UUID]
+          x-go-type-import:
+            path: github.com/oapi-codegen/nullable
+          x-go-type-skip-optional-pointer: true
+        target_minor:
+          type: integer
+          format: int64
+          minimum: 1
+        status:
+          $ref: "#/components/schemas/GoalStatus"
+        sort_order:
+          type: integer
+
+    Contribution:
+      description: Money moved into or out of a goal.
+      type: object
+      required: [id, kind, amount_minor, occurred_at, local_date]
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          $ref: "#/components/schemas/ContributionKind"
+        amount_minor:
+          type: integer
+          format: int64
+        occurred_at:
+          type: string
+          format: date-time
+        local_date:
+          type: string
+          format: date
+
+    ContributionList:
+      description: A page of contributions.
+      type: object
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Contribution"
+        next_cursor:
+          type: string
+          nullable: true
+
+    CreateContributionRequest:
+      description: A top-up or withdrawal.
+      type: object
+      required: [kind, amount_minor]
+      properties:
+        kind:
+          $ref: "#/components/schemas/ContributionKind"
+        amount_minor:
+          type: integer
+          format: int64
+          minimum: 1
+        occurred_at:
+          description: Defaults to now.
+          type: string
+          format: date-time
+
+    ContributionCreated:
+      description: A new contribution and the goal after it.
+      type: object
+      required: [contribution, goal]
+      properties:
+        contribution:
+          $ref: "#/components/schemas/Contribution"
+        goal:
+          $ref: "#/components/schemas/Goal"
+
+    # -------------------------------------------------------- categorisation
+
+    SuggestCategoryRequest:
+      description: What the user has typed so far.
+      type: object
+      properties:
+        merchant:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        amount_minor:
+          type: integer
+          format: int64
+
+    CategorySuggestion:
+      description: The categoriser's best guess.
+      type: object
+      required: [category_id, confidence, source]
+      properties:
+        category_id:
+          description: Null when nothing clears the confidence threshold.
+          type: string
+          format: uuid
+          nullable: true
+        confidence:
+          type: number
+          format: double
+        source:
+          $ref: "#/components/schemas/CategorizationSource"
+
+    # --------------------------------------------------------------- imports
+
+    CreateImportRequest:
+      description: The statement to import and the window to keep.
+      type: object
+      required: [upload_id, period]
+      properties:
+        upload_id:
+          type: string
+          format: uuid
+        period:
+          $ref: "#/components/schemas/ImportPeriod"
+
+    Import:
+      description: A statement import and its progress.
+      type: object
+      required:
+        - id
+        - status
+        - filename
+        - period
+        - detected
+        - summary
+        - mapping_request
+        - failure
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/ImportStatus"
+        filename:
+          type: string
+          nullable: true
+        period:
+          $ref: "#/components/schemas/ImportPeriod"
+        detected:
+          $ref: "#/components/schemas/ImportDetected"
+        summary:
+          $ref: "#/components/schemas/ImportSummary"
+        mapping_request:
+          description: Set when `status` is `needs_mapping`.
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/MappingRequest"
+        failure:
+          description: Set when `status` is `failed`.
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ImportFailure"
+        created_at:
+          type: string
+          format: date-time
+
+    ImportDetected:
+      description: What processing has worked out about the file so far; each field is null until known.
+      type: object
+      required: [format, bank_hint, mapping_source]
+      properties:
+        format:
+          description: Container format, such as `csv`, `ofx`, `xlsx` or `pdf`.
+          type: string
+          nullable: true
+        bank_hint:
+          type: string
+          nullable: true
+        mapping_source:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/MappingSource"
+
+    ImportSummary:
+      description: Row counts and totals for the drafted import; all zero while processing.
+      type: object
+      required:
+        - row_count
+        - included_count
+        - total_expense_minor
+        - total_income_minor
+        - duplicate_count
+        - uncategorized_count
+        - error_count
+        - out_of_period_count
+      properties:
+        row_count:
+          type: integer
+        included_count:
+          type: integer
+        total_expense_minor:
+          type: integer
+          format: int64
+        total_income_minor:
+          type: integer
+          format: int64
+        duplicate_count:
+          type: integer
+        uncategorized_count:
+          type: integer
+        error_count:
+          type: integer
+        out_of_period_count:
+          type: integer
+
+    ImportFailure:
+      description: Why an import failed.
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          $ref: "#/components/schemas/ImportFailureCode"
+        message:
+          type: string
+
+    MappingRequest:
+      description: The columns the user must label, with the server's best guesses.
+      type: object
+      required: [columns, suggested]
+      properties:
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/MappingRequestColumn"
+        suggested:
+          $ref: "#/components/schemas/MappingSuggestion"
+
+    MappingRequestColumn:
+      description: One column of the statement.
+      type: object
+      required: [index, header, samples, suggested_role]
+      properties:
+        index:
+          type: integer
+        header:
+          type: string
+        samples:
+          type: array
+          items:
+            type: string
+        suggested_role:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/MappingRole"
+
+    MappingSuggestion:
+      description: The server's guesses for the file-wide settings.
+      type: object
+      required: [date_format, amount_sign]
+      properties:
+        date_format:
+          type: string
+          nullable: true
+        amount_sign:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/AmountSign"
+
+    SetImportMappingRequest:
+      description: The user's column mapping.
+      type: object
+      required: [columns]
+      properties:
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/MappingColumn"
+        date_format:
+          description: Built from the tokens `DD`, `MM`, `YYYY`, `YY` and `MMM`.
+          type: string
+        amount_sign:
+          $ref: "#/components/schemas/AmountSign"
+
+    MappingColumn:
+      description: The role of one column.
+      type: object
+      required: [index, role]
+      properties:
+        index:
+          type: integer
+        role:
+          $ref: "#/components/schemas/MappingRole"
+
+    ImportRow:
+      description: One statement row, drafted for review. Parsed fields are null on a row whose `status` is `error`.
+      type: object
+      required:
+        - id
+        - status
+        - included
+        - kind
+        - amount_minor
+        - occurred_at
+        - local_date
+        - merchant
+        - raw_description
+        - category_id
+        - category_confidence
+        - category_source
+        - duplicate_of
+        - error
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/ImportRowStatus"
+        included:
+          description: Duplicate and transfer rows default to false; error rows cannot be included.
+          type: boolean
+        kind:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ImportRowKind"
+        amount_minor:
+          type: integer
+          format: int64
+          nullable: true
+        occurred_at:
+          type: string
+          format: date-time
+          nullable: true
+        local_date:
+          type: string
+          format: date
+          nullable: true
+        merchant:
+          type: string
+          nullable: true
+        raw_description:
+          description: Exactly as in the file.
+          type: string
+        category_id:
+          type: string
+          format: uuid
+          nullable: true
+        category_confidence:
+          type: number
+          format: double
+          nullable: true
+        category_source:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/CategorizationSource"
+        duplicate_of:
+          description: The existing transaction this row duplicates.
+          type: string
+          format: uuid
+          nullable: true
+        error:
+          description: Why the row could not be parsed.
+          type: string
+          nullable: true
+
+    ImportRowList:
+      description: A page of import rows.
+      type: object
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportRow"
+        next_cursor:
+          type: string
+          nullable: true
+
+    UpdateImportRowRequest:
+      description: Any subset of the editable row fields.
+      type: object
+      properties:
+        category_id:
+          type: string
+          format: uuid
+        included:
+          type: boolean
+        kind:
+          $ref: "#/components/schemas/ImportRowKind"
+        merchant:
+          type: string
+          maxLength: 80
+
+    ImportCommitResult:
+      description: The outcome of committing an import.
+      type: object
+      required: [created_count, skipped_count]
+      properties:
+        created_count:
+          type: integer
+        skipped_count:
+          type: integer
+
+    # -------------------------------------------------------------- receipts
+
+    CreateReceiptRequest:
+      description: The receipt image to scan.
+      type: object
+      required: [upload_id]
+      properties:
+        upload_id:
+          type: string
+          format: uuid
+
+    Receipt:
+      description: A scanned receipt. Every extracted field may be null; the client lets the user fill it in.
+      type: object
+      required:
+        - id
+        - status
+        - image_url
+        - merchant
+        - purchased_at
+        - total_minor
+        - currency
+        - payment_method
+        - category_id
+        - category_confidence
+        - line_items
+        - transaction_id
+        - failure
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/ReceiptStatus"
+        image_url:
+          description: Presigned URL, valid for an hour.
+          type: string
+          nullable: true
+        merchant:
+          type: string
+          nullable: true
+        purchased_at:
+          type: string
+          format: date-time
+          nullable: true
+        total_minor:
+          type: integer
+          format: int64
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        payment_method:
+          description: Card brand and last four digits only.
+          type: string
+          nullable: true
+        category_id:
+          type: string
+          format: uuid
+          nullable: true
+        category_confidence:
+          type: number
+          format: double
+          nullable: true
+        line_items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReceiptLineItem"
+        transaction_id:
+          description: Set once the receipt is confirmed.
+          type: string
+          format: uuid
+          nullable: true
+        failure:
+          description: Set when `status` is `failed`.
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ReceiptFailure"
+
+    ReceiptLineItem:
+      description: One line of a receipt.
+      type: object
+      required: [name, quantity, amount_minor]
+      properties:
+        name:
+          type: string
+        quantity:
+          type: number
+          format: double
+          nullable: true
+        amount_minor:
+          type: integer
+          format: int64
+          nullable: true
+
+    ReceiptFailure:
+      description: Why a receipt scan failed.
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          $ref: "#/components/schemas/ReceiptFailureCode"
+        message:
+          type: string
+
+    ConfirmReceiptRequest:
+      description: The values the user confirmed for the expense.
+      type: object
+      required: [amount_minor, category_id, occurred_at]
+      properties:
+        amount_minor:
+          type: integer
+          format: int64
+          minimum: 1
+        category_id:
+          type: string
+          format: uuid
+        occurred_at:
+          type: string
+          format: date-time
+        merchant:
+          type: string
+          maxLength: 80
+        note:
+          type: string
+          maxLength: 140
+
+    # --------------------------------------------------------- notifications
+
+    RegisterDeviceRequest:
+      description: A device's push registration.
+      type: object
+      required: [apns_token, environment]
+      properties:
+        apns_token:
+          type: string
+        environment:
+          $ref: "#/components/schemas/DeviceEnvironment"
+        app_version:
+          type: string
+        locale:
+          type: string
+
+    Notification:
+      description: One inbox entry.
+      type: object
+      required: [id, kind, title, body, deep_link, read_at, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          $ref: "#/components/schemas/NotificationKind"
+        title:
+          type: string
+        body:
+          type: string
+        deep_link:
+          description: A `sprout://` URL to open.
+          type: string
+          nullable: true
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    NotificationList:
+      description: A page of notifications.
+      type: object
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Notification"
+        next_cursor:
+          type: string
+          nullable: true
+
+    MarkNotificationsReadRequest:
+      description: Either the ids to mark, or `all`.
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        all:
+          type: boolean

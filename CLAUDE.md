@@ -34,7 +34,8 @@ docker compose up -d --wait   # postgres + minio
 make migrate-up          # goose migrations
 make run                 # API
 make worker              # river worker
-make generate            # sqlc (pinned, via go run) + oapi-codegen; must produce no diff on a second run
+make generate            # sqlc + oapi-codegen (pinned, via go run); must produce no diff on a second run
+make generate-check      # what CI runs: fails if committed generated code is stale
 make lint test           # required green before a task is ticked
 make eval                # deterministic categorisation eval (CI-gated)
 make eval-llm            # on demand only; calls the real LLM
@@ -43,6 +44,7 @@ make eval-llm            # on demand only; calls the real LLM
 ## Layout rules
 
 - Layout follows PRD §2.1. Feature packages under `internal/` expose a `Service` (business logic, takes `db.Querier`) and a `Handler` (implements the generated strict-server methods). **Handlers contain no SQL; services contain no HTTP.**
+- Adding or changing an endpoint: `docs/api-contract.md` → `api/openapi.yaml` → `make generate` → a method on `httpx.NotImplemented` (the compiler asks for it) → the feature handler. `api/spec_test.go` holds the endpoint list that must match the contract.
 - Never hand-edit generated code (`internal/db` sqlc output, `internal/httpx/api_gen.go`). Change `queries/*.sql`, `migrations/` or `api/openapi.yaml` and run `make generate`.
 - Never edit an applied migration; add a new one.
 - Bank-specific and merchant-specific knowledge lives in **data** (mapping templates, embedded data files, seeds), never in Go code.

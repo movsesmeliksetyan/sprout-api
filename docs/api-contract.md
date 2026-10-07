@@ -47,7 +47,7 @@ Every non-2xx response:
 
 ### 1.2 Periods
 
-Used by every summary endpoint: `?period=week|month|year&offset=N` (`offset` ≥ 0; `0` = current period, `1` = previous, …).
+Used by every summary endpoint: `?period=week|month|year&offset=N`. `period` is required; `offset` ≥ 0 and defaults to `0` (`0` = current period, `1` = previous, …).
 
 | period | Range (user timezone) | Trend / series buckets |
 |---|---|---|
@@ -107,6 +107,8 @@ The client renders labels (`July 2025`, `7–13 Jul`, `2025`, `W1…W4`, `M T W�
 ```
 
 The first authenticated call for an unknown Auth0 `sub` creates the user and seeds the 7 default categories (§2.3).
+
+`PATCH` bodies in general: a field left out is unchanged. Where a value can be cleared (`avatar_upload_id`; a transaction's `category_id`, `merchant`, `note`; a goal's `emoji`, `image_upload_id`), sending `null` clears it.
 
 `PATCH /me` — any subset of: `name`, `currency`, `timezone`, `starting_balance_minor`, `onboarding_completed`, `avatar_upload_id` (or `null` to remove), `preferences.{notifications_enabled,budget_alerts,weekly_recap}` → `200` full object.
 `currency` can only change while the user has zero transactions (`409 conflict` otherwise).
@@ -343,6 +345,7 @@ Flow: `POST /uploads` (purpose `statement`) → `PUT` file → `POST /imports` �
 
 - Poll every 1.5 s while `processing` (server target: < 20 s for 1,000 rows).
 - `failure`: `{ "code": "unsupported_format" | "empty_file" | "unreadable" | "too_many_rows" | "internal", "message": "…" }`.
+- While `processing`, `detected` and `summary` are still present: each field of `detected` is `null` until known, and every count in `summary` is `0`. `filename` is `null` if the upload had none.
 - `detected.mapping_source` ∈ `template`, `heuristic`, `llm`, `user`, `native` (OFX).
 
 When `status = needs_mapping`:
@@ -374,7 +377,7 @@ When `status = needs_mapping`:
 ```
 
 - `duplicate` rows and `transfer` rows default to `included: false`.
-- `error` rows cannot be included.
+- `error` rows cannot be included; on them `kind`, `amount_minor`, `occurred_at`, `local_date` and `category_source` may be `null`.
 
 `PATCH /imports/{id}/rows/{row_id}` — any of `category_id`, `included`, `kind`, `merchant` → `200` row. Changing `category_id` teaches the categoriser (user rule).
 

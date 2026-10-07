@@ -43,10 +43,13 @@ Run `make` to list every target.
 | `make run` | Run the HTTP API (`sprout api`) until interrupted |
 | `make worker` | Run the job worker (`sprout worker`) |
 | `make test` | Run all tests with the race detector (needs Docker: database tests start their own Postgres) |
-| `make lint` | Run golangci-lint |
-| `make generate` | Regenerate the sqlc query code in `internal/db` (runs a pinned sqlc; nothing to install) |
+| `make lint` | Run golangci-lint and lint `api/openapi.yaml` |
+| `make generate` | Regenerate the sqlc queries in `internal/db` and the OpenAPI server in `internal/httpx/api_gen.go` (pinned tools; nothing to install) |
+| `make generate-check` | Fail if the committed generated code is out of date (what CI runs) |
 | `make migrate-up` / `make migrate-down` | Apply all pending migrations / roll back the latest one |
 | `make eval` | Run the deterministic categorisation evaluation |
+
+The API is described by [api/openapi.yaml](api/openapi.yaml), served at `/v1/openapi.yaml` outside production. Every `/v1` operation exists and answers `501` until its task in the PRD implements it.
 
 `sprout migrate up|down|status` needs only `DATABASE_URL`. The `worker` subcommand is a stub for now and exits with "not implemented yet"; it and the evaluation set are filled in by later tasks in the PRD.
 

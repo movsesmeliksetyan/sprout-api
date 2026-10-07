@@ -17,6 +17,9 @@ const (
 	defaultMaxBodyBytes   = 1 << 20
 	defaultCheckTimeout   = 2 * time.Second
 	gzipLevel             = 5
+
+	apiBasePath = "/v1"
+	specPath    = apiBasePath + "/openapi.yaml"
 )
 
 // Server is the HTTP API: a router with the standard middleware stack and
@@ -25,6 +28,8 @@ type Server struct {
 	logger    *slog.Logger
 	router    chi.Router
 	responder *Responder
+	api       StrictServerInterface
+	spec      []byte
 	checks    []namedCheck
 
 	requestTimeout time.Duration
@@ -57,11 +62,24 @@ func WithMaxBodyBytes(n int64) Option {
 	return func(s *Server) { s.maxBodyBytes = n }
 }
 
+// WithAPI sets the implementation of the /v1 operations. The default answers
+// every one of them with 501.
+func WithAPI(api StrictServerInterface) Option {
+	return func(s *Server) { s.api = api }
+}
+
+// WithSpec serves the OpenAPI document at /v1/openapi.yaml. Without it that
+// path does not exist.
+func WithSpec(spec []byte) Option {
+	return func(s *Server) { s.spec = spec }
+}
+
 // NewServer builds the router. Routes are added through Router.
 func NewServer(logger *slog.Logger, opts ...Option) *Server {
 	s := &Server{
 		logger:         logger,
 		responder:      NewResponder(logger),
+		api:            NotImplemented{},
 		requestTimeout: defaultRequestTimeout,
 		checkTimeout:   defaultCheckTimeout,
 		maxBodyBytes:   defaultMaxBodyBytes,
@@ -91,9 +109,32 @@ func NewServer(logger *slog.Logger, opts ...Option) *Server {
 	})
 	r.Get(healthzPath, handleHealthz)
 	r.Get(readyzPath, s.handleReadyz)
+	s.mountAPI(r)
 
 	s.router = r
 	return s
+}
+
+// mountAPI registers every operation in api/openapi.yaml under /v1. Failures
+// to bind parameters or decode a body, and errors returned by the
+// implementation, all leave through the Responder.
+func (s *Server) mountAPI(r chi.Router) {
+	strict := NewStrictHandlerWithOptions(s.api, nil, StrictHTTPServerOptions{
+		RequestErrorHandlerFunc:  s.responder.RequestError,
+		ResponseErrorHandlerFunc: s.responder.Error,
+	})
+	HandlerWithOptions(strict, ChiServerOptions{
+		BaseURL:          apiBasePath,
+		BaseRouter:       r,
+		ErrorHandlerFunc: s.responder.RequestError,
+	})
+
+	if s.spec != nil {
+		r.Get(specPath, func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/yaml")
+			_, _ = w.Write(s.spec)
+		})
+	}
 }
 
 // Router exposes the router so feature packages can mount their routes.
