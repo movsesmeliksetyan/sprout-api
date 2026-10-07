@@ -277,12 +277,13 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-06 · OpenAPI spec and code generation**
 - Do: Transcribe every endpoint and schema in `docs/api-contract.md` into `api/openapi.yaml`. Generate strict server interface + models with `oapi-codegen`. Mount the generated router under `/v1`; unimplemented operations return `501` for now. Serve the spec at `/v1/openapi.yaml` in non-production. Generate optional response fields without `omitempty` so they are sent as `null` (contract §1), and plug `httpx.Responder` (BE-04) into the strict server's request and response error hooks.
-- Files: `api/openapi.yaml`, `api/codegen.yaml`, `internal/httpx/api_gen.go`
+- Files: `api/openapi.yaml`, `api/codegen.yaml`, `api/embed.go`, `api/vacuum.yaml`, `internal/httpx/api_gen.go` (generated), `internal/httpx/unimplemented.go`, `.github/workflows/backend.yml`
+- Notes: `oapi-codegen` and the `vacuum` linter run at pinned versions through the Makefile. `httpx.NotImplemented` answers every operation with `501` (code `not_implemented`, temporary and not in the contract); feature handlers are layered over it by embedding it one level deeper, and passed to the server with `httpx.WithAPI`. The generated server binds parameters and decodes bodies but does not enforce schema constraints; services validate. The workflow holds only the generated-code check, so that this task's CI criterion is real; BE-07 adds lint and tests to it.
 - Done when: spec validates with an OpenAPI linter; every path in the contract's traceability table exists in the spec; CI fails if generated code is stale.
 - Needs: BE-04
 
 **BE-07 · Test harness and CI**
-- Do: `testcontainers` helper that starts Postgres once per package, applies migrations, and gives each test an isolated schema or truncation. Helpers: `NewTestUser`, `AuthedRequest(user)` (bypasses JWT with a test verifier), fixture builders for categories/transactions. GitHub Actions workflow: lint, generate-drift check, tests with race detector.
+- Do: `testcontainers` helper that starts Postgres once per package, applies migrations, and gives each test an isolated schema or truncation. Helpers: `NewTestUser`, `AuthedRequest(user)` (bypasses JWT with a test verifier), fixture builders for categories/transactions. GitHub Actions workflow: lint, generate-drift check, tests with race detector (the file and the drift job already exist from BE-06; add the lint and test jobs).
 - Files: `internal/testutil/*`, `.github/workflows/backend.yml`
 - Done when: a sample integration test hitting `/healthz` and a DB round-trip runs locally and in CI.
 - Needs: BE-05, BE-06

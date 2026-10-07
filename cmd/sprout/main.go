@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/movsesmeliksetyan/sprout-api/api"
 	"github.com/movsesmeliksetyan/sprout-api/internal/config"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
@@ -125,8 +126,11 @@ func runAPI(c cli, _ []string) error {
 	}
 	logger.Info("listening", "addr", ln.Addr().String())
 
-	server := httpx.NewServer(logger, httpx.WithReadinessCheck("postgres", db.Ready(pool)))
-	if err := server.Run(c.ctx, ln); err != nil {
+	opts := []httpx.Option{httpx.WithReadinessCheck("postgres", db.Ready(pool))}
+	if cfg.Env != config.EnvProd {
+		opts = append(opts, httpx.WithSpec(api.Spec))
+	}
+	if err := httpx.NewServer(logger, opts...).Run(c.ctx, ln); err != nil {
 		return err
 	}
 	logger.Info("shutdown complete")

@@ -1,0 +1,14 @@
+# oapi-codegen configuration. Run through `make generate`.
+package: httpx
+output: internal/httpx/api_gen.go
+generate:
+  models: true
+  chi-server: true
+  strict-server: true
+output-options:
+  # /healthz and /readyz live outside /v1 and are mounted by hand.
+  exclude-tags:
+    - health
+  name-normalizer: ToCamelCaseWithInitialisms
+compatibility:
+  always-prefix-enum-values: true

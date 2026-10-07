@@ -3,8 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"io"
 	"net"
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -123,4 +126,77 @@ func TestRunAPI_AddressInUse(t *testing.T) {
 	assert.Equal(t, exitError, got)
 	assert.Contains(t, stderr.String(), "sprout api: listen on "+taken.Addr().String())
 	assert.NotContains(t, stdout.String(), `"msg":"listening"`)
+}
+
+// serveAPI runs `sprout api` with env until the test ends and returns its
+// base URL once it is accepting requests.
+func serveAPI(t *testing.T, env map[string]string) string {
+	t.Helper()
+	ctx, stop := context.WithCancel(context.Background())
+	lookup := func(key string) (string, bool) {
+		v, ok := env[key]
+		return v, ok
+	}
+	exited := make(chan int, 1)
+	go func() {
+		exited <- run([]string{"api"}, cli{ctx: ctx, lookup: lookup, stdout: io.Discard, stderr: io.Discard})
+	}()
+	t.Cleanup(func() {
+		stop()
+		assert.Equal(t, exitOK, <-exited)
+	})
+
+	baseURL := "http://" + env["HTTP_ADDR"]
+	require.Eventually(t, func() bool {
+		resp, err := http.Get(baseURL + "/healthz")
+		if err != nil {
+			return false
+		}
+		_ = resp.Body.Close()
+		return resp.StatusCode == http.StatusOK
+	}, 5*time.Second, 20*time.Millisecond, "the API did not start")
+	return baseURL
+}
+
+func TestRunAPI_ServesTheSpecOutsideProduction(t *testing.T) {
+	prodOnly := map[string]string{
+		"LLM_API_KEY": "test-key", "APNS_KEY_ID": "KEY", "APNS_TEAM_ID": "TEAM",
+		"APNS_BUNDLE_ID": "app.sprout.ios", "APNS_KEY_PATH": "/secrets/apns.p8",
+	}
+
+	tests := []struct {
+		env        string
+		wantStatus int
+	}{
+		{"dev", http.StatusOK},
+		{"staging", http.StatusOK},
+		{"prod", http.StatusNotFound},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.env, func(t *testing.T) {
+			env := devEnv(t)
+			env["ENV"] = tt.env
+			for k, v := range prodOnly {
+				env[k] = v
+			}
+			baseURL := serveAPI(t, env)
+
+			resp, err := http.Get(baseURL + "/v1/openapi.yaml")
+			require.NoError(t, err)
+			defer resp.Body.Close()
+			body, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.wantStatus, resp.StatusCode)
+			if tt.wantStatus == http.StatusOK {
+				assert.Contains(t, string(body), "openapi: 3.0.3")
+			}
+
+			unimplemented, err := http.Get(baseURL + "/v1/me")
+			require.NoError(t, err)
+			_ = unimplemented.Body.Close()
+			assert.Equal(t, http.StatusNotImplemented, unimplemented.StatusCode)
+		})
+	}
 }

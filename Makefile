@@ -4,8 +4,13 @@ BIN := bin/sprout
 
 # Build tools run at a pinned version so generated code is identical everywhere.
 SQLC := go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
+OAPI_CODEGEN := go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.8.0
+VACUUM := go run github.com/daveshanley/vacuum@v0.30.6
 
-.PHONY: help build run worker test lint generate migrate-up migrate-down eval
+# Paths written by `make generate`.
+GENERATED := internal/db internal/httpx/api_gen.go
+
+.PHONY: help build run worker test lint lint-spec generate generate-check migrate-up migrate-down eval
 
 help: ## List the available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -22,12 +27,24 @@ worker: ## Run the job worker
 test: ## Run all tests with the race detector
 	go test -race ./...
 
-lint: ## Run golangci-lint
+lint: lint-spec ## Run golangci-lint and the OpenAPI linter
 	golangci-lint run ./...
 
-generate: ## Regenerate code: sqlc queries (oapi-codegen is wired in BE-06)
+lint-spec: ## Lint api/openapi.yaml
+	$(VACUUM) lint --details --fail-severity error --ruleset api/vacuum.yaml api/openapi.yaml
+
+generate: ## Regenerate code: sqlc queries and the OpenAPI server
 	$(SQLC) generate
+	$(OAPI_CODEGEN) -config api/codegen.yaml api/openapi.yaml
 	go generate ./...
+
+generate-check: generate ## Fail if the committed generated code is out of date
+	@status="$$(git status --porcelain -- $(GENERATED))"; \
+	if [ -n "$$status" ]; then \
+		echo "generated code is stale; run 'make generate' and commit the result:"; \
+		echo "$$status"; \
+		exit 1; \
+	fi
 
 migrate-up: ## Apply all pending migrations
 	go run ./cmd/sprout migrate up

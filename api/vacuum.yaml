@@ -1,0 +1,9 @@
+# Ruleset for `make lint-spec`.
+extends: [[vacuum:oas, recommended]]
+rules:
+  # The contract mandates snake_case keys.
+  camel-case-properties: off
+  # Examples live in docs/api-contract.md.
+  oas3-missing-example: off
+  # Short field descriptions such as "Presigned URL, valid for an hour." legitimately repeat.
+  description-duplication: off

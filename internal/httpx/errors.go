@@ -44,6 +44,10 @@ var (
 	errUnavailable     = &apiError{http.StatusServiceUnavailable, codeUnavailable, "The service is temporarily unavailable. Please try again."}
 	errInternal        = &apiError{http.StatusInternalServerError, codeInternal, "Something went wrong. Please try again."}
 
+	// Temporary: returned by operations whose feature task has not landed. It
+	// is not part of the contract and disappears once every operation exists.
+	errNotImplemented = &apiError{http.StatusNotImplemented, "not_implemented", "This endpoint is not implemented yet."}
+
 	// The contract has no code for a wrong method, so it reuses bad_request.
 	errMethodNotAllowed = &apiError{http.StatusMethodNotAllowed, codeBadRequest, "This method is not allowed for the requested resource."}
 )
@@ -190,8 +194,9 @@ func (rs *Responder) RequestError(w http.ResponseWriter, r *http.Request, err er
 
 func (rs *Responder) write(w http.ResponseWriter, r *http.Request, err error, unknown *apiError) {
 	res := resolve(err, unknown)
-	// Client errors already show in the access log; server-side ones need the cause.
-	if res.status >= http.StatusInternalServerError {
+	// Client errors already show in the access log; server-side ones need the
+	// cause. A not-implemented answer is expected, not a failure.
+	if res.status >= http.StatusInternalServerError && res.status != http.StatusNotImplemented {
 		rs.logger.ErrorContext(r.Context(), "request failed",
 			slog.Int("status", res.status),
 			slog.String("code", res.code),
