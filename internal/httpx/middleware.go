@@ -110,7 +110,8 @@ func recoverer(logger *slog.Logger) func(http.Handler) http.Handler {
 					slog.String("stack", string(debug.Stack())),
 				)
 				if ww.Status() == 0 {
-					writeError(ww, r, http.StatusInternalServerError, codeInternal, "Something went wrong. Please try again.")
+					// Logged above with the stack, so write without logging again.
+					writeResolution(ww, r, resolve(errInternal, errInternal))
 				}
 			}()
 
@@ -122,7 +123,7 @@ func recoverer(logger *slog.Logger) func(http.Handler) http.Handler {
 // timeout gives the request a deadline. Handlers are expected to honour the
 // context; one that returns after the deadline without having written
 // anything gets the unavailable envelope.
-func timeout(d time.Duration) func(http.Handler) http.Handler {
+func timeout(d time.Duration, rs *Responder) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx, cancel := context.WithTimeout(r.Context(), d)
@@ -132,7 +133,7 @@ func timeout(d time.Duration) func(http.Handler) http.Handler {
 			next.ServeHTTP(ww, r.WithContext(ctx))
 
 			if ww.Status() == 0 && errors.Is(ctx.Err(), context.DeadlineExceeded) {
-				writeError(ww, r, http.StatusServiceUnavailable, codeUnavailable, "The request took too long. Please try again.")
+				rs.Error(ww, r, WithMessage(ErrUnavailable, "The request took too long. Please try again."))
 			}
 		})
 	}
@@ -140,11 +141,11 @@ func timeout(d time.Duration) func(http.Handler) http.Handler {
 
 // bodyLimit rejects request bodies larger than limit bytes: up front when the
 // length is declared, otherwise when the handler reads past the limit.
-func bodyLimit(limit int64) func(http.Handler) http.Handler {
+func bodyLimit(limit int64, rs *Responder) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.ContentLength > limit {
-				writeError(w, r, http.StatusRequestEntityTooLarge, codePayloadTooLarge, "The request body is too large.")
+				rs.Error(w, r, ErrPayloadTooLarge)
 				return
 			}
 			r.Body = http.MaxBytesReader(w, r.Body, limit)

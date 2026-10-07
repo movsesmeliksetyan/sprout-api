@@ -26,7 +26,7 @@ type statusBody struct {
 
 // handleHealthz answers as long as the process is serving requests.
 func handleHealthz(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, statusBody{Status: "ok"})
+	WriteJSON(w, http.StatusOK, statusBody{Status: "ok"})
 }
 
 // handleReadyz runs every readiness check. Failures are logged by name; the
@@ -53,10 +53,11 @@ func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !ready {
-		writeError(w, r, http.StatusServiceUnavailable, codeUnavailable, "The service is not ready.")
+		// Each failure is logged above by name, so write without logging again.
+		writeResolution(w, r, resolve(WithMessage(ErrUnavailable, "The service is not ready."), errInternal))
 		return
 	}
-	writeJSON(w, http.StatusOK, statusBody{Status: "ok"})
+	WriteJSON(w, http.StatusOK, statusBody{Status: "ok"})
 }
 
 // runCheck stops waiting when ctx ends, even if the check itself does not.
