@@ -77,3 +77,15 @@ RETURNING *;
 DELETE FROM goal_contributions
 WHERE id = $1 AND goal_id = $2 AND user_id = $3
 RETURNING *;
+
+-- name: ContributedBetween :many
+-- What the user's goals gained on the calendar days from_date to to_date,
+-- both included: top-ups minus withdrawals. A goal without contributions on
+-- those days has no row. A null goal_id is every goal.
+SELECT goal_id,
+       sum(CASE kind WHEN 'topup' THEN amount_minor ELSE -amount_minor END)::bigint AS net_minor
+FROM goal_contributions
+WHERE user_id = sqlc.arg(user_id)
+  AND (sqlc.narg(goal_id)::uuid IS NULL OR goal_id = sqlc.narg(goal_id)::uuid)
+  AND local_date BETWEEN sqlc.arg(from_date)::date AND sqlc.arg(to_date)::date
+GROUP BY goal_id;

@@ -79,8 +79,9 @@ func WithImages(uploadService *uploads.Service, store storage.Store, logger *slo
 	}
 }
 
-// WithClock sets the time a goal is recorded as completed at, and the time a
-// contribution without one is given.
+// WithClock sets the time a goal is recorded as completed at, the time a
+// contribution without one is given, and the day pace and ETA are counted
+// from.
 func WithClock(now func() time.Time) Option {
 	return func(s *Service) { s.now = now }
 }
@@ -108,9 +109,12 @@ type Goal struct {
 	// Pct is the part of the target that is saved, in whole percent; never
 	// above 100.
 	Pct int
-	// MonthlyPaceMinor and EtaMonth are computed once pace exists (BE-27).
+	// MonthlyPaceMinor is what the goal gained per month lately; negative
+	// when more was withdrawn than topped up.
 	MonthlyPaceMinor int64
-	EtaMonth         *string
+	// EtaMonth is the month, as YYYY-MM, the goal is fully saved in at that
+	// pace; nil when there is no such month.
+	EtaMonth *string
 }
 
 func newGoal(goal db.Goal, savedMinor int64) Goal {
@@ -144,8 +148,9 @@ type Detail struct {
 }
 
 // List returns the user's active and completed goals in display order.
-func (s *Service) List(ctx context.Context, userID uuid.UUID) (List, error) {
-	rows, err := db.New(s.db).ListGoals(ctx, userID)
+func (s *Service) List(ctx context.Context, user db.User) (List, error) {
+	q := db.New(s.db)
+	rows, err := q.ListGoals(ctx, user.ID)
 	if err != nil {
 		return List{}, fmt.Errorf("goals: list: %w", err)
 	}
@@ -156,15 +161,22 @@ func (s *Service) List(ctx context.Context, userID uuid.UUID) (List, error) {
 		list.TotalTargetMinor += row.Goal.TargetMinor
 	}
 	list.Pct = savedPct(list.TotalSavedMinor, list.TotalTargetMinor)
+	goals := make([]*Goal, len(list.Items))
+	for i := range list.Items {
+		goals[i] = &list.Items[i]
+	}
+	if err := s.pace(ctx, q, user, nil, goals...); err != nil {
+		return List{}, err
+	}
 	return list, nil
 }
 
 // Get returns one of the user's goals, archived or not, with its newest
 // contributions. A goal that is missing or someone else's is
 // httpx.ErrNotFound.
-func (s *Service) Get(ctx context.Context, userID, id uuid.UUID) (Detail, error) {
+func (s *Service) Get(ctx context.Context, user db.User, id uuid.UUID) (Detail, error) {
 	q := db.New(s.db)
-	row, err := q.GetGoal(ctx, db.GetGoalParams{ID: id, UserID: userID})
+	row, err := q.GetGoal(ctx, db.GetGoalParams{ID: id, UserID: user.ID})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Detail{}, httpx.ErrNotFound
 	}
@@ -172,12 +184,16 @@ func (s *Service) Get(ctx context.Context, userID, id uuid.UUID) (Detail, error)
 		return Detail{}, fmt.Errorf("goals: get: %w", err)
 	}
 	recent, err := q.ListRecentContributions(ctx, db.ListRecentContributionsParams{
-		GoalID: id, UserID: userID, RowLimit: recentContributions,
+		GoalID: id, UserID: user.ID, RowLimit: recentContributions,
 	})
 	if err != nil {
 		return Detail{}, fmt.Errorf("goals: recent contributions: %w", err)
 	}
-	return Detail{Goal: newGoal(row.Goal, row.SavedMinor), RecentContributions: recent}, nil
+	detail := Detail{Goal: newGoal(row.Goal, row.SavedMinor), RecentContributions: recent}
+	if err := s.pace(ctx, q, user, &id, &detail.Goal); err != nil {
+		return Detail{}, err
+	}
+	return detail, nil
 }
 
 // CreateParams describes a new goal.
@@ -259,7 +275,8 @@ type Patch struct {
 // saved against the target, which the patch may have moved. Invalid values
 // are reported together in an *httpx.ValidationError; bringing a goal back
 // into a full list of active ones is httpx.ErrConflict.
-func (s *Service) Update(ctx context.Context, userID, id uuid.UUID, patch Patch) (Goal, error) {
+func (s *Service) Update(ctx context.Context, user db.User, id uuid.UUID, patch Patch) (Goal, error) {
+	userID := user.ID
 	fields := map[string]string{}
 	var title, emoji *string
 	if patch.Title != nil {
@@ -288,8 +305,8 @@ func (s *Service) Update(ctx context.Context, userID, id uuid.UUID, patch Patch)
 		return Goal{}, &httpx.ValidationError{Fields: fields}
 	}
 
-	var previous, updated db.Goal
-	var saved int64
+	var previous db.Goal
+	var updated Goal
 	err := s.write(ctx, userID, func(q *db.Queries) error {
 		row, err := q.GetGoal(ctx, db.GetGoalParams{ID: id, UserID: userID})
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -298,7 +315,8 @@ func (s *Service) Update(ctx context.Context, userID, id uuid.UUID, patch Patch)
 		if err != nil {
 			return fmt.Errorf("goals: get: %w", err)
 		}
-		previous, saved = row.Goal, row.SavedMinor
+		previous = row.Goal
+		saved := row.SavedMinor
 
 		params := db.UpdateGoalParams{
 			ID:          id,
@@ -346,11 +364,15 @@ func (s *Service) Update(ctx context.Context, userID, id uuid.UUID, patch Patch)
 			}
 		}
 
-		updated, err = q.UpdateGoal(ctx, params)
+		stored, err := q.UpdateGoal(ctx, params)
 		if err != nil {
 			return fmt.Errorf("goals: update: %w", err)
 		}
-		return s.completed(ctx, q, previous, updated)
+		if err := s.completed(ctx, q, previous, stored); err != nil {
+			return err
+		}
+		updated = newGoal(stored, saved)
+		return s.pace(ctx, q, user, &id, &updated)
 	})
 	if err != nil {
 		return Goal{}, err
@@ -359,7 +381,7 @@ func (s *Service) Update(ctx context.Context, userID, id uuid.UUID, patch Patch)
 	if previous.ImageKey != nil && (updated.ImageKey == nil || *updated.ImageKey != *previous.ImageKey) {
 		s.deleteImage(ctx, *previous.ImageKey)
 	}
-	return newGoal(updated, saved), nil
+	return updated, nil
 }
 
 // Delete removes one of the user's goals with its contributions and its

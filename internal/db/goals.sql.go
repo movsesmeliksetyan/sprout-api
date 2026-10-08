@@ -12,6 +12,56 @@ import (
 	"github.com/google/uuid"
 )
 
+const contributedBetween = `-- name: ContributedBetween :many
+SELECT goal_id,
+       sum(CASE kind WHEN 'topup' THEN amount_minor ELSE -amount_minor END)::bigint AS net_minor
+FROM goal_contributions
+WHERE user_id = $1
+  AND ($2::uuid IS NULL OR goal_id = $2::uuid)
+  AND local_date BETWEEN $3::date AND $4::date
+GROUP BY goal_id
+`
+
+type ContributedBetweenParams struct {
+	UserID   uuid.UUID
+	GoalID   *uuid.UUID
+	FromDate time.Time
+	ToDate   time.Time
+}
+
+type ContributedBetweenRow struct {
+	GoalID   uuid.UUID
+	NetMinor int64
+}
+
+// What the user's goals gained on the calendar days from_date to to_date,
+// both included: top-ups minus withdrawals. A goal without contributions on
+// those days has no row. A null goal_id is every goal.
+func (q *Queries) ContributedBetween(ctx context.Context, arg ContributedBetweenParams) ([]ContributedBetweenRow, error) {
+	rows, err := q.db.Query(ctx, contributedBetween,
+		arg.UserID,
+		arg.GoalID,
+		arg.FromDate,
+		arg.ToDate,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ContributedBetweenRow
+	for rows.Next() {
+		var i ContributedBetweenRow
+		if err := rows.Scan(&i.GoalID, &i.NetMinor); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const countActiveGoals = `-- name: CountActiveGoals :one
 SELECT count(*) FROM goals WHERE user_id = $1 AND status = 'active'
 `

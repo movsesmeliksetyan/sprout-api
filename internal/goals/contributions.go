@@ -64,9 +64,9 @@ type ContributionPage struct {
 // below; an archived goal stays archived. Invalid values, a withdrawal of
 // more than is saved among them, are reported in an *httpx.ValidationError.
 func (s *Service) Contribute(ctx context.Context, user db.User, goalID uuid.UUID, params ContributionParams) (db.GoalContribution, Goal, error) {
-	loc, err := time.LoadLocation(user.Timezone)
+	loc, err := location(user)
 	if err != nil {
-		return db.GoalContribution{}, Goal{}, fmt.Errorf("goals: timezone %q: %w", user.Timezone, err)
+		return db.GoalContribution{}, Goal{}, err
 	}
 	id, err := uuid.NewV7()
 	if err != nil {
@@ -116,7 +116,10 @@ func (s *Service) Contribute(ctx context.Context, user db.User, goalID uuid.UUID
 			return fmt.Errorf("goals: create contribution: %w", err)
 		}
 		goal, err = s.resettle(ctx, q, row.Goal, saved)
-		return err
+		if err != nil {
+			return err
+		}
+		return s.pace(ctx, q, user, &goalID, &goal)
 	})
 	if err != nil {
 		return db.GoalContribution{}, Goal{}, err
@@ -169,7 +172,8 @@ func (s *Service) ListContributions(ctx context.Context, userID, goalID uuid.UUI
 // now says. A goal or contribution that is missing or someone else's is
 // httpx.ErrNotFound. A top-up that later withdrawals depend on cannot go: it
 // would leave less than nothing saved, which is httpx.ErrConflict.
-func (s *Service) DeleteContribution(ctx context.Context, userID, goalID, id uuid.UUID) (Goal, error) {
+func (s *Service) DeleteContribution(ctx context.Context, user db.User, goalID, id uuid.UUID) (Goal, error) {
+	userID := user.ID
 	var goal Goal
 	err := s.write(ctx, userID, func(q *db.Queries) error {
 		row, err := getGoal(ctx, q, userID, goalID)
@@ -189,7 +193,10 @@ func (s *Service) DeleteContribution(ctx context.Context, userID, goalID, id uui
 				"This top-up cannot be removed: more has been withdrawn from the goal than would be left in it.")
 		}
 		goal, err = s.resettle(ctx, q, row.Goal, saved)
-		return err
+		if err != nil {
+			return err
+		}
+		return s.pace(ctx, q, user, &goalID, &goal)
 	})
 	if err != nil {
 		return Goal{}, err
