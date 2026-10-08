@@ -29,9 +29,14 @@ type Querier interface {
 	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
 	// Locks the row until the transaction ends.
 	GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, error)
+	// Active categories in display order, then the archived ones when asked for.
+	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
+	ListCategoryTypes(ctx context.Context) ([]CategoryType, error)
 	Ping(ctx context.Context) (int32, error)
 	// Gives the key up so that a retry runs again.
 	ReleaseIdempotencyKey(ctx context.Context, arg ReleaseIdempotencyKeyParams) (int64, error)
+	// Does nothing when the user already has an active category of this name.
+	SeedCategory(ctx context.Context, arg SeedCategoryParams) error
 	// A null argument leaves its column as it is.
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }

@@ -337,7 +337,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-14 · Categories schema and default seed**
 - Do: `categories`, `category_types` migrations; seed function creating the 7 defaults from contract §2.3, each tagged with its `category_type`, registered on the `OnUserCreated` hook from BE-10 so it runs in the user-creation transaction. Type inference helper for custom categories (name synonyms + icon).
-- Files: `migrations/00005_categories.sql`, `internal/categories/seed.go`, `internal/categories/types.go`
+- Files: `migrations/00005_categories.sql`, `internal/categories/seed.go`, `internal/categories/types.go`, `internal/categories/data/types.csv`, `internal/db/queries/categories.sql`
+- Notes: the types are `food`, `transport`, `housing`, `utilities`, `leisure`, `selfcare`, `health`, `shopping`, `travel`, `education`, `pets`, `gifts`, `family`, `work`, inserted by the migration; a category's `category_type` references them and may be null. The defaults are typed Food→food, Car→transport, Home→housing, Leisure→leisure, Self-care→selfcare, Health→health, Communal→utilities. The seed skips a name the user already has among their active categories, which is what makes it idempotent. Inference reads its name synonyms and icon→type pairs from the embedded `data/types.csv`: the whole name decides first (lower-cased, punctuation ignored), then each word of it, then the icon; `tag` has no type.
 - Done when: a new user gets exactly 7 categories even with 10 parallel first requests; seed is idempotent; inference test maps e.g. "Groceries"→food, "Petrol"→transport, "Gym"→health, unknown→null.
 - Needs: BE-10
 
