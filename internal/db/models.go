@@ -10,6 +10,19 @@ import (
 	"github.com/google/uuid"
 )
 
+type IdempotencyKey struct {
+	UserID              uuid.UUID
+	Key                 uuid.UUID
+	RequestHash         []byte
+	Status              string
+	LockedUntil         time.Time
+	ResponseStatus      *int32
+	ResponseContentType *string
+	ResponseBody        []byte
+	ExpiresAt           time.Time
+	CreatedAt           time.Time
+}
+
 type Upload struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID

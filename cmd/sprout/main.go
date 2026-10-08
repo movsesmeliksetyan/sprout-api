@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 	_ "time/tzdata" // users' timezones are resolved by name; the production image has no system database
 
 	"github.com/movsesmeliksetyan/sprout-api/api"
@@ -23,6 +24,9 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
 	"github.com/movsesmeliksetyan/sprout-api/internal/users"
 )
+
+// idempotencyPurgeInterval is how often expired idempotency keys are deleted.
+const idempotencyPurgeInterval = time.Hour
 
 const (
 	exitOK    = 0
@@ -145,6 +149,23 @@ func runAPI(c cli, _ []string) error {
 		UsePathStyle:    cfg.S3.UsePathStyle,
 	})
 
+	idempotentRoutes, err := api.IdempotentRoutes()
+	if err != nil {
+		return err
+	}
+	// Until the job runner exists (BE-37), expired idempotency keys are
+	// purged from here. The purge stops before the pool closes.
+	purgeCtx, stopPurge := context.WithCancel(c.ctx)
+	purged := make(chan struct{})
+	go func() {
+		defer close(purged)
+		httpx.PurgeIdempotencyKeysEvery(purgeCtx, pool, logger, idempotencyPurgeInterval)
+	}()
+	defer func() {
+		stopPurge()
+		<-purged
+	}()
+
 	responder := httpx.NewResponder(logger)
 	uploadService := uploads.NewService(pool, store)
 	userService := users.NewService(pool, users.WithAvatars(uploadService, store, logger))
@@ -154,6 +175,7 @@ func runAPI(c cli, _ []string) error {
 		httpx.WithAPIMiddleware(
 			auth.Middleware(verifier, responder, logger),
 			users.Middleware(userService, responder),
+			httpx.Idempotency(pool, responder, logger, httpx.IdempotencyConfig{Routes: idempotentRoutes}),
 		),
 		httpx.WithAPI(newAPI(userService, uploadService)),
 	}
