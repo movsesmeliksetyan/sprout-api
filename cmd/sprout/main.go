@@ -22,6 +22,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
+	"github.com/movsesmeliksetyan/sprout-api/internal/summary"
 	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
 	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
 	"github.com/movsesmeliksetyan/sprout-api/internal/users"
@@ -185,7 +186,8 @@ func runAPI(c cli, _ []string) error {
 			users.Middleware(userService, responder),
 			httpx.Idempotency(pool, responder, logger, httpx.IdempotencyConfig{Routes: idempotentRoutes}),
 		),
-		httpx.WithAPI(newAPI(userService, uploadService, categoryService, transactionService)),
+		httpx.WithAPI(newAPI(userService, uploadService, categoryService, transactionService,
+			summary.NewService(pool, transactionService))),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))
