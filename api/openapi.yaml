@@ -34,7 +34,7 @@ tags:
   - name: me
     description: The signed-in user's profile and preferences.
   - name: uploads
-    description: Presigned uploads for avatars, receipts and statements.
+    description: Presigned uploads for avatars, goal pictures, receipts and statements.
   - name: categories
     description: Spending categories and their monthly budgets.
   - name: transactions
@@ -524,7 +524,7 @@ paths:
       operationId: createGoal
       tags: [goals]
       summary: Create a goal
-      description: A user can have at most 20 active goals.
+      description: The new goal is placed last. A user can have at most 20 active goals.
       requestBody:
         description: A new goal.
         required: true
@@ -563,7 +563,7 @@ paths:
       operationId: updateGoal
       tags: [goals]
       summary: Update a goal
-      description: Accepts any subset of the fields.
+      description: Accepts any subset of the fields. `status` may be set to `archived` or `active` only; `completed` follows from what is saved.
       requestBody:
         description: Any subset of the goal fields. Send null to clear `emoji` or the image.
         required: true
@@ -1249,7 +1249,7 @@ components:
     UploadPurpose:
       description: What an upload will be used for; decides allowed types and size.
       type: string
-      enum: [avatar, receipt, statement]
+      enum: [avatar, goal_image, receipt, statement]
 
     UploadMethod:
       description: HTTP method for the presigned upload.
@@ -2071,9 +2071,11 @@ components:
           type: integer
           format: int64
         remaining_minor:
+          description: Target minus saved; never below 0.
           type: integer
           format: int64
         pct:
+          description: Rounded share of the target that is saved; never above 100.
           type: integer
         monthly_pace_minor:
           description: Average net contributions per month over the last 90 days; 0 if none.
@@ -2135,6 +2137,7 @@ components:
         emoji:
           type: string
         image_upload_id:
+          description: A `goal_image` upload to use as the goal's picture.
           type: string
           format: uuid
         target_minor:
@@ -2173,6 +2176,7 @@ components:
           $ref: "#/components/schemas/GoalStatus"
         sort_order:
           type: integer
+          minimum: 0
 
     Contribution:
       description: Money moved into or out of a goal.

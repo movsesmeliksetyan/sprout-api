@@ -1,0 +1,17 @@
+$kind: http-request
+name: 'Restore goal'
+method: PATCH
+url: '{{baseUrl}}/v1/goals/{{goalId}}'
+order: 4200
+headers:
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: goalId
+    value: '{{goalId}}'
+body:
+  type: json
+  content: |-
+    {
+      "status": "active"
+    }

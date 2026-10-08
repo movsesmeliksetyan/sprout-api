@@ -1,0 +1,17 @@
+$kind: http-request
+name: 'Archive goal'
+method: PATCH
+url: '{{baseUrl}}/v1/goals/{{goalId}}'
+order: 4100
+headers:
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: goalId
+    value: '{{goalId}}'
+body:
+  type: json
+  content: |-
+    {
+      "status": "archived"
+    }

@@ -1,0 +1,27 @@
+$kind: http-request
+name: 'Create goal'
+method: POST
+url: '{{baseUrl}}/v1/goals'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Labubu",
+      "emoji": "🧸",
+      "target_minor": 12000
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 201 && json.id) {
+          pm.collectionVariables.set("goalId", json.id);
+          console.log("✅ goalId saved: " + json.id);
+      } else {
+          console.error("❌ Goal was not created:", JSON.stringify(json));
+      }

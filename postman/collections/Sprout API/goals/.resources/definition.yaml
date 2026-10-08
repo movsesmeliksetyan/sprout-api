@@ -1,0 +1,4 @@
+$kind: collection
+name: goals
+description: 'Savings goals: what the user is saving toward and how far along each one is.'
+order: 8000

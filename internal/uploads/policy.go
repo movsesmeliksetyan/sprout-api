@@ -11,6 +11,7 @@ type Purpose string
 // The purposes of the contract §2.2.
 const (
 	PurposeAvatar    Purpose = "avatar"
+	PurposeGoalImage Purpose = "goal_image"
 	PurposeReceipt   Purpose = "receipt"
 	PurposeStatement Purpose = "statement"
 )
@@ -26,8 +27,9 @@ type policy struct {
 var images = []string{"image/jpeg", "image/png", "image/heic"}
 
 var policies = map[Purpose]policy{
-	PurposeAvatar:  {contentTypes: images, maxBytes: 5 * megabyte},
-	PurposeReceipt: {contentTypes: images, maxBytes: 10 * megabyte},
+	PurposeAvatar:    {contentTypes: images, maxBytes: 5 * megabyte},
+	PurposeGoalImage: {contentTypes: images, maxBytes: 5 * megabyte},
+	PurposeReceipt:   {contentTypes: images, maxBytes: 10 * megabyte},
 	PurposeStatement: {
 		contentTypes: []string{
 			"text/csv",

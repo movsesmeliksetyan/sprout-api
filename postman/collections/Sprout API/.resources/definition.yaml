@@ -32,6 +32,8 @@ description: |-
     {{categoryIds}}       – by "List categories" and "Reorder categories":
                             the order the next reorder sends
     {{transactionId}}     – by "Create transaction"
+    {{goalId}}            – by "Create goal", and by "List goals" when it
+                            is still empty; cleared by "Delete goal"
 auth:
   type: bearer
   credentials:
@@ -50,3 +52,4 @@ variables:
   categoryId: ""
   categoryIds: "[]"
   transactionId: ""
+  goalId: ""

@@ -124,11 +124,15 @@ func TestStats_Counts(t *testing.T) {
 	testutil.NewCategory(t, pool, user.ID)
 	testutil.NewCategory(t, pool, user.ID, testutil.CategoryArchived())
 	testutil.NewCategory(t, pool, other.ID)
+	testutil.NewGoal(t, pool, user.ID)
+	testutil.NewGoal(t, pool, user.ID, testutil.GoalStatus("completed"))
+	testutil.NewGoal(t, pool, user.ID, testutil.GoalStatus("archived"))
+	testutil.NewGoal(t, pool, other.ID)
 
 	stats := getStats(t, server, user)
 
 	assert.Equal(t, 2, stats.CategoriesCount, "the active ones, and only the user's")
-	assert.Zero(t, stats.GoalsCount)
+	assert.Equal(t, 2, stats.GoalsCount, "the active and the completed ones, and only the user's")
 }
 
 func TestStats_AreInTheAnswerToAnUpdate(t *testing.T) {
