@@ -11,16 +11,27 @@ import (
 )
 
 type Querier interface {
+	// Claims the key for a request. Returns a row only to the request that now
+	// owns it: the key is new, has expired, or belongs to a request that never
+	// finished.
+	AcquireIdempotencyKey(ctx context.Context, arg AcquireIdempotencyKeyParams) (IdempotencyKey, error)
+	// Stores the response to replay. locked_until tells the owner apart from a
+	// request that took the key over.
+	CompleteIdempotencyKey(ctx context.Context, arg CompleteIdempotencyKeyParams) (int64, error)
 	// Returns no row unless the upload is the user's and still pending.
 	ConsumeUpload(ctx context.Context, arg ConsumeUploadParams) (Upload, error)
 	CreateUpload(ctx context.Context, arg CreateUploadParams) (Upload, error)
 	// Returns no row when a user with this auth0_sub already exists.
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteExpiredIdempotencyKeys(ctx context.Context) (int64, error)
+	GetIdempotencyKey(ctx context.Context, arg GetIdempotencyKeyParams) (IdempotencyKey, error)
 	GetUpload(ctx context.Context, arg GetUploadParams) (Upload, error)
 	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
 	// Locks the row until the transaction ends.
 	GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, error)
 	Ping(ctx context.Context) (int32, error)
+	// Gives the key up so that a retry runs again.
+	ReleaseIdempotencyKey(ctx context.Context, arg ReleaseIdempotencyKeyParams) (int64, error)
 	// A null argument leaves its column as it is.
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }

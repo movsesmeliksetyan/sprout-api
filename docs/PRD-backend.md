@@ -104,7 +104,7 @@ All tables: `id UUID PRIMARY KEY` (v7), `created_at`, `updated_at` unless noted.
 | `insights` | `user_id`, `period`, `period_start`, `kind`, `tone`, `icon`, `title`, `body`, `category_id`, `goal_id`, `score` | Unique `(user_id, period, period_start, kind, category_id, goal_id)` |
 | `devices` | `user_id`, `device_id`, `apns_token`, `environment`, `app_version`, `locale`, `last_seen_at`, `invalidated_at` | Unique `(user_id, device_id)` |
 | `notifications` | `user_id`, `kind`, `title`, `body`, `deep_link`, `dedup_key`, `read_at`, `sent_at` | Unique `(user_id, dedup_key)` |
-| `idempotency_keys` | `user_id`, `key`, `request_hash`, `status`, `response JSONB`, `expires_at` | |
+| `idempotency_keys` | `user_id`, `key`, `request_hash`, `status` (`processing`/`completed`), `locked_until`, `response_status`, `response_content_type`, `response_body`, `expires_at` | Primary key `(user_id, key)` |
 
 **Category types** are the bridge between global knowledge ("TESCO is groceries") and a user's personal category list ("Food", or a custom "Groceries"). Each user category carries an optional `category_type` (set for the 7 defaults; inferred from name/icon for custom ones). Global layers resolve to a type, then to the user's category of that type.
 
@@ -328,7 +328,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-13 · Idempotency middleware**
 - Do: For `POST` routes flagged idempotent: on first request store key + request hash, run handler, store response; replay returns the stored response; same key with a different body → `conflict`; concurrent duplicate waits or returns `conflict`. Cleanup job for expired keys.
-- Files: `internal/httpx/idempotency.go`, `migrations/00004_idempotency.sql`
+- Files: `internal/httpx/idempotency.go`, `api/idempotent.go`, `migrations/00004_idempotency.sql`
+- Notes: a route is idempotent when its operation declares the `Idempotency-Key` header in `api/openapi.yaml` (`api.IdempotentRoutes`); the header is ignored everywhere else. Only a `2xx` response is stored: a failed request created nothing, so its retry runs again. The response is kept as status, content type and raw body, not one `JSONB` column, so a replay is byte-identical; replays carry `Idempotency-Replayed: true`. The request hash covers method, path and body. A duplicate of a request still in flight waits up to 5 s for its response, then gets `409` with `Retry-After`. A `processing` key whose lock (1 min) has run out belongs to a request that died and is taken over by the retry. Expired keys are ignored and overwritten, so the purge only reclaims space; `sprout api` runs it hourly until BE-37 brings the job runner, which should take it over as a periodic job.
 - Done when: test fires the same create twice (sequential and parallel) and exactly one row exists.
 - Needs: BE-07
 

@@ -333,3 +333,43 @@ func TestUploadsMigration(t *testing.T) {
 		assert.Zero(t, count)
 	})
 }
+
+func TestIdempotencyMigration(t *testing.T) {
+	ctx := context.Background()
+	pool := newPool(t, true)
+	const insert = `INSERT INTO idempotency_keys (user_id, key, request_hash, locked_until, expires_at)
+		VALUES ((SELECT id FROM users), $1, '\x00', now(), now())`
+	const key = "0192f0c8-7b1a-7c3e-9d2f-4a5b6c7d8e9f"
+	violation := func(t *testing.T, err error, code string) {
+		t.Helper()
+		var pgErr *pgconn.PgError
+		require.ErrorAs(t, err, &pgErr)
+		assert.Equal(t, code, pgErr.Code)
+	}
+
+	_, err := pool.Exec(ctx, "INSERT INTO users (id, auth0_sub) VALUES (gen_random_uuid(), 'apple|1')")
+	require.NoError(t, err)
+	_, err = pool.Exec(ctx, insert, key)
+	require.NoError(t, err)
+
+	t.Run("a user uses a key once", func(t *testing.T) {
+		_, err := pool.Exec(ctx, insert, key)
+		violation(t, err, "23505")
+	})
+
+	t.Run("a completed key has a response", func(t *testing.T) {
+		_, err := pool.Exec(ctx, "UPDATE idempotency_keys SET status = 'completed'")
+		violation(t, err, "23514")
+		_, err = pool.Exec(ctx, "UPDATE idempotency_keys SET status = 'completed', response_status = 201")
+		assert.NoError(t, err)
+	})
+
+	t.Run("keys go with their user", func(t *testing.T) {
+		_, err := pool.Exec(ctx, "DELETE FROM users")
+		require.NoError(t, err)
+
+		var count int
+		require.NoError(t, pool.QueryRow(ctx, "SELECT count(*) FROM idempotency_keys").Scan(&count))
+		assert.Zero(t, count)
+	})
+}

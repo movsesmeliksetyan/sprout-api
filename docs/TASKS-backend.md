@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 12 / 63**
+**Progress: 13 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -35,7 +35,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
   - The currency lock uses an injected check until BE-17 adds transactions. The PRD records it.
 - [x] BE-12 · Object storage and `POST /uploads` — 2026-10-08, b7ca530
   - Added `internal/session` for the request's user (it was in `internal/users`), which the task's file list did not have. The `uploaded` status is unused: the contract has no call that reports a finished upload. The PRD records both.
-- [ ] BE-13 · Idempotency middleware
+- [x] BE-13 · Idempotency middleware — 2026-10-08, 9bfbe4a
+  - The stored response is status, content type and raw body instead of one `JSONB` column, and the purge of expired keys runs inside `sprout api` until BE-37 adds the job runner. The PRD records both.
 
 ## Milestone 3 — Categories and budgets
 
