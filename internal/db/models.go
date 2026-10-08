@@ -42,6 +42,25 @@ type IdempotencyKey struct {
 	CreatedAt           time.Time
 }
 
+type Transaction struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	Kind        string
+	AmountMinor int64
+	CategoryID  *uuid.UUID
+	Merchant    *string
+	MerchantKey string
+	Note        *string
+	OccurredAt  time.Time
+	LocalDate   time.Time
+	Source      string
+	ImportID    *uuid.UUID
+	ReceiptID   *uuid.UUID
+	DedupHash   []byte
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 type Upload struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
