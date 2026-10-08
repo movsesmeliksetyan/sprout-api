@@ -3,6 +3,7 @@ package httpx
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 // WriteJSON writes v as the JSON response body with the given status.
@@ -21,4 +22,10 @@ func WriteJSON(w http.ResponseWriter, status int, v any) {
 // NoContent writes a 204 response.
 func NoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// Instant returns t as the contract writes instants: UTC, to the second
+// (2025-07-21T17:24:00Z). Every timestamp in a response goes through it.
+func Instant(t time.Time) time.Time {
+	return t.UTC().Truncate(time.Second)
 }

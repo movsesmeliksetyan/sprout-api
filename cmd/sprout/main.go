@@ -19,6 +19,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
+	"github.com/movsesmeliksetyan/sprout-api/internal/users"
 )
 
 const (
@@ -133,9 +134,14 @@ func runAPI(c cli, _ []string) error {
 	}
 	logger.Info("listening", "addr", ln.Addr().String())
 
+	responder := httpx.NewResponder(logger)
 	opts := []httpx.Option{
 		httpx.WithReadinessCheck("postgres", db.Ready(pool)),
-		httpx.WithAPIMiddleware(auth.Middleware(verifier, httpx.NewResponder(logger), logger)),
+		httpx.WithAPIMiddleware(
+			auth.Middleware(verifier, responder, logger),
+			users.Middleware(users.NewService(pool), responder),
+		),
+		httpx.WithAPI(newAPI()),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))
