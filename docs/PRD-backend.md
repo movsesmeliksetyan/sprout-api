@@ -374,7 +374,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-19 · Balance and `GET /home`**
 - Do: Balance query per contract §2.5 (goal contributions wired after BE-26; until then treat as 0). Month block from the summary service, `segments` with shares via largest-remainder, 10 recent transactions with `days`, `has_unread_notifications` (false until BE-56).
-- Files: `internal/summary/home.go`, `queries/home.sql`
+- Files: `internal/summary/home.go`, `handler.go`, `internal/db/queries/home.sql`
+- Notes: the month is the current calendar month in the user's timezone, compared with the one before it; `delta_minor` is this month minus the previous one. `month.categories_count` is the number of the user's active categories, the same figure as `me.stats.categories_count`, whether or not they have spend. A segment's `share` is its whole-percent share (largest remainder, summing to 100) divided by 100. Segments with equal spend come in display order; an archived category with spend this month is still a segment. `recent` is the first page of the transactions list (BE-18) with a limit of 10. The balance counts every transaction, whatever its date. The reads are not in one database transaction.
 - Done when: fixture reproducing the design (balance, $1,842.50 month, 7 segments) returns the expected numbers; empty user returns zeros and empty arrays, not errors.
 - Needs: BE-18, BE-08
 

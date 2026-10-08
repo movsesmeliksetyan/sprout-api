@@ -41,6 +41,8 @@ type Querier interface {
 	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
 	// Locks the row until the transaction ends.
 	GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, error)
+	// Everything the user's transactions add up to: income minus expense.
+	LedgerNet(ctx context.Context, userID uuid.UUID) (int64, error)
 	// Active categories in display order, then the archived ones when asked for.
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListCategoryTypes(ctx context.Context) ([]CategoryType, error)
@@ -59,6 +61,13 @@ type Querier interface {
 	ReorderCategories(ctx context.Context, arg ReorderCategoriesParams) error
 	// Does nothing when the user already has an active category of this name.
 	SeedCategory(ctx context.Context, arg SeedCategoryParams) error
+	// The user's expenses on the calendar days from_date to to_date, both
+	// included.
+	SpentBetween(ctx context.Context, arg SpentBetweenParams) (int64, error)
+	// The user's expenses on the calendar days from_date to to_date per
+	// category, largest first; categories without any are left out. Equal
+	// amounts come in display order.
+	SpentByCategory(ctx context.Context, arg SpentByCategoryParams) ([]SpentByCategoryRow, error)
 	// A null argument leaves its column as it is. Archiving an archived category
 	// keeps the time it was first archived.
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error)

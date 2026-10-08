@@ -1,0 +1,4 @@
+$kind: collection
+name: home
+description: 'Everything the Home screen shows: balance, this month''s spending and the newest transactions.'
+order: 6000

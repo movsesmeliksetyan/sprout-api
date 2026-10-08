@@ -58,20 +58,7 @@ func (h *Handler) ListTransactions(ctx context.Context, request httpx.ListTransa
 		return nil, err
 	}
 
-	list := httpx.TransactionList{
-		Items: make([]httpx.Transaction, 0, len(page.Items)),
-		Days:  make([]httpx.DayTotal, 0, len(page.Days)),
-	}
-	for _, item := range page.Items {
-		list.Items = append(list.Items, toTransaction(item))
-	}
-	for _, day := range page.Days {
-		list.Days = append(list.Days, httpx.DayTotal{
-			Date:     openapi_types.Date{Time: day.Date},
-			NetMinor: day.NetMinor,
-			Count:    day.Count,
-		})
-	}
+	list := httpx.TransactionList{Items: ItemsToAPI(page.Items), Days: DaysToAPI(page.Days)}
 	if page.Next != nil {
 		next := httpx.EncodeCursor(*page.Next)
 		list.NextCursor = &next
@@ -100,7 +87,7 @@ func (h *Handler) CreateTransaction(ctx context.Context, request httpx.CreateTra
 	if err != nil {
 		return nil, err
 	}
-	return httpx.CreateTransaction201JSONResponse(toTransaction(created)), nil
+	return httpx.CreateTransaction201JSONResponse(ToAPI(created)), nil
 }
 
 // GetTransaction returns one of the user's transactions.
@@ -113,7 +100,7 @@ func (h *Handler) GetTransaction(ctx context.Context, request httpx.GetTransacti
 	if err != nil {
 		return nil, err
 	}
-	return httpx.GetTransaction200JSONResponse(toTransaction(transaction)), nil
+	return httpx.GetTransaction200JSONResponse(ToAPI(transaction)), nil
 }
 
 // UpdateTransaction changes any subset of a transaction's fields.
@@ -141,7 +128,7 @@ func (h *Handler) UpdateTransaction(ctx context.Context, request httpx.UpdateTra
 	if err != nil {
 		return nil, err
 	}
-	return httpx.UpdateTransaction200JSONResponse(toTransaction(updated)), nil
+	return httpx.UpdateTransaction200JSONResponse(ToAPI(updated)), nil
 }
 
 // DeleteTransaction removes one of the user's transactions.
@@ -168,7 +155,32 @@ func toOptional[T any](field nullable.Nullable[T]) Optional[T] {
 	return Optional[T]{Set: true, Value: &value}
 }
 
-func toTransaction(transaction db.Transaction) httpx.Transaction {
+// ItemsToAPI returns transactions as the API sends them; an empty list is
+// [], not null.
+func ItemsToAPI(transactions []db.Transaction) []httpx.Transaction {
+	items := make([]httpx.Transaction, 0, len(transactions))
+	for _, transaction := range transactions {
+		items = append(items, ToAPI(transaction))
+	}
+	return items
+}
+
+// DaysToAPI returns day totals as the API sends them; an empty list is [],
+// not null.
+func DaysToAPI(totals []DayTotal) []httpx.DayTotal {
+	days := make([]httpx.DayTotal, 0, len(totals))
+	for _, total := range totals {
+		days = append(days, httpx.DayTotal{
+			Date:     openapi_types.Date{Time: total.Date},
+			NetMinor: total.NetMinor,
+			Count:    total.Count,
+		})
+	}
+	return days
+}
+
+// ToAPI returns a transaction as the API sends it.
+func ToAPI(transaction db.Transaction) httpx.Transaction {
 	return httpx.Transaction{
 		ID:          transaction.ID,
 		Kind:        httpx.TransactionKind(transaction.Kind),
