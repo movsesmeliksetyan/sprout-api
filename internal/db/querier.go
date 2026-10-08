@@ -44,6 +44,12 @@ type Querier interface {
 	// Active categories in display order, then the archived ones when asked for.
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListCategoryTypes(ctx context.Context) ([]CategoryType, error)
+	// The whole-day totals of the given days under the same filters as
+	// ListTransactions: income minus expense, and how many transactions.
+	ListDayTotals(ctx context.Context, arg ListDayTotalsParams) ([]ListDayTotalsRow, error)
+	// A page of the user's transactions, newest first. A null filter is not
+	// applied. The cursor is the last row of the previous page.
+	ListTransactions(ctx context.Context, arg ListTransactionsParams) ([]Transaction, error)
 	// The position after the user's last active category.
 	NextCategorySortOrder(ctx context.Context, userID uuid.UUID) (int32, error)
 	Ping(ctx context.Context) (int32, error)

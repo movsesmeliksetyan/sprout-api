@@ -334,7 +334,7 @@ func TestGetTransaction(t *testing.T) {
 	assert.EqualValues(t, 4800, got.AmountMinor)
 	require.NotNil(t, got.Merchant)
 	assert.Equal(t, "Shell", *got.Merchant)
-	assert.WithinDuration(t, seeded.CreatedAt, got.CreatedAt, time.Millisecond)
+	assert.Equal(t, httpx.Instant(seeded.CreatedAt), got.CreatedAt)
 }
 
 func TestGetTransaction_Unknown(t *testing.T) {

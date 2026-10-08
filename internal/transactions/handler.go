@@ -19,6 +19,66 @@ type Handler struct {
 // NewHandler returns the handler for the /transactions operations.
 func NewHandler(service *Service) *Handler { return &Handler{service: service} }
 
+// ListTransactions returns a page of the user's transactions, newest first,
+// with the totals of the days on it.
+func (h *Handler) ListTransactions(ctx context.Context, request httpx.ListTransactionsRequestObject) (httpx.ListTransactionsResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+
+	params := ListParams{
+		CategoryID: request.Params.CategoryID,
+		Limit:      request.Params.Limit,
+	}
+	if request.Params.From != nil {
+		params.From = &request.Params.From.Time
+	}
+	if request.Params.To != nil {
+		params.To = &request.Params.To.Time
+	}
+	if request.Params.Kind != nil {
+		kind := Kind(*request.Params.Kind)
+		params.Kind = &kind
+	}
+	if request.Params.Q != nil {
+		params.Query = *request.Params.Q
+	}
+	// An empty cursor is the first page, as no cursor is.
+	if request.Params.Cursor != nil && *request.Params.Cursor != "" {
+		cursor, err := httpx.DecodeCursor(*request.Params.Cursor)
+		if err != nil {
+			return nil, err
+		}
+		params.After = &cursor
+	}
+
+	page, err := h.service.List(ctx, user.ID, params)
+	if err != nil {
+		return nil, err
+	}
+
+	list := httpx.TransactionList{
+		Items: make([]httpx.Transaction, 0, len(page.Items)),
+		Days:  make([]httpx.DayTotal, 0, len(page.Days)),
+	}
+	for _, item := range page.Items {
+		list.Items = append(list.Items, toTransaction(item))
+	}
+	for _, day := range page.Days {
+		list.Days = append(list.Days, httpx.DayTotal{
+			Date:     openapi_types.Date{Time: day.Date},
+			NetMinor: day.NetMinor,
+			Count:    day.Count,
+		})
+	}
+	if page.Next != nil {
+		next := httpx.EncodeCursor(*page.Next)
+		list.NextCursor = &next
+	}
+	return httpx.ListTransactions200JSONResponse(list), nil
+}
+
 // CreateTransaction adds a manual transaction to the user's ledger.
 func (h *Handler) CreateTransaction(ctx context.Context, request httpx.CreateTransactionRequestObject) (httpx.CreateTransactionResponseObject, error) {
 	user, ok := session.User(ctx)
@@ -116,11 +176,11 @@ func toTransaction(transaction db.Transaction) httpx.Transaction {
 		CategoryID:  transaction.CategoryID,
 		Merchant:    transaction.Merchant,
 		Note:        transaction.Note,
-		OccurredAt:  transaction.OccurredAt.UTC(),
+		OccurredAt:  httpx.Instant(transaction.OccurredAt),
 		LocalDate:   openapi_types.Date{Time: transaction.LocalDate},
 		Source:      httpx.TransactionSource(transaction.Source),
 		ReceiptID:   transaction.ReceiptID,
 		ImportID:    transaction.ImportID,
-		CreatedAt:   transaction.CreatedAt.UTC(),
+		CreatedAt:   httpx.Instant(transaction.CreatedAt),
 	}
 }

@@ -367,7 +367,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-18 · Transactions list**
 - Do: Keyset pagination on `(local_date DESC, id DESC)`; filters `from`, `to`, `category_id`, `kind`, `q` (ILIKE on merchant/note; trigram index). Second query for full-day `days` totals covering the dates in the page.
-- Files: `internal/transactions/list.go`, `queries/transactions_list.sql`
+- Files: `internal/transactions/list.go`, `internal/db/queries/transactions_list.sql`, `migrations/00007_transactions_search.sql`
+- Notes: `limit` outside 1–200, a `kind` that is not `expense` or `income`, a `q` longer than 100 characters and a cursor that is not one are `400 bad_request`; an empty `cursor` is the first page. `from` and `to` are inclusive on `local_date`, and `from` after `to` is an empty page. A `category_id` that is unknown or someone else's is an empty page, not `404`. `q` is trimmed, an empty one filters nothing, and `%` and `_` in it stand for themselves. The cursor is only a position: the client sends the same filters with it. `days` is computed under the same filters, newest first, by a second query that is not in a database transaction with the first. The search uses two trigram GIN indexes, on `merchant` and on `note`. `items` and `days` are `[]` when there is nothing, never `null`.
 - Done when: paging through 500 seeded rows with limit 50 yields each row once; a day split across two pages reports the same full `net_minor` on both pages.
 - Needs: BE-17
 
