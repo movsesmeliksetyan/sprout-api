@@ -38,6 +38,10 @@ type Querier interface {
 	CompleteIdempotencyKey(ctx context.Context, arg CompleteIdempotencyKeyParams) (int64, error)
 	// Returns no row unless the upload is the user's and still pending.
 	ConsumeUpload(ctx context.Context, arg ConsumeUploadParams) (Upload, error)
+	// What the user's goals gained on the calendar days from_date to to_date,
+	// both included: top-ups minus withdrawals. A goal without contributions on
+	// those days has no row. A null goal_id is every goal.
+	ContributedBetween(ctx context.Context, arg ContributedBetweenParams) ([]ContributedBetweenRow, error)
 	// Bulk-loads transactions with a chosen created_at; only the seed command
 	// writes the ledger this way.
 	CopyTransactions(ctx context.Context, arg []CopyTransactionsParams) (int64, error)

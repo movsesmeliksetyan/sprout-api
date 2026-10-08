@@ -300,8 +300,8 @@ Items cover every active category, plus any archived category that has spend in 
   "monthly_pace_minor": 2500, "eta_month": "2025-09", "status": "active", "sort_order": 0, "created_at": "…" }
 ```
 
-- `monthly_pace_minor`: average net contributions per month over the last 90 days (or since creation if younger); `0` if none.
-- `eta_month`: month the goal completes at the current pace; `null` when pace is 0 or the goal is complete.
+- `monthly_pace_minor`: average net contributions per month over the last 90 days (or since creation if younger, counted as at least a month); `0` if none. Signed: negative when more was withdrawn than topped up. The 90 days are calendar days in `me.timezone`, ending today.
+- `eta_month`: month the goal completes at the current pace: the current month plus the months `remaining_minor` takes, rounded up. `null` when the pace is 0 or negative, when nothing remains, and when it is more than 100 years away.
 - `saved_minor`: top-ups minus withdrawals. `remaining_minor` is `target_minor − saved_minor`, never below `0`; `pct` is the rounded share saved, never above `100`.
 - `image_url`: presigned link to the goal's picture, valid for an hour; set from a `goal_image` upload passed as `image_upload_id`.
 - `status`: a goal is `completed` exactly when `saved_minor ≥ target_minor`, and `active` otherwise; the server keeps this up to date, also when the target changes. The client can only archive a goal (`"status": "archived"`) and bring it back (`"status": "active"`, which makes it `completed` again if it is fully saved). Sending `"status": "completed"` is `422`.

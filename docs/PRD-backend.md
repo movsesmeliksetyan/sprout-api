@@ -434,7 +434,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-27 · Pace and ETA**
 - Do: `monthly_pace_minor` = net contributions in the trailing 90 days ÷ 3 (or ÷ months since creation, min 1, if younger). `eta_month` = current month + ceil(remaining / pace); null if pace ≤ 0 or completed.
-- Files: `internal/goals/pace.go`
+- Files: `internal/goals/pace.go`, `service.go`, `contributions.go`, `internal/db/queries/goals.sql`
+- Notes: the trailing 90 days are the user's calendar days up to and including today, read from `local_date`; a contribution dated later than today does not count until its day comes. One formula covers both ages: pace = net × 30 ÷ the goal's age in days, the age held between 30 and 90, rounded once — a third of the net for a goal 90 days old or older, and for a younger one the average over the days it has existed, a goal under a month old counting as a month. The pace is signed: negative when more was withdrawn than topped up. `eta_month` counts from the current month in the user's timezone; it is `null` when the pace is ≤ 0, when nothing remains (a completed goal, or an archived one that is fully saved), and when it would be more than 1 200 months away. An archived goal has both figures like any other. Every response that holds a goal carries them: one grouped query reads the window for the whole list, so the list costs one query more, not one per goal. The service methods that return a goal take the user, for the timezone.
 - Done when: table tests for new goal, steady saver, stalled goal, completed goal, withdrawal-heavy goal.
 - Needs: BE-26
 

@@ -25,7 +25,7 @@ func (h *Handler) ListGoals(ctx context.Context, _ httpx.ListGoalsRequestObject)
 	if !ok {
 		return nil, httpx.ErrUnauthenticated
 	}
-	list, err := h.service.List(ctx, user.ID)
+	list, err := h.service.List(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (h *Handler) GetGoal(ctx context.Context, request httpx.GetGoalRequestObjec
 	if !ok {
 		return nil, httpx.ErrUnauthenticated
 	}
-	detail, err := h.service.Get(ctx, user.ID, request.ID)
+	detail, err := h.service.Get(ctx, user, request.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (h *Handler) UpdateGoal(ctx context.Context, request httpx.UpdateGoalReques
 		patch.Status = &status
 	}
 
-	updated, err := h.service.Update(ctx, user.ID, request.ID, patch)
+	updated, err := h.service.Update(ctx, user, request.ID, patch)
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +224,7 @@ func (h *Handler) DeleteContribution(ctx context.Context, request httpx.DeleteCo
 	if !ok {
 		return nil, httpx.ErrUnauthenticated
 	}
-	updated, err := h.service.DeleteContribution(ctx, user.ID, request.ID, request.Cid)
+	updated, err := h.service.DeleteContribution(ctx, user, request.ID, request.Cid)
 	if err != nil {
 		return nil, err
 	}

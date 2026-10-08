@@ -969,14 +969,14 @@ type Goal struct {
 	CreatedAt time.Time `json:"created_at"`
 	Emoji     *string   `json:"emoji"`
 
-	// EtaMonth Month (`YYYY-MM`) the goal completes at the current pace; null when the pace is 0 or the goal is complete.
+	// EtaMonth Month (`YYYY-MM`) the goal completes at the current pace; null when the pace is 0 or negative, when nothing remains, and when it is more than 100 years away.
 	EtaMonth *string            `json:"eta_month"`
 	ID       openapi_types.UUID `json:"id"`
 
 	// ImageURL Presigned URL, valid for an hour.
 	ImageURL *string `json:"image_url"`
 
-	// MonthlyPaceMinor Average net contributions per month over the last 90 days; 0 if none.
+	// MonthlyPaceMinor Average net contributions per month over the last 90 days, or since creation if younger; 0 if none. Signed, negative when more was withdrawn than topped up.
 	MonthlyPaceMinor int64 `json:"monthly_pace_minor"`
 
 	// Pct Rounded share of the target that is saved; never above 100.
@@ -998,14 +998,14 @@ type GoalDetail struct {
 	CreatedAt time.Time `json:"created_at"`
 	Emoji     *string   `json:"emoji"`
 
-	// EtaMonth Month (`YYYY-MM`) the goal completes at the current pace; null when the pace is 0 or the goal is complete.
+	// EtaMonth Month (`YYYY-MM`) the goal completes at the current pace; null when the pace is 0 or negative, when nothing remains, and when it is more than 100 years away.
 	EtaMonth *string            `json:"eta_month"`
 	ID       openapi_types.UUID `json:"id"`
 
 	// ImageURL Presigned URL, valid for an hour.
 	ImageURL *string `json:"image_url"`
 
-	// MonthlyPaceMinor Average net contributions per month over the last 90 days; 0 if none.
+	// MonthlyPaceMinor Average net contributions per month over the last 90 days, or since creation if younger; 0 if none. Signed, negative when more was withdrawn than topped up.
 	MonthlyPaceMinor int64 `json:"monthly_pace_minor"`
 
 	// Pct Rounded share of the target that is saved; never above 100.
