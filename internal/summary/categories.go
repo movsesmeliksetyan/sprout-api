@@ -57,7 +57,7 @@ type CategoryItem struct {
 // Categories returns the user's spending per category in the period of the
 // given kind, offset periods back; a nil offset is the current period.
 func (s *Service) Categories(ctx context.Context, user db.User, kind string, offset *int) (CategoriesOverview, error) {
-	r, err := s.resolveRange(user, kind, offset)
+	r, _, err := s.resolveRange(user, kind, offset)
 	if err != nil {
 		return CategoriesOverview{}, err
 	}
@@ -78,49 +78,71 @@ func (s *Service) Categories(ctx context.Context, user db.User, kind string, off
 	}
 	shares := money.Shares(amounts)
 	for i, row := range rows {
-		budget := period.ScaleBudget(row.MonthlyBudgetMinor, r.Kind)
+		budget := budgetFor(row.SpentMinor, row.MonthlyBudgetMinor, r.Kind)
 		overview.Items = append(overview.Items, CategoryItem{
 			CategoryID:     row.CategoryID,
 			SpentMinor:     row.SpentMinor,
-			BudgetMinor:    budget,
-			RemainingMinor: budget - row.SpentMinor,
-			OverBudget:     budget > 0 && row.SpentMinor > budget,
-			BudgetUsedPct:  optional(money.Percent(row.SpentMinor, budget)),
+			BudgetMinor:    budget.BudgetMinor,
+			RemainingMinor: budget.RemainingMinor,
+			OverBudget:     budget.Over,
+			BudgetUsedPct:  budget.UsedPct,
 			SharePct:       shares[i],
 			TxnCount:       int(row.TxnCount),
 			TrendPct:       optional(money.PercentChange(row.SpentMinor, row.PreviousSpentMinor)),
 		})
 		overview.TotalSpentMinor += row.SpentMinor
-		overview.TotalBudgetMinor += budget
+		overview.TotalBudgetMinor += budget.BudgetMinor
 	}
 	overview.BudgetUsedPct = optional(money.Percent(overview.TotalSpentMinor, overview.TotalBudgetMinor))
 	return overview, nil
 }
 
-// resolveRange returns the period a summary request names, in the user's
-// timezone.
-func (s *Service) resolveRange(user db.User, kind string, offset *int) (period.Range, error) {
+// budget is a period's spending in a category measured against its budget.
+type budget struct {
+	// BudgetMinor is the monthly budget scaled to the period.
+	BudgetMinor    int64
+	RemainingMinor int64
+	Over           bool
+	UsedPct        *int
+}
+
+// budgetFor measures spent against the monthly budget scaled to a period of
+// the given kind. A category without a budget is never over it.
+func budgetFor(spentMinor, monthlyBudgetMinor int64, kind period.Kind) budget {
+	scaled := period.ScaleBudget(monthlyBudgetMinor, kind)
+	return budget{
+		BudgetMinor:    scaled,
+		RemainingMinor: scaled - spentMinor,
+		Over:           scaled > 0 && spentMinor > scaled,
+		UsedPct:        optional(money.Percent(spentMinor, scaled)),
+	}
+}
+
+// resolveRange returns the period a summary request names and today's
+// calendar day, both in the user's timezone.
+func (s *Service) resolveRange(user db.User, kind string, offset *int) (period.Range, time.Time, error) {
 	parsed, err := period.ParseKind(kind)
 	if err != nil {
-		return period.Range{}, httpx.WithMessage(httpx.ErrBadRequest, "The period must be week, month or year.")
+		return period.Range{}, time.Time{}, httpx.WithMessage(httpx.ErrBadRequest, "The period must be week, month or year.")
 	}
 	back := 0
 	if offset != nil {
 		back = *offset
 	}
 	if back < 0 || back > MaxOffset {
-		return period.Range{}, httpx.WithMessage(httpx.ErrBadRequest,
+		return period.Range{}, time.Time{}, httpx.WithMessage(httpx.ErrBadRequest,
 			fmt.Sprintf("The offset must be between 0 and %d.", MaxOffset))
 	}
 	loc, err := time.LoadLocation(user.Timezone)
 	if err != nil {
-		return period.Range{}, fmt.Errorf("summary: timezone %q: %w", user.Timezone, err)
+		return period.Range{}, time.Time{}, fmt.Errorf("summary: timezone %q: %w", user.Timezone, err)
 	}
-	r, err := period.Resolve(parsed, back, loc, s.now())
+	now := s.now()
+	r, err := period.Resolve(parsed, back, loc, now)
 	if err != nil {
-		return period.Range{}, fmt.Errorf("summary: resolve period: %w", err)
+		return period.Range{}, time.Time{}, fmt.Errorf("summary: resolve period: %w", err)
 	}
-	return r, nil
+	return r, period.LocalDate(now, loc), nil
 }
 
 // optional turns a percentage that may not exist into the pointer the

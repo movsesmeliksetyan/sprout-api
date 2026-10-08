@@ -261,7 +261,7 @@ Items cover every active category, plus any archived category that has spend in 
 }
 ```
 
-`trend.unit` is `day` (week), `week` (month) or `month` (year). The transaction list for this screen is `GET /transactions?category_id=&from=&to=`.
+`trend.unit` is `day` (week), `week` (month) or `month` (year). `trend.buckets` always covers the whole period (7, 4 or 12 buckets, §1.2); a bucket without spend, or still to come, holds `0`. `average_minor` is the spend per bucket: over every bucket of a past period, and over only the buckets that have started in the current one. `peak_index` is the highest bucket, the first on a tie; with no spend `peak_minor` and `peak_index` are `0`. The header figures follow the same rules as an item of `GET /summary/categories`. An archived category can still be read; an unknown id is `404`. The transaction list for this screen is `GET /transactions?category_id=&from=&to=`.
 
 `GET /summary/stats`
 

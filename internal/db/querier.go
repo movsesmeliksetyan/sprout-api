@@ -29,6 +29,9 @@ type Querier interface {
 	// it has expenses in the period. Largest first; equal amounts come in
 	// display order.
 	CategorySpending(ctx context.Context, arg CategorySpendingParams) ([]CategorySpendingRow, error)
+	// The user's expenses in one category on the calendar days from_date to
+	// to_date, both included, day by day; days without any are left out.
+	CategorySpentByDay(ctx context.Context, arg CategorySpentByDayParams) ([]CategorySpentByDayRow, error)
 	// Stores the response to replay. locked_until tells the owner apart from a
 	// request that took the key over.
 	CompleteIdempotencyKey(ctx context.Context, arg CompleteIdempotencyKeyParams) (int64, error)

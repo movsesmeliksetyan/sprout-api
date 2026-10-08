@@ -453,7 +453,7 @@ paths:
       operationId: getCategorySummary
       tags: [summary]
       summary: One category's spending and trend for a period
-      description: The transaction list for the same screen is `GET /transactions?category_id=&from=&to=`.
+      description: An archived category can still be read. The transaction list for the same screen is `GET /transactions?category_id=&from=&to=`.
       parameters:
         - $ref: "#/components/parameters/PeriodQuery"
         - $ref: "#/components/parameters/OffsetQuery"
@@ -1894,6 +1894,7 @@ components:
           type: integer
           format: int64
         over_budget:
+          description: Whether more than the budget was spent; always false when the budget is 0.
           type: boolean
         budget_used_pct:
           description: Null when the budget is 0.
@@ -1912,17 +1913,19 @@ components:
         unit:
           $ref: "#/components/schemas/BucketUnit"
         buckets:
+          description: Every bucket of the period; one without spend, or still to come, holds 0.
           type: array
           items:
             $ref: "#/components/schemas/Bucket"
         average_minor:
+          description: Spend per bucket; in the current period only the buckets that have started count.
           type: integer
           format: int64
         peak_minor:
           type: integer
           format: int64
         peak_index:
-          description: Index of the highest bucket; the first one on a tie.
+          description: Index of the highest bucket; the first one on a tie, and 0 when nothing was spent.
           type: integer
 
     StatsSummary:

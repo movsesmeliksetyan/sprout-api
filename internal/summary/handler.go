@@ -94,6 +94,48 @@ func (h *Handler) GetCategoriesSummary(ctx context.Context, request httpx.GetCat
 	}, nil
 }
 
+// GetCategorySummary returns the signed-in user's spending in one category
+// for a period, with its trend across the period's buckets.
+func (h *Handler) GetCategorySummary(ctx context.Context, request httpx.GetCategorySummaryRequestObject) (httpx.GetCategorySummaryResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	detail, err := h.service.Category(ctx, user, request.ID, string(request.Params.Period), request.Params.Offset)
+	if err != nil {
+		return nil, err
+	}
+	return httpx.GetCategorySummary200JSONResponse{
+		Range:          toRange(detail.Range),
+		CategoryID:     detail.CategoryID,
+		SpentMinor:     detail.SpentMinor,
+		BudgetMinor:    detail.BudgetMinor,
+		RemainingMinor: detail.RemainingMinor,
+		OverBudget:     detail.OverBudget,
+		BudgetUsedPct:  detail.BudgetUsedPct,
+		TxnCount:       detail.TxnCount,
+		Trend: httpx.Trend{
+			Unit:         httpx.BucketUnit(detail.Trend.Unit),
+			Buckets:      toBuckets(detail.Trend.Buckets),
+			AverageMinor: detail.Trend.AverageMinor,
+			PeakMinor:    detail.Trend.PeakMinor,
+			PeakIndex:    detail.Trend.PeakIndex,
+		},
+	}, nil
+}
+
+func toBuckets(buckets []BucketAmount) []httpx.Bucket {
+	out := make([]httpx.Bucket, 0, len(buckets))
+	for _, bucket := range buckets {
+		out = append(out, httpx.Bucket{
+			Start:       openapi_types.Date{Time: bucket.Start},
+			End:         openapi_types.Date{Time: bucket.End},
+			AmountMinor: bucket.AmountMinor,
+		})
+	}
+	return out
+}
+
 func toRange(r period.Range) httpx.Range {
 	return httpx.Range{
 		Period:    httpx.Period(r.Kind),
