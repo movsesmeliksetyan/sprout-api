@@ -18,6 +18,6 @@ type unimplemented struct{ httpx.NotImplemented }
 
 var _ httpx.StrictServerInterface = apiHandlers{}
 
-func newAPI() apiHandlers {
-	return apiHandlers{Handler: users.NewHandler()}
+func newAPI(userService *users.Service) apiHandlers {
+	return apiHandlers{Handler: users.NewHandler(userService)}
 }

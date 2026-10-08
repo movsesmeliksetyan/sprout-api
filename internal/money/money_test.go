@@ -218,3 +218,12 @@ func TestShares_DoesNotModifyItsInput(t *testing.T) {
 
 	assert.Equal(t, []int64{3, 1, 2}, amounts)
 }
+
+func TestSupported(t *testing.T) {
+	for _, code := range []string{"USD", "EUR", "GBP", "JPY", "CAD", "AUD", "AMD"} {
+		assert.True(t, Supported(code), code)
+	}
+	for _, code := range []string{"CHF", "XXX", "usd", "US", ""} {
+		assert.False(t, Supported(code), "%q", code)
+	}
+}

@@ -14,8 +14,8 @@ type currency struct {
 	decimals int    // minor units per major unit, as a power of ten
 }
 
-// currencies holds the ones with a familiar symbol or an unusual number of
-// decimals. Anything else is written as its code and two decimals.
+// currencies holds the supported currencies. Format still writes any other
+// code, as the code and two decimals.
 var currencies = map[string]currency{
 	"USD": {"$", 2},
 	"EUR": {"€", 2},
@@ -24,6 +24,13 @@ var currencies = map[string]currency{
 	"CAD": {"CA$", 2},
 	"AUD": {"A$", 2},
 	"AMD": {"֏", 2},
+}
+
+// Supported reports whether code is a currency a user may hold their ledger
+// in: the ones in the table above, written in upper case.
+func Supported(code string) bool {
+	_, ok := currencies[code]
+	return ok
 }
 
 // Format renders an amount of minor units for display: "$1,842.50", "$210".
