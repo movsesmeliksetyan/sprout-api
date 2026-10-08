@@ -15,6 +15,11 @@ type Querier interface {
 	// owns it: the key is new, has expired, or belongs to a request that never
 	// finished.
 	AcquireIdempotencyKey(ctx context.Context, arg AcquireIdempotencyKeyParams) (IdempotencyKey, error)
+	// How many calendar days in a row, ending today or yesterday, the user
+	// created at least one transaction on. Days are read in the given timezone.
+	// Each run of consecutive days is an island: within one, the day minus its
+	// rank is the same date.
+	ActivityStreak(ctx context.Context, arg ActivityStreakParams) (int64, error)
 	CategoryHasTransactions(ctx context.Context, arg CategoryHasTransactionsParams) (bool, error)
 	// Whether another active category of the user has this name, in any case.
 	CategoryNameTaken(ctx context.Context, arg CategoryNameTakenParams) (bool, error)

@@ -57,6 +57,7 @@ type Service struct {
 	onCreated       CreatedHook
 	hasTransactions TransactionCheck
 	avatars         *avatars
+	now             func() time.Time
 }
 
 // avatars is what the service needs to keep profile pictures.
@@ -81,6 +82,11 @@ func WithTransactionCheck(check TransactionCheck) Option {
 	return func(s *Service) { s.hasTransactions = check }
 }
 
+// WithClock sets the time that decides which day is today for the streak.
+func WithClock(now func() time.Time) Option {
+	return func(s *Service) { s.now = now }
+}
+
 // WithAvatars lets users set a profile picture from an upload. Without it no
 // upload can be used as an avatar.
 func WithAvatars(uploadService *uploads.Service, store storage.Store, logger *slog.Logger) Option {
@@ -94,6 +100,7 @@ func NewService(database Database, opts ...Option) *Service {
 	s := &Service{
 		db:              database,
 		hasTransactions: func(context.Context, db.Querier, uuid.UUID) (bool, error) { return false, nil },
+		now:             time.Now,
 	}
 	for _, opt := range opts {
 		opt(s)
