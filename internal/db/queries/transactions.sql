@@ -35,3 +35,10 @@ SELECT EXISTS (SELECT 1 FROM transactions WHERE user_id = $1);
 
 -- name: CategoryHasTransactions :one
 SELECT EXISTS (SELECT 1 FROM transactions WHERE user_id = $1 AND category_id = $2);
+
+-- name: CopyTransactions :copyfrom
+-- Bulk-loads transactions with a chosen created_at; only the seed command
+-- writes the ledger this way.
+INSERT INTO transactions (id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note,
+                          occurred_at, local_date, source, dedup_hash, created_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);

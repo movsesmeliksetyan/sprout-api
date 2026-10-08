@@ -37,6 +37,9 @@ type Querier interface {
 	CompleteIdempotencyKey(ctx context.Context, arg CompleteIdempotencyKeyParams) (int64, error)
 	// Returns no row unless the upload is the user's and still pending.
 	ConsumeUpload(ctx context.Context, arg ConsumeUploadParams) (Upload, error)
+	// Bulk-loads transactions with a chosen created_at; only the seed command
+	// writes the ledger this way.
+	CopyTransactions(ctx context.Context, arg []CopyTransactionsParams) (int64, error)
 	CountActiveCategories(ctx context.Context, userID uuid.UUID) (int64, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)

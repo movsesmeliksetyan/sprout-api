@@ -11,7 +11,7 @@ GOLANGCI_LINT := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v
 # Paths written by `make generate`.
 GENERATED := internal/db internal/httpx/api_gen.go
 
-.PHONY: help build run worker test lint lint-spec generate generate-check migrate-up migrate-down eval
+.PHONY: help build run worker test lint lint-spec generate generate-check migrate-up migrate-down seed perf-notes eval
 
 help: ## List the available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -52,6 +52,12 @@ migrate-up: ## Apply all pending migrations
 
 migrate-down: ## Roll back the latest migration
 	go run ./cmd/sprout migrate down
+
+seed: ## Fill a development user's ledger with 50,000 generated transactions
+	go run ./cmd/sprout seed
+
+perf-notes: ## Measure the read endpoints on the seeded ledger and rewrite docs/perf-notes.md (needs Docker)
+	PERF_NOTES=$(CURDIR)/docs/perf-notes.md go test -count=1 -run '^TestAggregationPerformance$$' ./cmd/sprout
 
 eval: ## Run the deterministic categorisation evaluation (built in BE-36)
 	go test -run '^TestEval' ./internal/categorize/...

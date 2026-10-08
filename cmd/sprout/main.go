@@ -56,13 +56,16 @@ type cli struct {
 type command struct {
 	name    string
 	summary string
-	run     func(c cli, args []string) error
+	// hidden keeps a development command out of the usage text.
+	hidden bool
+	run    func(c cli, args []string) error
 }
 
 var commands = []command{
 	{name: "api", summary: "Serve the HTTP API", run: runAPI},
 	{name: "worker", summary: "Run background and periodic jobs", run: configuredStub},
 	{name: "migrate", summary: "Apply or inspect database migrations (up, down, status)", run: runMigrate},
+	{name: "seed", summary: "Fill a user's ledger with generated transactions", hidden: true, run: runSeed},
 }
 
 func main() {
@@ -112,6 +115,9 @@ func run(args []string, c cli) int {
 func usage(w io.Writer) {
 	fmt.Fprint(w, "Sprout backend.\n\nUsage:\n  sprout <command> [arguments]\n\nCommands:\n")
 	for _, cmd := range commands {
+		if cmd.hidden {
+			continue
+		}
 		fmt.Fprintf(w, "  %-8s %s\n", cmd.name, cmd.summary)
 	}
 }
