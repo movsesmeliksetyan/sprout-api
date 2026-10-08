@@ -118,6 +118,35 @@ func (q *Queries) CreateGoal(ctx context.Context, arg CreateGoalParams) (Goal, e
 	return i, err
 }
 
+const deleteContribution = `-- name: DeleteContribution :one
+DELETE FROM goal_contributions
+WHERE id = $1 AND goal_id = $2 AND user_id = $3
+RETURNING id, user_id, goal_id, kind, amount_minor, occurred_at, local_date, created_at
+`
+
+type DeleteContributionParams struct {
+	ID     uuid.UUID
+	GoalID uuid.UUID
+	UserID uuid.UUID
+}
+
+// Removes a contribution of one of the user's goals and returns it.
+func (q *Queries) DeleteContribution(ctx context.Context, arg DeleteContributionParams) (GoalContribution, error) {
+	row := q.db.QueryRow(ctx, deleteContribution, arg.ID, arg.GoalID, arg.UserID)
+	var i GoalContribution
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.GoalID,
+		&i.Kind,
+		&i.AmountMinor,
+		&i.OccurredAt,
+		&i.LocalDate,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const deleteGoal = `-- name: DeleteGoal :execrows
 DELETE FROM goals WHERE id = $1 AND user_id = $2
 `
@@ -174,6 +203,60 @@ func (q *Queries) GetGoal(ctx context.Context, arg GetGoalParams) (GetGoalRow, e
 	return i, err
 }
 
+const listContributions = `-- name: ListContributions :many
+SELECT id, user_id, goal_id, kind, amount_minor, occurred_at, local_date, created_at FROM goal_contributions
+WHERE goal_id = $1 AND user_id = $2
+  AND ($3::date IS NULL
+       OR (local_date, id) < ($3::date, $4::uuid))
+ORDER BY local_date DESC, id DESC
+LIMIT $5
+`
+
+type ListContributionsParams struct {
+	GoalID     uuid.UUID
+	UserID     uuid.UUID
+	CursorDate *time.Time
+	CursorID   *uuid.UUID
+	RowLimit   int32
+}
+
+// A page of the contributions of one of the user's goals, newest first. The
+// cursor is the last row of the previous page.
+func (q *Queries) ListContributions(ctx context.Context, arg ListContributionsParams) ([]GoalContribution, error) {
+	rows, err := q.db.Query(ctx, listContributions,
+		arg.GoalID,
+		arg.UserID,
+		arg.CursorDate,
+		arg.CursorID,
+		arg.RowLimit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GoalContribution
+	for rows.Next() {
+		var i GoalContribution
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.GoalID,
+			&i.Kind,
+			&i.AmountMinor,
+			&i.OccurredAt,
+			&i.LocalDate,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listGoals = `-- name: ListGoals :many
 SELECT g.id, g.user_id, g.title, g.emoji, g.image_key, g.target_minor, g.status, g.sort_order, g.completed_at, g.created_at, g.updated_at,
        COALESCE((SELECT sum(CASE c.kind WHEN 'topup' THEN c.amount_minor ELSE -c.amount_minor END)
@@ -227,7 +310,7 @@ func (q *Queries) ListGoals(ctx context.Context, userID uuid.UUID) ([]ListGoalsR
 const listRecentContributions = `-- name: ListRecentContributions :many
 SELECT id, user_id, goal_id, kind, amount_minor, occurred_at, local_date, created_at FROM goal_contributions
 WHERE goal_id = $1 AND user_id = $2
-ORDER BY occurred_at DESC, id DESC
+ORDER BY local_date DESC, id DESC
 LIMIT $3
 `
 

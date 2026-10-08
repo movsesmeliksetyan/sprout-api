@@ -26,6 +26,21 @@ func (q *Queries) LedgerNet(ctx context.Context, userID uuid.UUID) (int64, error
 	return column_1, err
 }
 
+const savedInGoals = `-- name: SavedInGoals :one
+SELECT COALESCE(sum(CASE kind WHEN 'topup' THEN amount_minor ELSE -amount_minor END), 0)::bigint
+FROM goal_contributions
+WHERE user_id = $1
+`
+
+// Everything the user has put into goals and not taken back: top-ups minus
+// withdrawals.
+func (q *Queries) SavedInGoals(ctx context.Context, userID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, savedInGoals, userID)
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const spentBetween = `-- name: SpentBetween :one
 SELECT COALESCE(sum(amount_minor), 0)::bigint
 FROM transactions

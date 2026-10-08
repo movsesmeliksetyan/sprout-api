@@ -598,7 +598,7 @@ paths:
       operationId: listContributions
       tags: [goals]
       summary: List a goal's contributions
-      description: Newest first.
+      description: Newest first, by `local_date` and then id.
       parameters:
         - $ref: "#/components/parameters/LimitQuery"
         - $ref: "#/components/parameters/CursorQuery"
@@ -615,7 +615,7 @@ paths:
       operationId: createContribution
       tags: [goals]
       summary: Top up or withdraw from a goal
-      description: A withdrawal cannot exceed the amount saved. The goal completes automatically when it reaches its target.
+      description: A withdrawal cannot exceed the amount saved (`422` on `amount_minor`). The goal completes automatically when it reaches its target and is active again when a withdrawal takes it below. An archived goal stays archived.
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -643,7 +643,7 @@ paths:
       operationId: deleteContribution
       tags: [goals]
       summary: Delete a contribution
-      description: Returns the goal after the contribution is removed.
+      description: Returns the goal after the contribution is removed. A top-up whose removal would leave less than nothing saved is `409`.
       responses:
         "200":
           description: The goal after the deletion.

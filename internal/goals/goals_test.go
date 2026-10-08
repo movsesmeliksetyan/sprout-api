@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	spec "github.com/movsesmeliksetyan/sprout-api/api"
 	"github.com/movsesmeliksetyan/sprout-api/internal/auth"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/goals"
@@ -57,10 +58,13 @@ func newServer(t *testing.T, pool *pgxpool.Pool, opts ...goals.Option) http.Hand
 	logger := testutil.Logger(t)
 	responder := httpx.NewResponder(logger)
 	opts = append([]goals.Option{goals.WithClock(func() time.Time { return now })}, opts...)
+	routes, err := spec.IdempotentRoutes()
+	require.NoError(t, err)
 	return httpx.NewServer(logger,
 		httpx.WithAPIMiddleware(
 			auth.Middleware(testutil.TokenVerifier(), responder, logger),
 			users.Middleware(users.NewService(pool), responder),
+			httpx.Idempotency(pool, responder, logger, httpx.IdempotencyConfig{Routes: routes}),
 		),
 		httpx.WithAPI(api{Handler: goals.NewHandler(goals.NewService(pool, opts...))}),
 	).Handler()

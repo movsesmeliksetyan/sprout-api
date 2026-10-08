@@ -1,0 +1,29 @@
+$kind: http-request
+name: 'Top up goal'
+method: POST
+url: '{{baseUrl}}/v1/goals/{{goalId}}/contributions'
+order: 4400
+pathVariables:
+  - key: goalId
+    value: '{{goalId}}'
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Idempotency-Key
+    value: '{{$guid}}'
+body:
+  type: json
+  content: |-
+    {
+      "kind": "topup",
+      "amount_minor": 2500
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 201 && json.contribution) {
+          pm.collectionVariables.set("contributionId", json.contribution.id);
+          console.log("✅ contributionId saved: " + json.contribution.id);
+      }

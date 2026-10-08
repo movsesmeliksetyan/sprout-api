@@ -4,6 +4,13 @@ SELECT COALESCE(sum(CASE kind WHEN 'income' THEN amount_minor ELSE -amount_minor
 FROM transactions
 WHERE user_id = $1;
 
+-- name: SavedInGoals :one
+-- Everything the user has put into goals and not taken back: top-ups minus
+-- withdrawals.
+SELECT COALESCE(sum(CASE kind WHEN 'topup' THEN amount_minor ELSE -amount_minor END), 0)::bigint
+FROM goal_contributions
+WHERE user_id = $1;
+
 -- name: SpentBetween :one
 -- The user's expenses on the calendar days from_date to to_date, both
 -- included.

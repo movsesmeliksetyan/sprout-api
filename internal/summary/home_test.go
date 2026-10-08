@@ -218,6 +218,33 @@ func TestGetHome_BalanceCanBeNegative(t *testing.T) {
 	assert.Empty(t, home.Month.Segments)
 }
 
+func TestGetHome_BalanceLeavesOutWhatIsSavedInGoals(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	user := testutil.NewTestUser(t, f.pool)
+	other := testutil.NewTestUser(t, f.pool)
+	f.earn(t, user, 10000, 2025, time.July, 1)
+	goal := testutil.NewGoal(t, f.pool, user.ID)
+	archived := testutil.NewGoal(t, f.pool, user.ID, testutil.GoalStatus("archived"))
+	theirs := testutil.NewGoal(t, f.pool, other.ID)
+	at := time.Date(2025, 7, 2, 12, 0, 0, 0, time.UTC)
+	testutil.NewContribution(t, f.pool, other.User, theirs.ID, "topup", 9999, at)
+
+	testutil.NewContribution(t, f.pool, user.User, goal.ID, "topup", 2500, at)
+	assert.EqualValues(t, 7500, f.home(t, user).BalanceMinor, "a top-up leaves the balance")
+
+	testutil.NewContribution(t, f.pool, user.User, archived.ID, "topup", 1000, at)
+	assert.EqualValues(t, 6500, f.home(t, user).BalanceMinor, "also into an archived goal")
+
+	testutil.NewContribution(t, f.pool, user.User, goal.ID, "withdrawal", 700, at)
+	assert.EqualValues(t, 7200, f.home(t, user).BalanceMinor, "a withdrawal comes back")
+
+	_, err := db.New(f.pool).DeleteGoal(context.Background(), db.DeleteGoalParams{ID: goal.ID, UserID: user.ID})
+	require.NoError(t, err)
+	assert.EqualValues(t, 9000, f.home(t, user).BalanceMinor, "a deleted goal returns its money")
+	assert.Zero(t, f.home(t, user).Month.SpentMinor, "saving is not spending")
+}
+
 func TestGetHome_MonthFollowsLocalDates(t *testing.T) {
 	t.Parallel()
 	f := newFixture(t)

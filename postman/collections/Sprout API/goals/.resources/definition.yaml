@@ -1,4 +1,4 @@
 $kind: collection
 name: goals
-description: 'Savings goals: what the user is saving toward and how far along each one is.'
+description: 'Savings goals: what the user is saving toward, how far along each one is, and the top-ups and withdrawals that move money in and out.'
 order: 8000
