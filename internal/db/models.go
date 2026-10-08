@@ -10,6 +10,20 @@ import (
 	"github.com/google/uuid"
 )
 
+type Upload struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	Purpose     string
+	ObjectKey   string
+	ContentType string
+	SizeBytes   int64
+	Filename    *string
+	Status      string
+	ExpiresAt   time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 type User struct {
 	ID                   uuid.UUID
 	Auth0Sub             string

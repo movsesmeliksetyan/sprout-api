@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 11 / 63**
+**Progress: 12 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -32,8 +32,9 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 - [x] BE-10 · User provisioning and `GET /me` — 2026-10-07, c3fa6bc
   - A `name` claim that is an email address is not kept as the name; missing `email`/`name` are stored as empty strings. The PRD records both.
 - [x] BE-11 · `PATCH /me`, preferences, onboarding — 2026-10-08, 3b87893
-  - The currency lock uses an injected check until BE-17 adds transactions, and an `avatar_upload_id` is refused until BE-12 adds uploads. The PRD records both.
-- [ ] BE-12 · Object storage and `POST /uploads`
+  - The currency lock uses an injected check until BE-17 adds transactions. The PRD records it.
+- [x] BE-12 · Object storage and `POST /uploads` — 2026-10-08, b7ca530
+  - Added `internal/session` for the request's user (it was in `internal/users`), which the task's file list did not have. The `uploaded` status is unused: the contract has no call that reports a finished upload. The PRD records both.
 - [ ] BE-13 · Idempotency middleware
 
 ## Milestone 3 — Categories and budgets

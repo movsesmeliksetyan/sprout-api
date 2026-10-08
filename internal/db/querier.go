@@ -11,8 +11,12 @@ import (
 )
 
 type Querier interface {
+	// Returns no row unless the upload is the user's and still pending.
+	ConsumeUpload(ctx context.Context, arg ConsumeUploadParams) (Upload, error)
+	CreateUpload(ctx context.Context, arg CreateUploadParams) (Upload, error)
 	// Returns no row when a user with this auth0_sub already exists.
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	GetUpload(ctx context.Context, arg GetUploadParams) (Upload, error)
 	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
 	// Locks the row until the transaction ends.
 	GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, error)

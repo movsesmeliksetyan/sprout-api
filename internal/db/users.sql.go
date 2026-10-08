@@ -116,8 +116,8 @@ SET name                   = COALESCE($1, name),
     notifications_enabled  = COALESCE($6, notifications_enabled),
     budget_alerts          = COALESCE($7, budget_alerts),
     weekly_recap           = COALESCE($8, weekly_recap),
-    avatar_key             = CASE WHEN $9::boolean THEN NULL ELSE avatar_key END
-WHERE id = $10
+    avatar_key             = CASE WHEN $9::boolean THEN NULL ELSE COALESCE($10, avatar_key) END
+WHERE id = $11
 RETURNING id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at
 `
 
@@ -131,6 +131,7 @@ type UpdateUserParams struct {
 	BudgetAlerts         *bool
 	WeeklyRecap          *bool
 	ClearAvatar          bool
+	AvatarKey            *string
 	ID                   uuid.UUID
 }
 
@@ -146,6 +147,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.BudgetAlerts,
 		arg.WeeklyRecap,
 		arg.ClearAvatar,
+		arg.AvatarKey,
 		arg.ID,
 	)
 	var i User

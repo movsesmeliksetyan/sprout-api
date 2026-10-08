@@ -55,10 +55,10 @@ One binary, three subcommands: `sprout api`, `sprout worker`, `sprout migrate`.
   api/openapi.yaml
   migrations/                 # goose SQL
   internal/
-    config/  logging/  httpx/  auth/  storage/  llm/  jobs/
+    config/  logging/  httpx/  auth/  session/  storage/  llm/  jobs/
     db/                       # sqlc output + queries/*.sql
     money/  period/
-    users/  categories/  transactions/  summary/  goals/
+    users/  uploads/  categories/  transactions/  summary/  goals/
     categorize/               # merchant normaliser + layered engine
     statements/               # detect, extract, mapping, transform, dedup
     imports/  receipts/  insights/  notify/
@@ -315,13 +315,14 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-11 · `PATCH /me`, preferences, onboarding**
 - Do: Partial update with validation (IANA timezone, ISO 4217 currency from an allow-list, name length). Currency change rejected with `conflict` once any transaction exists. Changing timezone does **not** rewrite historic `local_date`s.
 - Files: `internal/users/service.go`, `internal/users/handler.go`
-- Notes: supported currencies are the ones `internal/money` formats (USD, EUR, GBP, JPY, CAD, AUD, AMD; `money.Supported`), accepted in any case and stored upper-case. `name` is trimmed, 1–100 characters. `starting_balance_minor` may be negative and is limited to ±1 000 000 000 000. Every invalid field is reported in one `422`, and nothing is written. The currency lock asks an injected `TransactionCheck` (default: no transactions) until BE-17 supplies the real query; sending the current currency is not a change. `avatar_upload_id: null` clears the avatar; an id is answered `422` until BE-12 wires uploads in.
+- Notes: supported currencies are the ones `internal/money` formats (USD, EUR, GBP, JPY, CAD, AUD, AMD; `money.Supported`), accepted in any case and stored upper-case. `name` is trimmed, 1–100 characters. `starting_balance_minor` may be negative and is limited to ±1 000 000 000 000. Every invalid field is reported in one `422`, and nothing is written. The currency lock asks an injected `TransactionCheck` (default: no transactions) until BE-17 supplies the real query; sending the current currency is not a change. `avatar_upload_id: null` clears the avatar; an id is consumed as an `avatar` upload (BE-12).
 - Done when: tests cover each field, invalid values (`422` with `fields`), and the currency lock.
 - Needs: BE-10
 
 **BE-12 · Object storage and `POST /uploads`**
 - Do: `storage.Store` interface (presign PUT, presign GET, head, delete) with S3 implementation. `uploads` migration and endpoint enforcing purpose-specific content types and size limits (contract §2.2); object key `u/{user_id}/{purpose}/{upload_id}`. Helper `uploads.Consume(ctx, userID, id, purpose)` that verifies the object exists, checks real size, marks it consumed. Wire `avatar_upload_id` in `PATCH /me`; `avatar_url` is a presigned GET (1 h).
-- Files: `internal/storage/s3.go`, `internal/uploads/*`, `migrations/00003_uploads.sql`
+- Files: `internal/storage/s3.go`, `internal/uploads/*`, `internal/session/session.go`, `migrations/00003_uploads.sql`
+- Notes: the presigned PUT signs `Content-Type` and `Content-Length`, so storage itself refuses a file of another type or size; `Consume` still checks the stored object's size and deletes one over the limit. Upload URLs work for 15 minutes. A declared size over the purpose's limit is `413 payload_too_large`; every other bad declaration is `422`. There is no "upload finished" call in the contract, so an upload goes straight from `pending` to `consumed` and the `uploaded` status is unused. `Consume` takes the caller's querier, so a failed write in the consuming feature leaves the upload usable, and it refuses with typed errors (`ErrNotFound`, also for another user's upload; `ErrWrongPurpose`; `ErrNotUploaded`; `ErrTooLarge`; `ErrAlreadyConsumed`) that the consumer reports as `422` on its own field. A replaced or removed avatar's object is deleted after the profile is saved; a failure there is logged, not returned. The request's user now lives in the leaf package `internal/session` (`session.User(ctx)`), so features can read it without importing `internal/users`. `/readyz` checks the bucket. Tests get a bucket of their own on a real MinIO through `testutil.NewStore`.
 - Done when: integration test against MinIO uploads a file through the presigned URL and consumes it; wrong purpose, another user's upload, oversize and never-uploaded all fail correctly.
 - Needs: BE-05, BE-10
 

@@ -8,3 +8,12 @@ queryParams:
     value: 'false'
     description: 'Include archived categories'
     disabled: true
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 200 && json.items && json.items.length > 0 && !pm.collectionVariables.get("categoryId")) {
+          pm.collectionVariables.set("categoryId", json.items[0].id);
+          console.log("✅ categoryId was empty; saved the first category: " + json.items[0].id);
+      }

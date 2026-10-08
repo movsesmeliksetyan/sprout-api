@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -16,6 +17,8 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/money"
+	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
+	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
 )
 
 const (
@@ -27,6 +30,9 @@ const (
 	// maxStartingBalanceMinor bounds the starting balance in either
 	// direction, far below where sums of amounts could overflow.
 	maxStartingBalanceMinor = 1_000_000_000_000
+
+	// avatarURLLifetime is how long the avatar_url in a response works.
+	avatarURLLifetime = time.Hour
 )
 
 // Database is what the service needs from the pool: queries, and
@@ -50,6 +56,14 @@ type Service struct {
 	db              Database
 	onCreated       CreatedHook
 	hasTransactions TransactionCheck
+	avatars         *avatars
+}
+
+// avatars is what the service needs to keep profile pictures.
+type avatars struct {
+	uploads *uploads.Service
+	store   storage.Store
+	logger  *slog.Logger
 }
 
 // Option customises a Service.
@@ -65,6 +79,14 @@ func WithOnUserCreated(hook CreatedHook) Option {
 // it no user has any.
 func WithTransactionCheck(check TransactionCheck) Option {
 	return func(s *Service) { s.hasTransactions = check }
+}
+
+// WithAvatars lets users set a profile picture from an upload. Without it no
+// upload can be used as an avatar.
+func WithAvatars(uploadService *uploads.Service, store storage.Store, logger *slog.Logger) Option {
+	return func(s *Service) {
+		s.avatars = &avatars{uploads: uploadService, store: store, logger: logger}
+	}
 }
 
 // NewService returns a Service working on database.
@@ -172,8 +194,8 @@ type Patch struct {
 	BudgetAlerts         *bool
 	WeeklyRecap          *bool
 
-	// AvatarUploadID is the upload to use as the avatar; ClearAvatar removes
-	// the current one.
+	// AvatarUploadID is the avatar upload to use as the profile picture;
+	// ClearAvatar removes the current one.
 	AvatarUploadID *uuid.UUID
 	ClearAvatar    bool
 }
@@ -188,16 +210,20 @@ func (s *Service) Update(ctx context.Context, userID uuid.UUID, patch Patch) (db
 		return db.User{}, err
 	}
 	params.ID = userID
+	if patch.AvatarUploadID != nil && s.avatars == nil {
+		return db.User{}, avatarError("upload not found")
+	}
 
-	var updated db.User
+	var previous, updated db.User
 	err = db.WithTx(ctx, s.db, func(tx pgx.Tx) error {
 		q := db.New(tx)
-		current, err := q.GetUserForUpdate(ctx, userID)
+		var err error
+		previous, err = q.GetUserForUpdate(ctx, userID)
 		if err != nil {
 			return fmt.Errorf("users: lock for update: %w", err)
 		}
 
-		if params.Currency != nil && *params.Currency != current.Currency {
+		if params.Currency != nil && *params.Currency != previous.Currency {
 			locked, err := s.hasTransactions(ctx, q, userID)
 			if err != nil {
 				return fmt.Errorf("users: transaction check: %w", err)
@@ -206,6 +232,17 @@ func (s *Service) Update(ctx context.Context, userID uuid.UUID, patch Patch) (db
 				return httpx.WithMessage(httpx.ErrConflict,
 					"The currency cannot be changed once you have transactions.")
 			}
+		}
+
+		if patch.AvatarUploadID != nil {
+			upload, err := s.avatars.uploads.Consume(ctx, q, userID, *patch.AvatarUploadID, uploads.PurposeAvatar)
+			if reason, refused := uploads.Rejection(err); refused {
+				return avatarError(reason)
+			}
+			if err != nil {
+				return err
+			}
+			params.AvatarKey = &upload.ObjectKey
 		}
 
 		updated, err = q.UpdateUser(ctx, params)
@@ -217,7 +254,43 @@ func (s *Service) Update(ctx context.Context, userID uuid.UUID, patch Patch) (db
 	if err != nil {
 		return db.User{}, err
 	}
+
+	s.deleteReplacedAvatar(ctx, previous, updated)
 	return updated, nil
+}
+
+func avatarError(reason string) error {
+	return &httpx.ValidationError{Fields: map[string]string{"avatar_upload_id": reason}}
+}
+
+// deleteReplacedAvatar removes the picture a user no longer has. The profile
+// is already saved, so a failure is logged and left for a later clean-up.
+func (s *Service) deleteReplacedAvatar(ctx context.Context, previous, updated db.User) {
+	if s.avatars == nil || previous.AvatarKey == nil {
+		return
+	}
+	if updated.AvatarKey != nil && *updated.AvatarKey == *previous.AvatarKey {
+		return
+	}
+	if err := s.avatars.store.Delete(ctx, *previous.AvatarKey); err != nil {
+		s.avatars.logger.WarnContext(ctx, "could not delete the replaced avatar",
+			slog.String("object_key", *previous.AvatarKey),
+			slog.String("error", err.Error()),
+		)
+	}
+}
+
+// AvatarURL returns a link to the user's profile picture that works for an
+// hour, or nil when they have none.
+func (s *Service) AvatarURL(ctx context.Context, user db.User) (*string, error) {
+	if s.avatars == nil || user.AvatarKey == nil {
+		return nil, nil
+	}
+	url, err := s.avatars.store.PresignGet(ctx, *user.AvatarKey, avatarURLLifetime)
+	if err != nil {
+		return nil, fmt.Errorf("users: avatar url: %w", err)
+	}
+	return &url, nil
 }
 
 // validate checks patch and turns it into the update's arguments, with
@@ -264,11 +337,6 @@ func validate(patch Patch) (db.UpdateUserParams, error) {
 		fields["starting_balance_minor"] = "is out of range"
 	}
 
-	// Uploads arrive with BE-12; until then no upload id can exist.
-	if patch.AvatarUploadID != nil {
-		fields["avatar_upload_id"] = "upload not found"
-	}
-
 	if len(fields) > 0 {
 		return db.UpdateUserParams{}, &httpx.ValidationError{Fields: fields}
 	}
@@ -289,18 +357,4 @@ func validTimezone(zone string) bool {
 func FirstName(name string) string {
 	first, _, _ := strings.Cut(strings.TrimSpace(name), " ")
 	return first
-}
-
-type userKey struct{}
-
-// WithUser returns a context carrying the request's user.
-func WithUser(ctx context.Context, user db.User) context.Context {
-	return context.WithValue(ctx, userKey{}, user)
-}
-
-// FromContext returns the user put there by Middleware. ok is false outside
-// an authenticated request.
-func FromContext(ctx context.Context) (user db.User, ok bool) {
-	user, ok = ctx.Value(userKey{}).(db.User)
-	return user, ok
 }

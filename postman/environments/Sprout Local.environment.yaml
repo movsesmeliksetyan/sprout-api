@@ -4,47 +4,15 @@ values:
     value: 'http://localhost:8080'
     enabled: true
     type: default
-  - key: bearerToken
-    value: ''
+  - key: auth0Domain
+    value: 'dev-ryjmw8xnz7n315j0.us.auth0.com'
     enabled: true
     type: default
-  - key: categoryId
-    value: '00000000-0000-0000-0000-000000000001'
+  - key: auth0ClientId
+    value: 'TqzOSbedDJ3OuE2J2y20OcltzUwey7to'
     enabled: true
     type: default
-  - key: transactionId
-    value: '00000000-0000-0000-0000-000000000002'
-    enabled: true
-    type: default
-  - key: goalId
-    value: '00000000-0000-0000-0000-000000000003'
-    enabled: true
-    type: default
-  - key: contributionId
-    value: '00000000-0000-0000-0000-000000000004'
-    enabled: true
-    type: default
-  - key: importId
-    value: '00000000-0000-0000-0000-000000000005'
-    enabled: true
-    type: default
-  - key: importRowId
-    value: '00000000-0000-0000-0000-000000000006'
-    enabled: true
-    type: default
-  - key: receiptId
-    value: '00000000-0000-0000-0000-000000000007'
-    enabled: true
-    type: default
-  - key: deviceId
-    value: '00000000-0000-0000-0000-000000000008'
-    enabled: true
-    type: default
-  - key: uploadId
-    value: '00000000-0000-0000-0000-000000000009'
-    enabled: true
-    type: default
-  - key: idempotencyKey
-    value: '00000000-0000-0000-0000-000000000010'
+  - key: auth0Audience
+    value: 'https://api.sprout.app'
     enabled: true
     type: default

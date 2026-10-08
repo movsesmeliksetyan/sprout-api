@@ -1,0 +1,10 @@
+$kind: http-request
+name: '2 - Upload the file'
+method: PUT
+url: '{{uploadUrl}}'
+order: 2000
+auth:
+  type: noauth
+headers:
+  - key: Content-Type
+    value: '{{uploadContentType}}'

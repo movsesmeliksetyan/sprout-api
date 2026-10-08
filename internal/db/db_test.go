@@ -286,3 +286,50 @@ func TestUsersMigration(t *testing.T) {
 		assert.WithinDuration(t, time.Now(), updatedAt, time.Minute)
 	})
 }
+
+func TestUploadsMigration(t *testing.T) {
+	ctx := context.Background()
+	pool := newPool(t, true)
+	const insert = `INSERT INTO uploads (id, user_id, purpose, object_key, content_type, size_bytes, expires_at)
+		VALUES (gen_random_uuid(), (SELECT id FROM users), $1, $2, 'image/png', $3, now())`
+	violation := func(t *testing.T, err error, code string) {
+		t.Helper()
+		var pgErr *pgconn.PgError
+		require.ErrorAs(t, err, &pgErr)
+		assert.Equal(t, code, pgErr.Code)
+	}
+
+	_, err := pool.Exec(ctx, "INSERT INTO users (id, auth0_sub) VALUES (gen_random_uuid(), 'apple|1')")
+	require.NoError(t, err)
+	_, err = pool.Exec(ctx, insert, "avatar", "u/1/avatar/1", 10)
+	require.NoError(t, err)
+
+	t.Run("starts pending", func(t *testing.T) {
+		var status string
+		require.NoError(t, pool.QueryRow(ctx, "SELECT status FROM uploads").Scan(&status))
+		assert.Equal(t, "pending", status)
+	})
+
+	t.Run("only known purposes and statuses", func(t *testing.T) {
+		_, err := pool.Exec(ctx, insert, "video", "u/1/video/1", 10)
+		violation(t, err, "23514")
+		_, err = pool.Exec(ctx, "UPDATE uploads SET status = 'lost'")
+		violation(t, err, "23514")
+	})
+
+	t.Run("a size is positive and a key is used once", func(t *testing.T) {
+		_, err := pool.Exec(ctx, insert, "avatar", "u/1/avatar/2", 0)
+		violation(t, err, "23514")
+		_, err = pool.Exec(ctx, insert, "avatar", "u/1/avatar/1", 10)
+		violation(t, err, "23505")
+	})
+
+	t.Run("uploads go with their user", func(t *testing.T) {
+		_, err := pool.Exec(ctx, "DELETE FROM users")
+		require.NoError(t, err)
+
+		var count int
+		require.NoError(t, pool.QueryRow(ctx, "SELECT count(*) FROM uploads").Scan(&count))
+		assert.Zero(t, count)
+	})
+}

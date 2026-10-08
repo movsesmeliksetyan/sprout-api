@@ -23,6 +23,6 @@ SET name                   = COALESCE(sqlc.narg(name), name),
     notifications_enabled  = COALESCE(sqlc.narg(notifications_enabled), notifications_enabled),
     budget_alerts          = COALESCE(sqlc.narg(budget_alerts), budget_alerts),
     weekly_recap           = COALESCE(sqlc.narg(weekly_recap), weekly_recap),
-    avatar_key             = CASE WHEN sqlc.arg(clear_avatar)::boolean THEN NULL ELSE avatar_key END
+    avatar_key             = CASE WHEN sqlc.arg(clear_avatar)::boolean THEN NULL ELSE COALESCE(sqlc.narg(avatar_key), avatar_key) END
 WHERE id = sqlc.arg(id)
 RETURNING *;
