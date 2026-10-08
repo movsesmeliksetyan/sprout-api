@@ -1,7 +1,7 @@
 $kind: http-request
 name: '2 - Exchange OTP for token'
 method: POST
-url: 'https://dev-ryjmw8xnz7n315j0.us.auth0.com/oauth/token'
+url: 'https://{{auth0Domain}}/oauth/token'
 order: 2000
 auth:
   type: noauth
@@ -13,11 +13,11 @@ body:
   content: |-
     {
       "grant_type": "http://auth0.com/oauth/grant-type/passwordless/otp",
-      "client_id": "TqzOSbedDJ3OuE2J2y20OcltzUwey7to",
+      "client_id": "{{auth0ClientId}}",
       "username": "{{authEmail}}",
       "otp": "{{authOtp}}",
       "realm": "email",
-      "audience": "https://api.sprout.app",
+      "audience": "{{auth0Audience}}",
       "scope": "openid profile email"
     }
 scripts:

@@ -7,7 +7,7 @@ headers:
   - key: Content-Type
     value: application/json
   - key: Idempotency-Key
-    value: '{{idempotencyKey}}'
+    value: '{{$guid}}'
 body:
   type: json
   content: |-
@@ -19,3 +19,12 @@ body:
       "note": "Morning coffee",
       "occurred_at": "2025-01-15T09:30:00Z"
     }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 201 && json.id) {
+          pm.collectionVariables.set("transactionId", json.id);
+          console.log("✅ transactionId saved: " + json.id);
+      }

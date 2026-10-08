@@ -6,30 +6,43 @@ description: |-
   Organised by OpenAPI tag. Health endpoints are unauthenticated; every other
   request uses Bearer token auth inherited from the collection.
 
-  Variables used:
-    {{baseUrl}}       – e.g. http://localhost:8080
-    {{bearerToken}}   – Auth0 access token
-    {{categoryId}}    – UUID of an existing category
-    {{transactionId}} – UUID of an existing transaction
-    {{goalId}}        – UUID of an existing goal
-    {{contributionId}}– UUID of an existing contribution
-    {{importId}}      – UUID of an existing import
-    {{importRowId}}   – UUID of an existing import row
-    {{receiptId}}     – UUID of an existing receipt
-    {{deviceId}}      – client-generated device UUID
-    {{uploadId}}      – UUID returned by POST /uploads
-    {{uploadUrl}}     – presigned URL returned by POST /uploads
-    {{uploadContentType}} – Content-Type to send to that URL
-    {{idempotencyKey}}– UUID for idempotent mutations
+  Variables. An environment holds only what differs between environments;
+  the collection holds the same settings as defaults, so requests also work
+  with no environment selected. Everything a request saves from a response
+  is a collection variable, and no environment defines those names, so a
+  saved value is never hidden.
+
+  Settings (environment, with defaults here):
+    {{baseUrl}}           – e.g. http://localhost:8080
+    {{auth0Domain}}       – Auth0 tenant hostname
+    {{auth0ClientId}}     – client id of the native application
+    {{auth0Audience}}     – identifier of the Sprout API in Auth0
+
+  Yours to fill in:
+    {{authEmail}}         – the address you sign in with
+    {{authOtp}}           – the code from the sign-in email
+
+  Saved by requests:
+    {{bearerToken}}       – by "2 - Exchange OTP for token"
+    {{uploadId}}, {{uploadUrl}}, {{uploadContentType}}
+                          – by "1 - Request presigned upload"
+    {{categoryId}}        – by "Create category", and by "List categories"
+                            when it is still empty
+    {{transactionId}}     – by "Create transaction"
 auth:
   type: bearer
   credentials:
     token: "{{bearerToken}}"
 variables:
   baseUrl: http://localhost:8080
-  bearerToken: ""
+  auth0Domain: dev-ryjmw8xnz7n315j0.us.auth0.com
+  auth0ClientId: TqzOSbedDJ3OuE2J2y20OcltzUwey7to
+  auth0Audience: https://api.sprout.app
   authEmail: you@example.com
   authOtp: ""
+  bearerToken: ""
   uploadId: ""
   uploadUrl: ""
   uploadContentType: ""
+  categoryId: ""
+  transactionId: ""

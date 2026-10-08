@@ -21,11 +21,6 @@ scripts:
     code: |-
       const json = pm.response.json();
       if (pm.response.code === 201 && json.id) {
-          // The environment's placeholder uploadId would hide a collection
-          // variable, so set it there too when an environment is selected.
-          if (pm.environment.name) {
-              pm.environment.set("uploadId", json.id);
-          }
           pm.collectionVariables.set("uploadId", json.id);
           pm.collectionVariables.set("uploadUrl", json.upload_url);
           pm.collectionVariables.set("uploadContentType", json.headers["Content-Type"]);

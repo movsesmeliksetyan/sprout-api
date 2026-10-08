@@ -1,7 +1,7 @@
 $kind: http-request
 name: '1 - Send OTP'
 method: POST
-url: 'https://dev-ryjmw8xnz7n315j0.us.auth0.com/passwordless/start'
+url: 'https://{{auth0Domain}}/passwordless/start'
 order: 1000
 auth:
   type: noauth
@@ -12,7 +12,7 @@ body:
   type: json
   content: |-
     {
-      "client_id": "TqzOSbedDJ3OuE2J2y20OcltzUwey7to",
+      "client_id": "{{auth0ClientId}}",
       "connection": "email",
       "email": "{{authEmail}}",
       "send": "code"
