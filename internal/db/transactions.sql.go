@@ -28,6 +28,22 @@ func (q *Queries) CategoryHasTransactions(ctx context.Context, arg CategoryHasTr
 	return exists, err
 }
 
+type CopyTransactionsParams struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	Kind        string
+	AmountMinor int64
+	CategoryID  *uuid.UUID
+	Merchant    *string
+	MerchantKey string
+	Note        *string
+	OccurredAt  time.Time
+	LocalDate   time.Time
+	Source      string
+	DedupHash   []byte
+	CreatedAt   time.Time
+}
+
 const createTransaction = `-- name: CreateTransaction :one
 INSERT INTO transactions (id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note,
                           occurred_at, local_date, source, import_id, receipt_id, dedup_hash)

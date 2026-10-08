@@ -37,6 +37,8 @@ make worker              # river worker
 make generate            # sqlc + oapi-codegen (pinned, via go run); must produce no diff on a second run
 make generate-check      # what CI runs: fails if committed generated code is stale
 make lint test           # required green before a task is ticked
+make seed                # 50,000 generated transactions for a development user (never in prod)
+make perf-notes          # re-measure the read endpoints and rewrite docs/perf-notes.md
 make eval                # deterministic categorisation eval (CI-gated)
 make eval-llm            # on demand only; calls the real LLM
 ```
