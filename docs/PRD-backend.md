@@ -381,7 +381,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-20 · Profile stats and streak**
 - Do: `stats.categories_count`, `goals_count` (0 until BE-25), `streak_days` — consecutive local days with ≥ 1 created transaction/contribution, ending today or yesterday; computed by a single SQL gaps-and-islands query.
-- Files: `internal/users/stats.go`
+- Files: `internal/users/stats.go`, `internal/db/queries/stats.sql`, `migrations/00008_transactions_created_at.sql`
+- Notes: a day counts for the streak when a transaction was *added* on it (`created_at`), whenever the transaction happened and however it arrived (by hand, import or receipt), so one import is one day of activity, not a streak. The days are read in the timezone the user has now: `created_at` has no stored local date, so a timezone change can move a day boundary. `categories_count` is the number of active categories. The stats are part of every `Me` response, `PATCH /me` included. Contributions join the streak in BE-26; an index on `(user_id, created_at)` serves the query.
 - Done when: tests for no activity (0), today only (1), gap yesterday (resets), activity yesterday but not yet today (still counts).
 - Needs: BE-17
 

@@ -105,6 +105,10 @@ func (h *Handler) toMe(ctx context.Context, user db.User) (httpx.Me, error) {
 	if err != nil {
 		return httpx.Me{}, err
 	}
+	stats, err := h.service.Stats(ctx, user)
+	if err != nil {
+		return httpx.Me{}, err
+	}
 	return httpx.Me{
 		ID:                   user.ID,
 		Name:                 user.Name,
@@ -120,8 +124,11 @@ func (h *Handler) toMe(ctx context.Context, user db.User) (httpx.Me, error) {
 			BudgetAlerts:         user.BudgetAlerts,
 			WeeklyRecap:          user.WeeklyRecap,
 		},
-		// Counted once categories, goals and the streak exist (BE-20).
-		Stats:     httpx.ProfileStats{},
+		Stats: httpx.ProfileStats{
+			CategoriesCount: stats.CategoriesCount,
+			GoalsCount:      stats.GoalsCount,
+			StreakDays:      stats.StreakDays,
+		},
 		CreatedAt: httpx.Instant(user.CreatedAt),
 	}, nil
 }
