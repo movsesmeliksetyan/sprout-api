@@ -19,3 +19,17 @@ GROUP BY c.id
 HAVING c.archived_at IS NULL
     OR count(t.id) FILTER (WHERE t.local_date >= sqlc.arg(from_date)::date) > 0
 ORDER BY spent_minor DESC, c.sort_order, c.id;
+
+-- name: CategorySpentByDay :many
+-- The user's expenses in one category on the calendar days from_date to
+-- to_date, both included, day by day; days without any are left out.
+SELECT local_date,
+       sum(amount_minor)::bigint AS spent_minor,
+       count(*)::integer AS txn_count
+FROM transactions
+WHERE user_id = sqlc.arg(user_id)
+  AND category_id = sqlc.arg(category_id)::uuid
+  AND kind = 'expense'
+  AND local_date BETWEEN sqlc.arg(from_date)::date AND sqlc.arg(to_date)::date
+GROUP BY local_date
+ORDER BY local_date;

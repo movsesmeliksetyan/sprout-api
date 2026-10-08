@@ -779,7 +779,9 @@ type CategorySummary struct {
 	// BudgetUsedPct Null when the budget is 0.
 	BudgetUsedPct *int               `json:"budget_used_pct"`
 	CategoryID    openapi_types.UUID `json:"category_id"`
-	OverBudget    bool               `json:"over_budget"`
+
+	// OverBudget Whether more than the budget was spent; always false when the budget is 0.
+	OverBudget bool `json:"over_budget"`
 
 	// Range The period a summary covers.
 	Range Range `json:"range"`
@@ -1475,10 +1477,13 @@ type TransactionSource string
 
 // Trend Spending across the buckets of a period.
 type Trend struct {
-	AverageMinor int64    `json:"average_minor"`
-	Buckets      []Bucket `json:"buckets"`
+	// AverageMinor Spend per bucket; in the current period only the buckets that have started count.
+	AverageMinor int64 `json:"average_minor"`
 
-	// PeakIndex Index of the highest bucket; the first one on a tie.
+	// Buckets Every bucket of the period; one without spend, or still to come, holds 0.
+	Buckets []Bucket `json:"buckets"`
+
+	// PeakIndex Index of the highest bucket; the first one on a tie, and 0 when nothing was spent.
 	PeakIndex int   `json:"peak_index"`
 	PeakMinor int64 `json:"peak_minor"`
 

@@ -80,3 +80,56 @@ func (q *Queries) CategorySpending(ctx context.Context, arg CategorySpendingPara
 	}
 	return items, nil
 }
+
+const categorySpentByDay = `-- name: CategorySpentByDay :many
+SELECT local_date,
+       sum(amount_minor)::bigint AS spent_minor,
+       count(*)::integer AS txn_count
+FROM transactions
+WHERE user_id = $1
+  AND category_id = $2::uuid
+  AND kind = 'expense'
+  AND local_date BETWEEN $3::date AND $4::date
+GROUP BY local_date
+ORDER BY local_date
+`
+
+type CategorySpentByDayParams struct {
+	UserID     uuid.UUID
+	CategoryID uuid.UUID
+	FromDate   time.Time
+	ToDate     time.Time
+}
+
+type CategorySpentByDayRow struct {
+	LocalDate  time.Time
+	SpentMinor int64
+	TxnCount   int32
+}
+
+// The user's expenses in one category on the calendar days from_date to
+// to_date, both included, day by day; days without any are left out.
+func (q *Queries) CategorySpentByDay(ctx context.Context, arg CategorySpentByDayParams) ([]CategorySpentByDayRow, error) {
+	rows, err := q.db.Query(ctx, categorySpentByDay,
+		arg.UserID,
+		arg.CategoryID,
+		arg.FromDate,
+		arg.ToDate,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CategorySpentByDayRow
+	for rows.Next() {
+		var i CategorySpentByDayRow
+		if err := rows.Scan(&i.LocalDate, &i.SpentMinor, &i.TxnCount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -397,7 +397,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-22 · Category detail summary**
 - Do: `GET /summary/categories/{id}`: header figures plus `trend` buckets (zero-filled), average over buckets, peak value and index (first on ties). Future buckets in the current period are returned with `0`.
-- Files: `internal/summary/category_detail.go`
+- Files: `internal/summary/category_detail.go`, `internal/db/queries/summary.sql`
+- Notes: one query reads the category's spend day by day and Go spreads it over `period.Range.Buckets()`, so the three periods share it. The header figures follow BE-21's budget rules. The average divides by every bucket of a past period, and by only the buckets that have started (start on or before today in the user's timezone) in the current one, so it is not diluted by days still to come. With no spend `peak_minor` and `peak_index` are `0`. A category that is unknown or someone else's is `404`.
 - Done when: bucket counts are 7/4/12; average and peak verified on fixtures; archived category still readable; unknown id `404`.
 - Needs: BE-21
 
