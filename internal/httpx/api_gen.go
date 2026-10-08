@@ -678,6 +678,7 @@ func (e UploadMethod) Valid() bool {
 // Defines values for UploadPurpose.
 const (
 	UploadPurposeAvatar    UploadPurpose = "avatar"
+	UploadPurposeGoalImage UploadPurpose = "goal_image"
 	UploadPurposeReceipt   UploadPurpose = "receipt"
 	UploadPurposeStatement UploadPurpose = "statement"
 )
@@ -686,6 +687,8 @@ const (
 func (e UploadPurpose) Valid() bool {
 	switch e {
 	case UploadPurposeAvatar:
+		return true
+	case UploadPurposeGoalImage:
 		return true
 	case UploadPurposeReceipt:
 		return true
@@ -879,7 +882,9 @@ type CreateContributionRequest struct {
 
 // CreateGoalRequest A new goal.
 type CreateGoalRequest struct {
-	Emoji         *string             `json:"emoji,omitempty"`
+	Emoji *string `json:"emoji,omitempty"`
+
+	// ImageUploadID A `goal_image` upload to use as the goal's picture.
 	ImageUploadID *openapi_types.UUID `json:"image_upload_id,omitempty"`
 	TargetMinor   int64               `json:"target_minor"`
 	Title         string              `json:"title"`
@@ -973,10 +978,14 @@ type Goal struct {
 
 	// MonthlyPaceMinor Average net contributions per month over the last 90 days; 0 if none.
 	MonthlyPaceMinor int64 `json:"monthly_pace_minor"`
-	Pct              int   `json:"pct"`
-	RemainingMinor   int64 `json:"remaining_minor"`
-	SavedMinor       int64 `json:"saved_minor"`
-	SortOrder        int   `json:"sort_order"`
+
+	// Pct Rounded share of the target that is saved; never above 100.
+	Pct int `json:"pct"`
+
+	// RemainingMinor Target minus saved; never below 0.
+	RemainingMinor int64 `json:"remaining_minor"`
+	SavedMinor     int64 `json:"saved_minor"`
+	SortOrder      int   `json:"sort_order"`
 
 	// Status Lifecycle of a goal.
 	Status      GoalStatus `json:"status"`
@@ -998,13 +1007,17 @@ type GoalDetail struct {
 
 	// MonthlyPaceMinor Average net contributions per month over the last 90 days; 0 if none.
 	MonthlyPaceMinor int64 `json:"monthly_pace_minor"`
-	Pct              int   `json:"pct"`
+
+	// Pct Rounded share of the target that is saved; never above 100.
+	Pct int `json:"pct"`
 
 	// RecentContributions The five newest contributions.
 	RecentContributions []Contribution `json:"recent_contributions"`
-	RemainingMinor      int64          `json:"remaining_minor"`
-	SavedMinor          int64          `json:"saved_minor"`
-	SortOrder           int            `json:"sort_order"`
+
+	// RemainingMinor Target minus saved; never below 0.
+	RemainingMinor int64 `json:"remaining_minor"`
+	SavedMinor     int64 `json:"saved_minor"`
+	SortOrder      int   `json:"sort_order"`
 
 	// Status Lifecycle of a goal.
 	Status      GoalStatus `json:"status"`

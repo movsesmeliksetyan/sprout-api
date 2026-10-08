@@ -85,7 +85,7 @@ The client renders labels (`July 2025`, `7–13 Jul`, `2025`, `W1…W4`, `M T W�
 | `mapping.role` | `date`, `description`, `amount`, `debit`, `credit`, `balance`, `currency`, `reference`, `mcc`, `ignore` |
 | `insight.tone` | `positive`, `warning`, `neutral` |
 | `insight.icon` | `sparkle`, `warning`, `chart`, `target` |
-| `upload.purpose` | `avatar`, `receipt`, `statement` |
+| `upload.purpose` | `avatar`, `goal_image`, `receipt`, `statement` |
 
 ---
 
@@ -136,6 +136,7 @@ The client `PUT`s the bytes to `upload_url`, then passes `id` to the consuming e
 | purpose | Content types | Max |
 |---|---|---|
 | `avatar` | `image/jpeg`, `image/png`, `image/heic` | 5 MB |
+| `goal_image` | `image/jpeg`, `image/png`, `image/heic` | 5 MB |
 | `receipt` | `image/jpeg`, `image/png`, `image/heic` | 10 MB |
 | `statement` | `text/csv`, `application/x-ofx`, `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `application/pdf`, `application/octet-stream` | 15 MB |
 
@@ -301,13 +302,17 @@ Items cover every active category, plus any archived category that has spend in 
 
 - `monthly_pace_minor`: average net contributions per month over the last 90 days (or since creation if younger); `0` if none.
 - `eta_month`: month the goal completes at the current pace; `null` when pace is 0 or the goal is complete.
+- `saved_minor`: top-ups minus withdrawals. `remaining_minor` is `target_minor − saved_minor`, never below `0`; `pct` is the rounded share saved, never above `100`.
+- `image_url`: presigned link to the goal's picture, valid for an hour; set from a `goal_image` upload passed as `image_upload_id`.
+- `status`: a goal is `completed` exactly when `saved_minor ≥ target_minor`, and `active` otherwise; the server keeps this up to date, also when the target changes. The client can only archive a goal (`"status": "archived"`) and bring it back (`"status": "active"`, which makes it `completed` again if it is fully saved). Sending `"status": "completed"` is `422`.
+- At most 20 `active` goals: creating or unarchiving one beyond that is `409`. Completed and archived goals do not count.
 
 | Method | Path | Notes |
 |---|---|---|
-| `GET` | `/goals` | `{ "total_saved_minor", "total_target_minor", "pct", "items": [Goal] }` (active + completed) |
-| `POST` | `/goals` | `title` (1–40), `emoji?`, `image_upload_id?`, `target_minor` (> 0) |
+| `GET` | `/goals` | `{ "total_saved_minor", "total_target_minor", "pct", "items": [Goal] }` (active + completed, by `sort_order`; the totals cover the listed goals and `pct` is `0` when there are none) |
+| `POST` | `/goals` | `title` (1–40), `emoji?`, `image_upload_id?`, `target_minor` (> 0). `201` Goal, placed last |
 | `GET` | `/goals/{id}` | Goal + `"recent_contributions": [Contribution]` (5 newest) |
-| `PATCH` | `/goals/{id}` | `title`, `emoji`, `image_upload_id`, `target_minor`, `status`, `sort_order` |
+| `PATCH` | `/goals/{id}` | any of `title`, `emoji`, `image_upload_id`, `target_minor`, `status`, `sort_order` (≥ 0). `200` Goal |
 | `DELETE` | `/goals/{id}` | `204`; its contributions are removed and the money returns to balance |
 | `GET` | `/goals/{id}/contributions` | Paginated |
 | `POST` | `/goals/{id}/contributions` | `{ "kind": "topup", "amount_minor": 2500, "occurred_at"? }` → `201` `{ "contribution": Contribution, "goal": Goal }`. Idempotent. Withdrawal cannot exceed `saved_minor`. |

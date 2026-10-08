@@ -13,7 +13,9 @@ import (
 type Stats struct {
 	// CategoriesCount is how many active categories the user has.
 	CategoriesCount int
-	GoalsCount      int
+	// GoalsCount is how many goals the user's list shows: the active and
+	// the completed ones.
+	GoalsCount int
 	// StreakDays is how many calendar days in a row, ending today or
 	// yesterday, the user added at least one transaction on. A day without
 	// one yet does not break the streak until it is over.
@@ -33,6 +35,10 @@ func (s *Service) Stats(ctx context.Context, user db.User) (Stats, error) {
 	if err != nil {
 		return Stats{}, fmt.Errorf("users: count categories: %w", err)
 	}
+	goals, err := q.CountGoals(ctx, user.ID)
+	if err != nil {
+		return Stats{}, fmt.Errorf("users: count goals: %w", err)
+	}
 	// Contributions to goals join the streak once goals exist (BE-26).
 	streak, err := q.ActivityStreak(ctx, db.ActivityStreakParams{
 		UserID:   user.ID,
@@ -45,8 +51,7 @@ func (s *Service) Stats(ctx context.Context, user db.User) (Stats, error) {
 
 	return Stats{
 		CategoriesCount: int(categories),
-		// Counted once goals exist (BE-25).
-		GoalsCount: 0,
-		StreakDays: int(streak),
+		GoalsCount:      int(goals),
+		StreakDays:      int(streak),
 	}, nil
 }

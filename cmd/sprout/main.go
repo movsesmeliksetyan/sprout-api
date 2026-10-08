@@ -19,6 +19,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/categories"
 	"github.com/movsesmeliksetyan/sprout-api/internal/config"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
+	"github.com/movsesmeliksetyan/sprout-api/internal/goals"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
@@ -193,7 +194,8 @@ func runAPI(c cli, _ []string) error {
 			httpx.Idempotency(pool, responder, logger, httpx.IdempotencyConfig{Routes: idempotentRoutes}),
 		),
 		httpx.WithAPI(newAPI(userService, uploadService, categoryService, transactionService,
-			summary.NewService(pool, transactionService))),
+			summary.NewService(pool, transactionService),
+			goals.NewService(pool, goals.WithImages(uploadService, store, logger)))),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))

@@ -1,0 +1,8 @@
+$kind: http-request
+name: 'Get goal'
+method: GET
+url: '{{baseUrl}}/v1/goals/{{goalId}}'
+order: 3000
+pathVariables:
+  - key: goalId
+    value: '{{goalId}}'

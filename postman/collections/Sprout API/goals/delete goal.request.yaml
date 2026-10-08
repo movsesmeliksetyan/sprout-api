@@ -1,0 +1,16 @@
+$kind: http-request
+name: 'Delete goal'
+method: DELETE
+url: '{{baseUrl}}/v1/goals/{{goalId}}'
+order: 5000
+pathVariables:
+  - key: goalId
+    value: '{{goalId}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      if (pm.response.code === 204) {
+          pm.collectionVariables.set("goalId", "");
+          console.log("✅ Deleted; goalId cleared. \"List goals\" or \"Create goal\" saves a new one.");
+      }

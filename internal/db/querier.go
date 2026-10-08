@@ -41,15 +41,22 @@ type Querier interface {
 	// writes the ledger this way.
 	CopyTransactions(ctx context.Context, arg []CopyTransactionsParams) (int64, error)
 	CountActiveCategories(ctx context.Context, userID uuid.UUID) (int64, error)
+	CountActiveGoals(ctx context.Context, userID uuid.UUID) (int64, error)
+	// How many goals the user's list shows: the active and the completed ones.
+	CountGoals(ctx context.Context, userID uuid.UUID) (int64, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
+	CreateContribution(ctx context.Context, arg CreateContributionParams) (GoalContribution, error)
+	CreateGoal(ctx context.Context, arg CreateGoalParams) (Goal, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)
 	CreateUpload(ctx context.Context, arg CreateUploadParams) (Upload, error)
 	// Returns no row when a user with this auth0_sub already exists.
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteCategory(ctx context.Context, arg DeleteCategoryParams) (int64, error)
 	DeleteExpiredIdempotencyKeys(ctx context.Context) (int64, error)
+	DeleteGoal(ctx context.Context, arg DeleteGoalParams) (int64, error)
 	DeleteTransaction(ctx context.Context, arg DeleteTransactionParams) (int64, error)
 	GetCategory(ctx context.Context, arg GetCategoryParams) (Category, error)
+	GetGoal(ctx context.Context, arg GetGoalParams) (GetGoalRow, error)
 	GetIdempotencyKey(ctx context.Context, arg GetIdempotencyKeyParams) (IdempotencyKey, error)
 	GetTransaction(ctx context.Context, arg GetTransactionParams) (Transaction, error)
 	// Locks the row until the database transaction ends.
@@ -66,11 +73,18 @@ type Querier interface {
 	// The whole-day totals of the given days under the same filters as
 	// ListTransactions: income minus expense, and how many transactions.
 	ListDayTotals(ctx context.Context, arg ListDayTotalsParams) ([]ListDayTotalsRow, error)
+	// The user's active and completed goals in display order, each with what is
+	// saved in it: top-ups minus withdrawals.
+	ListGoals(ctx context.Context, userID uuid.UUID) ([]ListGoalsRow, error)
+	// The newest contributions of one of the user's goals.
+	ListRecentContributions(ctx context.Context, arg ListRecentContributionsParams) ([]GoalContribution, error)
 	// A page of the user's transactions, newest first. A null filter is not
 	// applied. The cursor is the last row of the previous page.
 	ListTransactions(ctx context.Context, arg ListTransactionsParams) ([]Transaction, error)
 	// The position after the user's last active category.
 	NextCategorySortOrder(ctx context.Context, userID uuid.UUID) (int32, error)
+	// The position after the user's last goal.
+	NextGoalSortOrder(ctx context.Context, userID uuid.UUID) (int32, error)
 	Ping(ctx context.Context) (int32, error)
 	// Gives the key up so that a retry runs again.
 	ReleaseIdempotencyKey(ctx context.Context, arg ReleaseIdempotencyKeyParams) (int64, error)
@@ -93,6 +107,9 @@ type Querier interface {
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error)
 	// Sets the budget of ids[i] to amounts[i].
 	UpdateCategoryBudgets(ctx context.Context, arg UpdateCategoryBudgetsParams) error
+	// Writes the goal as given: the caller reads it, changes what it must and
+	// sends every column back.
+	UpdateGoal(ctx context.Context, arg UpdateGoalParams) (Goal, error)
 	// Writes every field a user can change; the caller sends the ones that stay
 	// as they are.
 	UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) (Transaction, error)

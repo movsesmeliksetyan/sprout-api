@@ -268,8 +268,9 @@ func TestCreateUpload_AcceptedTypesAndSizes(t *testing.T) {
 		types []string
 		max   int
 	}{
-		"avatar":  {[]string{"image/jpeg", "image/png", "image/heic"}, 5 * mb},
-		"receipt": {[]string{"image/jpeg", "image/png", "image/heic"}, 10 * mb},
+		"avatar":     {[]string{"image/jpeg", "image/png", "image/heic"}, 5 * mb},
+		"goal_image": {[]string{"image/jpeg", "image/png", "image/heic"}, 5 * mb},
+		"receipt":    {[]string{"image/jpeg", "image/png", "image/heic"}, 10 * mb},
 		"statement": {[]string{"text/csv", "application/x-ofx",
 			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/pdf", "application/octet-stream"}, 15 * mb},
 	}

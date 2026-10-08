@@ -1,0 +1,20 @@
+$kind: http-request
+name: 'Update goal'
+method: PATCH
+url: '{{baseUrl}}/v1/goals/{{goalId}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: goalId
+    value: '{{goalId}}'
+body:
+  type: json
+  content: |-
+    {
+      "title": "Labubu collection",
+      "emoji": "🧸",
+      "target_minor": 15000,
+      "sort_order": 0
+    }

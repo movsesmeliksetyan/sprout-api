@@ -79,7 +79,7 @@ func (s *Service) Create(ctx context.Context, userID uuid.UUID, params CreatePar
 	rules, known := policies[params.Purpose]
 	switch {
 	case !known:
-		fields["purpose"] = "must be one of avatar, receipt, statement"
+		fields["purpose"] = "must be one of avatar, goal_image, receipt, statement"
 	case !rules.allows(contentType):
 		fields["content_type"] = "is not accepted for this purpose"
 	}

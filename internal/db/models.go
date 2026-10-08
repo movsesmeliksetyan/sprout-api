@@ -29,6 +29,31 @@ type CategoryType struct {
 	Name string
 }
 
+type Goal struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	Title       string
+	Emoji       *string
+	ImageKey    *string
+	TargetMinor int64
+	Status      string
+	SortOrder   int32
+	CompletedAt *time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+type GoalContribution struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	GoalID      uuid.UUID
+	Kind        string
+	AmountMinor int64
+	OccurredAt  time.Time
+	LocalDate   time.Time
+	CreatedAt   time.Time
+}
+
 type IdempotencyKey struct {
 	UserID              uuid.UUID
 	Key                 uuid.UUID
