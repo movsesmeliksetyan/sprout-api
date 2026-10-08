@@ -133,3 +133,47 @@ func (q *Queries) CategorySpentByDay(ctx context.Context, arg CategorySpentByDay
 	}
 	return items, nil
 }
+
+const spentByDay = `-- name: SpentByDay :many
+SELECT local_date,
+       sum(amount_minor)::bigint AS spent_minor
+FROM transactions
+WHERE user_id = $1
+  AND kind = 'expense'
+  AND local_date BETWEEN $2::date AND $3::date
+GROUP BY local_date
+ORDER BY local_date
+`
+
+type SpentByDayParams struct {
+	UserID   uuid.UUID
+	FromDate time.Time
+	ToDate   time.Time
+}
+
+type SpentByDayRow struct {
+	LocalDate  time.Time
+	SpentMinor int64
+}
+
+// The user's expenses on the calendar days from_date to to_date, both
+// included, day by day; days without any are left out.
+func (q *Queries) SpentByDay(ctx context.Context, arg SpentByDayParams) ([]SpentByDayRow, error) {
+	rows, err := q.db.Query(ctx, spentByDay, arg.UserID, arg.FromDate, arg.ToDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SpentByDayRow
+	for rows.Next() {
+		var i SpentByDayRow
+		if err := rows.Scan(&i.LocalDate, &i.SpentMinor); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

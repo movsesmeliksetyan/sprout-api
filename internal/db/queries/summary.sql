@@ -33,3 +33,15 @@ WHERE user_id = sqlc.arg(user_id)
   AND local_date BETWEEN sqlc.arg(from_date)::date AND sqlc.arg(to_date)::date
 GROUP BY local_date
 ORDER BY local_date;
+
+-- name: SpentByDay :many
+-- The user's expenses on the calendar days from_date to to_date, both
+-- included, day by day; days without any are left out.
+SELECT local_date,
+       sum(amount_minor)::bigint AS spent_minor
+FROM transactions
+WHERE user_id = sqlc.arg(user_id)
+  AND kind = 'expense'
+  AND local_date BETWEEN sqlc.arg(from_date)::date AND sqlc.arg(to_date)::date
+GROUP BY local_date
+ORDER BY local_date;

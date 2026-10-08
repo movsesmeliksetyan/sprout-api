@@ -82,6 +82,9 @@ type Querier interface {
 	// category, largest first; categories without any are left out. Equal
 	// amounts come in display order.
 	SpentByCategory(ctx context.Context, arg SpentByCategoryParams) ([]SpentByCategoryRow, error)
+	// The user's expenses on the calendar days from_date to to_date, both
+	// included, day by day; days without any are left out.
+	SpentByDay(ctx context.Context, arg SpentByDayParams) ([]SpentByDayRow, error)
 	// A null argument leaves its column as it is. Archiving an archived category
 	// keeps the time it was first archived.
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error)

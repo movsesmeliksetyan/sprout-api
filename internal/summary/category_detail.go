@@ -119,13 +119,12 @@ func newTrend(r period.Range, today time.Time, days []dayAmount) Trend {
 	buckets := fillBuckets(r, days)
 	trend := Trend{Unit: r.Unit(), Buckets: buckets}
 
+	trend.PeakMinor, trend.PeakIndex = peakOf(buckets)
+
 	var total int64
 	started := 0
-	for i, bucket := range buckets {
+	for _, bucket := range buckets {
 		total += bucket.AmountMinor
-		if bucket.AmountMinor > trend.PeakMinor {
-			trend.PeakMinor, trend.PeakIndex = bucket.AmountMinor, i
-		}
 		if !r.IsCurrent || !bucket.Start.After(today) {
 			started++
 		}
@@ -134,6 +133,17 @@ func newTrend(r period.Range, today time.Time, days []dayAmount) Trend {
 		trend.AverageMinor = money.DivRound(total, int64(started))
 	}
 	return trend
+}
+
+// peakOf returns the amount of the highest bucket and its position: the
+// first one on a tie, and 0 when no bucket holds anything.
+func peakOf(buckets []BucketAmount) (amountMinor int64, index int) {
+	for i, bucket := range buckets {
+		if bucket.AmountMinor > amountMinor {
+			amountMinor, index = bucket.AmountMinor, i
+		}
+	}
+	return amountMinor, index
 }
 
 // fillBuckets returns r's buckets with the amounts of days, which lie in r

@@ -1393,8 +1393,11 @@ type ReorderCategoriesRequest struct {
 
 // Series Total spending across the buckets of a period.
 type Series struct {
-	Buckets   []Bucket `json:"buckets"`
-	PeakIndex int      `json:"peak_index"`
+	// Buckets Every bucket of the period; one without spend, or still to come, holds 0.
+	Buckets []Bucket `json:"buckets"`
+
+	// PeakIndex Index of the highest bucket; the first one on a tie, and 0 when nothing was spent.
+	PeakIndex int `json:"peak_index"`
 
 	// Unit What one bucket of a series covers; day for a week, week for a month, month for a year.
 	Unit BucketUnit `json:"unit"`
@@ -1412,6 +1415,7 @@ type SetImportMappingRequest struct {
 
 // StatsSummary Total spending for a period with its series and breakdown.
 type StatsSummary struct {
+	// Breakdown The categories with spend, largest first; the shares sum to 100. Empty when nothing was spent.
 	Breakdown []BreakdownItem `json:"breakdown"`
 
 	// DeltaMinor Signed; this period minus the previous one.
