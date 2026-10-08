@@ -23,6 +23,12 @@ type Querier interface {
 	CategoryHasTransactions(ctx context.Context, arg CategoryHasTransactionsParams) (bool, error)
 	// Whether another active category of the user has this name, in any case.
 	CategoryNameTaken(ctx context.Context, arg CategoryNameTakenParams) (bool, error)
+	// Every active category of the user with its expenses on the calendar days
+	// from_date to to_date, and on the days from previous_from_date up to
+	// from_date, the period before. An archived category is included only when
+	// it has expenses in the period. Largest first; equal amounts come in
+	// display order.
+	CategorySpending(ctx context.Context, arg CategorySpendingParams) ([]CategorySpendingRow, error)
 	// Stores the response to replay. locked_until tells the owner apart from a
 	// request that took the key over.
 	CompleteIdempotencyKey(ctx context.Context, arg CompleteIdempotencyKeyParams) (int64, error)
