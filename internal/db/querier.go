@@ -15,6 +15,7 @@ type Querier interface {
 	// owns it: the key is new, has expired, or belongs to a request that never
 	// finished.
 	AcquireIdempotencyKey(ctx context.Context, arg AcquireIdempotencyKeyParams) (IdempotencyKey, error)
+	CategoryHasTransactions(ctx context.Context, arg CategoryHasTransactionsParams) (bool, error)
 	// Whether another active category of the user has this name, in any case.
 	CategoryNameTaken(ctx context.Context, arg CategoryNameTakenParams) (bool, error)
 	// Stores the response to replay. locked_until tells the owner apart from a
@@ -24,13 +25,18 @@ type Querier interface {
 	ConsumeUpload(ctx context.Context, arg ConsumeUploadParams) (Upload, error)
 	CountActiveCategories(ctx context.Context, userID uuid.UUID) (int64, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
+	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)
 	CreateUpload(ctx context.Context, arg CreateUploadParams) (Upload, error)
 	// Returns no row when a user with this auth0_sub already exists.
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteCategory(ctx context.Context, arg DeleteCategoryParams) (int64, error)
 	DeleteExpiredIdempotencyKeys(ctx context.Context) (int64, error)
+	DeleteTransaction(ctx context.Context, arg DeleteTransactionParams) (int64, error)
 	GetCategory(ctx context.Context, arg GetCategoryParams) (Category, error)
 	GetIdempotencyKey(ctx context.Context, arg GetIdempotencyKeyParams) (IdempotencyKey, error)
+	GetTransaction(ctx context.Context, arg GetTransactionParams) (Transaction, error)
+	// Locks the row until the database transaction ends.
+	GetTransactionForUpdate(ctx context.Context, arg GetTransactionForUpdateParams) (Transaction, error)
 	GetUpload(ctx context.Context, arg GetUploadParams) (Upload, error)
 	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
 	// Locks the row until the transaction ends.
@@ -52,8 +58,12 @@ type Querier interface {
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error)
 	// Sets the budget of ids[i] to amounts[i].
 	UpdateCategoryBudgets(ctx context.Context, arg UpdateCategoryBudgetsParams) error
+	// Writes every field a user can change; the caller sends the ones that stay
+	// as they are.
+	UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) (Transaction, error)
 	// A null argument leaves its column as it is.
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UserHasTransactions(ctx context.Context, userID uuid.UUID) (bool, error)
 }
 
 var _ Querier = (*Queries)(nil)

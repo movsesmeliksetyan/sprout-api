@@ -22,6 +22,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
+	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
 	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
 	"github.com/movsesmeliksetyan/sprout-api/internal/users"
 )
@@ -172,7 +173,10 @@ func runAPI(c cli, _ []string) error {
 	userService := users.NewService(pool,
 		users.WithAvatars(uploadService, store, logger),
 		users.WithOnUserCreated(categories.Seed),
+		users.WithTransactionCheck(transactions.HasAny),
 	)
+	categoryService := categories.NewService(pool, categories.WithUsageCheck(transactions.CategoryInUse))
+	transactionService := transactions.NewService(pool)
 	opts := []httpx.Option{
 		httpx.WithReadinessCheck("postgres", db.Ready(pool)),
 		httpx.WithReadinessCheck("storage", store.Ready),
@@ -181,7 +185,7 @@ func runAPI(c cli, _ []string) error {
 			users.Middleware(userService, responder),
 			httpx.Idempotency(pool, responder, logger, httpx.IdempotencyConfig{Routes: idempotentRoutes}),
 		),
-		httpx.WithAPI(newAPI(userService, uploadService, categories.NewService(pool))),
+		httpx.WithAPI(newAPI(userService, uploadService, categoryService, transactionService)),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))
