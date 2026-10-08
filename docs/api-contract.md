@@ -274,7 +274,9 @@ Items cover every active category, plus any archived category that has spend in 
 }
 ```
 
-`breakdown`: top 5 categories by spend, then one `category_id: null` row ("Other") aggregating the rest (omitted if empty).
+`total_spent_minor` counts every expense of the period, as Home's month figure does; `previous_total_minor` is the whole preceding period. `delta_pct` is `null` when the previous total is 0. `series.buckets` always covers the whole period, zero-filled; `peak_index` is the highest bucket, the first on a tie, and `0` with no spend.
+
+`breakdown`: top 5 categories by spend (ties in display order), then one `category_id: null` row ("Other") aggregating the rest (omitted if empty). Only categories with spend are rows, "Other" is always last, `share_pct` sums to 100, and the list is `[]` when nothing was spent.
 
 ### 2.7 Insights
 

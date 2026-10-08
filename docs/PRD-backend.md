@@ -404,7 +404,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-23 · Stats summary**
 - Do: `GET /summary/stats`: total, previous total, delta (signed) and pct, time series with peak, breakdown top-5 + Other with `share_pct` summing to 100.
-- Files: `internal/summary/stats.go`
+- Files: `internal/summary/stats.go`, `internal/db/queries/summary.sql`
+- Notes: the total counts every expense of the period, an archived category's included, so it equals Home's month figure and BE-21's total; the previous total is the whole preceding period. The series reuses BE-22's bucket filling over a day-by-day query; `peak_index` is the first on a tie and `0` with no spend. The breakdown reuses Home's `SpentByCategory`: only categories with spend are rows, equal spend comes in display order, and the "Other" row is last even when it outweighs a named one. Shares are computed over the rows, so they sum to 100; with no spend the breakdown is `[]`. The three reads are not in one database transaction.
 - Done when: fixtures for all three periods; previous total 0 → `delta_pct: null`; fewer than 6 categories → no Other row.
 - Needs: BE-21
 

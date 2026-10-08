@@ -1952,6 +1952,7 @@ components:
         series:
           $ref: "#/components/schemas/Series"
         breakdown:
+          description: The categories with spend, largest first; the shares sum to 100. Empty when nothing was spent.
           type: array
           items:
             $ref: "#/components/schemas/BreakdownItem"
@@ -1964,10 +1965,12 @@ components:
         unit:
           $ref: "#/components/schemas/BucketUnit"
         buckets:
+          description: Every bucket of the period; one without spend, or still to come, holds 0.
           type: array
           items:
             $ref: "#/components/schemas/Bucket"
         peak_index:
+          description: Index of the highest bucket; the first one on a tie, and 0 when nothing was spent.
           type: integer
 
     BreakdownItem:

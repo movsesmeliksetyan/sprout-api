@@ -1,0 +1,13 @@
+$kind: http-request
+name: 'Stats'
+method: GET
+url: '{{baseUrl}}/v1/summary/stats'
+order: 3000
+queryParams:
+  - key: period
+    value: month
+    description: 'week, month or year'
+  - key: offset
+    value: '0'
+    description: 'Periods back; 0 is the current one (0-1200)'
+    disabled: true

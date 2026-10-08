@@ -124,6 +124,41 @@ func (h *Handler) GetCategorySummary(ctx context.Context, request httpx.GetCateg
 	}, nil
 }
 
+// GetStatsSummary returns the signed-in user's total spending for a period,
+// its series and its breakdown by category.
+func (h *Handler) GetStatsSummary(ctx context.Context, request httpx.GetStatsSummaryRequestObject) (httpx.GetStatsSummaryResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	stats, err := h.service.Stats(ctx, user, string(request.Params.Period), request.Params.Offset)
+	if err != nil {
+		return nil, err
+	}
+
+	breakdown := make([]httpx.BreakdownItem, 0, len(stats.Breakdown))
+	for _, row := range stats.Breakdown {
+		breakdown = append(breakdown, httpx.BreakdownItem{
+			CategoryID:  row.CategoryID,
+			AmountMinor: row.AmountMinor,
+			SharePct:    row.SharePct,
+		})
+	}
+	return httpx.GetStatsSummary200JSONResponse{
+		Range:              toRange(stats.Range),
+		TotalSpentMinor:    stats.TotalSpentMinor,
+		PreviousTotalMinor: stats.PreviousTotalMinor,
+		DeltaMinor:         stats.DeltaMinor,
+		DeltaPct:           stats.DeltaPct,
+		Series: httpx.Series{
+			Unit:      httpx.BucketUnit(stats.Series.Unit),
+			Buckets:   toBuckets(stats.Series.Buckets),
+			PeakIndex: stats.Series.PeakIndex,
+		},
+		Breakdown: breakdown,
+	}, nil
+}
+
 func toBuckets(buckets []BucketAmount) []httpx.Bucket {
 	out := make([]httpx.Bucket, 0, len(buckets))
 	for _, bucket := range buckets {
