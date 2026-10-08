@@ -1,4 +1,28 @@
 $kind: collection
 name: categories
-description: 'Spending categories and their monthly budgets.'
+description: |-
+  Spending categories and their monthly budgets.
+
+  A new user starts with seven categories: Food, Car, Home, Leisure,
+  Self-care, Health and Communal.
+
+  List categories     Leaves archived ones out unless include_archived is
+                      enabled; then they come last. Saves {{categoryIds}}.
+  Create category     name (1–24 characters, unique among your active
+                      categories whatever the case) and icon are required.
+                      A second run with the same name answers 422; a 31st
+                      active category answers 409.
+  Reorder categories  ids must name every active category exactly once, or
+                      the answer is 422. It sends {{categoryIds}}: the
+                      current order with the first category moved to the
+                      end. Run "List categories" first, and again after
+                      creating, archiving, restoring or deleting.
+  Update category     Any subset of the fields; one left out is unchanged.
+  Archive category    Hides the category and frees its name.
+  Restore category    Brings it back at the end of the list: 422 when its
+                      name has been taken, 409 when the list is full.
+  Delete category     204 for a category with no transactions, otherwise
+                      409. Clears {{categoryId}}.
+  Set budgets         All or nothing: one bad item rejects the request with
+                      422, with fields keyed items.<index>.<field>.
 order: 4000

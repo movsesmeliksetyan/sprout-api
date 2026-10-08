@@ -337,19 +337,22 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-14 · Categories schema and default seed**
 - Do: `categories`, `category_types` migrations; seed function creating the 7 defaults from contract §2.3, each tagged with its `category_type`, registered on the `OnUserCreated` hook from BE-10 so it runs in the user-creation transaction. Type inference helper for custom categories (name synonyms + icon).
-- Files: `migrations/00005_categories.sql`, `internal/categories/seed.go`, `internal/categories/types.go`
+- Files: `migrations/00005_categories.sql`, `internal/categories/seed.go`, `internal/categories/types.go`, `internal/categories/data/types.csv`, `internal/db/queries/categories.sql`
+- Notes: the types are `food`, `transport`, `housing`, `utilities`, `leisure`, `selfcare`, `health`, `shopping`, `travel`, `education`, `pets`, `gifts`, `family`, `work`, inserted by the migration; a category's `category_type` references them and may be null. The defaults are typed Food→food, Car→transport, Home→housing, Leisure→leisure, Self-care→selfcare, Health→health, Communal→utilities. The seed skips a name the user already has among their active categories, which is what makes it idempotent. Inference reads its name synonyms and icon→type pairs from the embedded `data/types.csv`: the whole name decides first (lower-cased, punctuation ignored), then each word of it, then the icon; `tag` has no type.
 - Done when: a new user gets exactly 7 categories even with 10 parallel first requests; seed is idempotent; inference test maps e.g. "Groceries"→food, "Petrol"→transport, "Gym"→health, unknown→null.
 - Needs: BE-10
 
 **BE-15 · Categories CRUD, archive, reorder**
 - Do: All category endpoints. Enforce name uniqueness, 30-category cap, valid `icon`/`shade`. `DELETE` only when unused, else `conflict`; archive via `PATCH archived:true` (keeps transactions, hides from lists and pickers). `PUT /categories/order` requires the exact set of active ids.
-- Files: `internal/categories/service.go`, `handler.go`, `internal/db/queries/categories.sql`
+- Files: `internal/categories/service.go`, `handler.go`, `internal/db/queries/categories.sql`, `internal/testutil/categories.go`
+- Notes: every write locks the user's row first, so one user's category changes happen one at a time and the cap, the names and the order are checked against a list that cannot move. Names are trimmed, 1–24 characters; a new category goes last, and without a `shade` takes its position modulo 7. `monthly_budget_minor` is limited to 1 000 000 000 000. Every invalid field is reported in one `422`. A duplicate name is `422` on `name`; reaching the cap is `409 conflict`, because no field of the request is wrong. Only active categories hold their name and count toward the cap. `archived: false` restores a category to the end of the list and is refused when the list is full (`409`) or the name is taken again (`422`); an archived category can still be edited. A category with no type gets one inferred when its name or icon changes; a type, once set, stays. `DELETE` asks an injected `UsageCheck` (default: unused) whether the category has transactions, until BE-17 supplies the real query. `PUT /categories/order` answers `422` on `ids` for a missing, unknown, archived, duplicate or foreign id, and leaves archived categories' positions alone. `GET /categories?include_archived=true` lists the archived ones after the active ones.
 - Done when: integration tests for each endpoint incl. cross-user `404`, duplicate name `422`, reorder with a missing id `422`. `internal/testutil` gains the category fixture builder (deferred from BE-07).
 - Needs: BE-14, BE-10
 
 **BE-16 · Budgets bulk update**
 - Do: `PUT /budgets` updating many categories atomically (all-or-nothing validation; amounts ≥ 0).
-- Files: `internal/categories/budgets.go`
+- Files: `internal/categories/budgets.go`, `internal/db/queries/categories.sql`
+- Notes: an item must name one of the user's active categories, once; an unknown, archived, foreign or repeated id is `422` like a bad amount, not `404`, since the request names many resources. Errors are keyed `items.<index>.category_id` and `items.<index>.monthly_budget_minor`, all reported together. Amounts have the same upper limit as in BE-15. The response holds only the categories in the request, in display order; an empty `items` answers `200` with an empty list.
 - Done when: one invalid item rejects the whole request; response returns updated categories.
 - Needs: BE-15
 
