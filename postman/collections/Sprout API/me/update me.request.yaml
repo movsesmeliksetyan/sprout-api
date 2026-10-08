@@ -1,0 +1,23 @@
+$kind: http-request
+name: 'Update current user'
+method: PATCH
+url: '{{baseUrl}}/v1/me'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Jane Doe",
+      "currency": "USD",
+      "timezone": "America/New_York",
+      "starting_balance_minor": 100000,
+      "onboarding_completed": true,
+      "preferences": {
+        "notifications_enabled": true,
+        "budget_alerts": true,
+        "weekly_recap": true
+      }
+    }

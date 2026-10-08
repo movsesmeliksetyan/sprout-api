@@ -1,0 +1,4 @@
+$kind: collection
+name: categories
+description: 'Spending categories and their monthly budgets.'
+order: 4000

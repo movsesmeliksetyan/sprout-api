@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'Get current user'
+method: GET
+url: '{{baseUrl}}/v1/me'
+order: 1000

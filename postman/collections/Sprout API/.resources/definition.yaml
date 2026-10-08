@@ -1,0 +1,30 @@
+$kind: collection
+description: |-
+  Backend for the Sprout iOS app: spending by category, savings goals,
+  statement imports and receipt scanning.
+
+  Organised by OpenAPI tag. Health endpoints are unauthenticated; every other
+  request uses Bearer token auth inherited from the collection.
+
+  Variables used:
+    {{baseUrl}}       – e.g. http://localhost:8080
+    {{bearerToken}}   – Auth0 access token
+    {{categoryId}}    – UUID of an existing category
+    {{transactionId}} – UUID of an existing transaction
+    {{goalId}}        – UUID of an existing goal
+    {{contributionId}}– UUID of an existing contribution
+    {{importId}}      – UUID of an existing import
+    {{importRowId}}   – UUID of an existing import row
+    {{receiptId}}     – UUID of an existing receipt
+    {{deviceId}}      – client-generated device UUID
+    {{uploadId}}      – UUID returned by POST /uploads
+    {{idempotencyKey}}– UUID for idempotent mutations
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+variables:
+  baseUrl: http://localhost:8080
+  bearerToken: ""
+  authEmail: you@example.com
+  authOtp: ""

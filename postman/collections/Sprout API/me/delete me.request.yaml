@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'Delete account'
+method: DELETE
+url: '{{baseUrl}}/v1/me'
+order: 3000

@@ -1,0 +1,4 @@
+$kind: collection
+name: health
+description: 'Liveness and readiness probes. These endpoints are outside /v1 and unauthenticated.'
+order: 1000

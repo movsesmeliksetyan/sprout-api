@@ -1,0 +1,33 @@
+$kind: http-request
+name: '2 - Exchange OTP for token'
+method: POST
+url: 'https://dev-ryjmw8xnz7n315j0.us.auth0.com/oauth/token'
+order: 2000
+auth:
+  type: noauth
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "grant_type": "http://auth0.com/oauth/grant-type/passwordless/otp",
+      "client_id": "TqzOSbedDJ3OuE2J2y20OcltzUwey7to",
+      "username": "{{authEmail}}",
+      "otp": "{{authOtp}}",
+      "realm": "email",
+      "audience": "https://api.sprout.app",
+      "scope": "openid profile email"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 200 && json.access_token) {
+          pm.collectionVariables.set("bearerToken", json.access_token);
+          console.log("✅ bearerToken saved to collection variables");
+      } else {
+          console.error("❌ Token exchange failed:", JSON.stringify(json));
+      }

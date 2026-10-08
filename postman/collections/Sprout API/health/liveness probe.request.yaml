@@ -1,0 +1,7 @@
+$kind: http-request
+name: 'Liveness probe'
+method: GET
+url: '{{baseUrl}}/healthz'
+order: 1000
+auth:
+  type: noauth

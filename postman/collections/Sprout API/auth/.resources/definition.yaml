@@ -1,0 +1,4 @@
+$kind: collection
+name: auth
+description: 'Auth0 passwordless (email OTP) flow. Run step 1 to receive a code, then step 2 to exchange it for a token. The token is saved automatically to {{bearerToken}}.'
+order: 500

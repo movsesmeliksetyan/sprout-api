@@ -1,0 +1,19 @@
+$kind: http-request
+name: 'Set budgets'
+method: PUT
+url: '{{baseUrl}}/v1/budgets'
+order: 6000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "items": [
+        {
+          "category_id": "{{categoryId}}",
+          "monthly_budget_minor": 50000
+        }
+      ]
+    }

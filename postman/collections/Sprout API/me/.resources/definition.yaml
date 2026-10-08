@@ -1,0 +1,4 @@
+$kind: collection
+name: me
+description: 'The signed-in user''s profile and preferences.'
+order: 2000

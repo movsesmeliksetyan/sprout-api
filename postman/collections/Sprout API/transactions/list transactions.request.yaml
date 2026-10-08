@@ -1,0 +1,34 @@
+$kind: http-request
+name: 'List transactions'
+method: GET
+url: '{{baseUrl}}/v1/transactions'
+order: 1000
+queryParams:
+  - key: from
+    value: '2025-01-01'
+    description: 'First calendar day to include'
+    disabled: true
+  - key: to
+    value: '2025-01-31'
+    description: 'Last calendar day to include'
+    disabled: true
+  - key: category_id
+    value: '{{categoryId}}'
+    description: 'Only transactions in this category'
+    disabled: true
+  - key: kind
+    value: expense
+    description: 'expense or income'
+    disabled: true
+  - key: q
+    value: 'coffee'
+    description: 'Search merchant or note'
+    disabled: true
+  - key: limit
+    value: '50'
+    description: 'Page size (1-200)'
+    disabled: true
+  - key: cursor
+    value: ''
+    description: 'next_cursor from previous page'
+    disabled: true

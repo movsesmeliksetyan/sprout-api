@@ -1,0 +1,4 @@
+$kind: collection
+name: transactions
+description: 'The ledger of expenses and income.'
+order: 5000
