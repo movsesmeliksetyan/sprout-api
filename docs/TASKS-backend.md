@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 18 / 63**
+**Progress: 19 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -48,7 +48,7 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 - [x] BE-17 · Transactions schema and CRUD — 2026-10-08, 5f5df89
 - [x] BE-18 · Transactions list — 2026-10-08, c60e730
-- [ ] BE-19 · Balance and `GET /home`
+- [x] BE-19 · Balance and `GET /home` — 2026-10-08, 98400c3
 - [ ] BE-20 · Profile stats and streak
 
 ## Milestone 5 — Aggregations
