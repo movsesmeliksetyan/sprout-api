@@ -16,7 +16,8 @@ type Querier interface {
 	// finished.
 	AcquireIdempotencyKey(ctx context.Context, arg AcquireIdempotencyKeyParams) (IdempotencyKey, error)
 	// How many calendar days in a row, ending today or yesterday, the user
-	// created at least one transaction on. Days are read in the given timezone.
+	// created at least one transaction or goal contribution on. Days are read in
+	// the given timezone.
 	// Each run of consecutive days is an island: within one, the day minus its
 	// rank is the same date.
 	ActivityStreak(ctx context.Context, arg ActivityStreakParams) (int64, error)
@@ -52,6 +53,8 @@ type Querier interface {
 	// Returns no row when a user with this auth0_sub already exists.
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteCategory(ctx context.Context, arg DeleteCategoryParams) (int64, error)
+	// Removes a contribution of one of the user's goals and returns it.
+	DeleteContribution(ctx context.Context, arg DeleteContributionParams) (GoalContribution, error)
 	DeleteExpiredIdempotencyKeys(ctx context.Context) (int64, error)
 	DeleteGoal(ctx context.Context, arg DeleteGoalParams) (int64, error)
 	DeleteTransaction(ctx context.Context, arg DeleteTransactionParams) (int64, error)
@@ -70,6 +73,9 @@ type Querier interface {
 	// Active categories in display order, then the archived ones when asked for.
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListCategoryTypes(ctx context.Context) ([]CategoryType, error)
+	// A page of the contributions of one of the user's goals, newest first. The
+	// cursor is the last row of the previous page.
+	ListContributions(ctx context.Context, arg ListContributionsParams) ([]GoalContribution, error)
 	// The whole-day totals of the given days under the same filters as
 	// ListTransactions: income minus expense, and how many transactions.
 	ListDayTotals(ctx context.Context, arg ListDayTotalsParams) ([]ListDayTotalsRow, error)
@@ -90,6 +96,9 @@ type Querier interface {
 	ReleaseIdempotencyKey(ctx context.Context, arg ReleaseIdempotencyKeyParams) (int64, error)
 	// Puts the user's categories in the order of ids.
 	ReorderCategories(ctx context.Context, arg ReorderCategoriesParams) error
+	// Everything the user has put into goals and not taken back: top-ups minus
+	// withdrawals.
+	SavedInGoals(ctx context.Context, userID uuid.UUID) (int64, error)
 	// Does nothing when the user already has an active category of this name.
 	SeedCategory(ctx context.Context, arg SeedCategoryParams) error
 	// The user's expenses on the calendar days from_date to to_date, both

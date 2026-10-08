@@ -1,0 +1,26 @@
+$kind: http-request
+name: 'List contributions'
+method: GET
+url: '{{baseUrl}}/v1/goals/{{goalId}}/contributions'
+order: 4300
+pathVariables:
+  - key: goalId
+    value: '{{goalId}}'
+queryParams:
+  - key: limit
+    value: '50'
+    description: 'Page size (1-200)'
+    disabled: true
+  - key: cursor
+    value: ''
+    description: 'next_cursor from previous page'
+    disabled: true
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 200 && json.items.length > 0 && !pm.collectionVariables.get("contributionId")) {
+          pm.collectionVariables.set("contributionId", json.items[0].id);
+          console.log("✅ contributionId saved: " + json.items[0].id);
+      }

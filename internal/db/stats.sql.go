@@ -14,9 +14,13 @@ import (
 
 const activityStreak = `-- name: ActivityStreak :one
 WITH days AS (
-    SELECT DISTINCT (created_at AT TIME ZONE $2::text)::date AS day
-    FROM transactions
-    WHERE user_id = $3
+    SELECT (t.created_at AT TIME ZONE $2::text)::date AS day
+    FROM transactions t
+    WHERE t.user_id = $3
+    UNION
+    SELECT (c.created_at AT TIME ZONE $2::text)::date
+    FROM goal_contributions c
+    WHERE c.user_id = $3
 ),
 islands AS (
     SELECT day, day - (row_number() OVER (ORDER BY day))::integer AS island
@@ -40,7 +44,8 @@ type ActivityStreakParams struct {
 }
 
 // How many calendar days in a row, ending today or yesterday, the user
-// created at least one transaction on. Days are read in the given timezone.
+// created at least one transaction or goal contribution on. Days are read in
+// the given timezone.
 // Each run of consecutive days is an island: within one, the day minus its
 // rank is the same date.
 func (q *Queries) ActivityStreak(ctx context.Context, arg ActivityStreakParams) (int64, error) {

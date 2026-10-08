@@ -1,0 +1,30 @@
+$kind: http-request
+name: 'Withdraw from goal'
+method: POST
+url: '{{baseUrl}}/v1/goals/{{goalId}}/contributions'
+order: 4500
+pathVariables:
+  - key: goalId
+    value: '{{goalId}}'
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Idempotency-Key
+    value: '{{$guid}}'
+body:
+  type: json
+  content: |-
+    {
+      "kind": "withdrawal",
+      "amount_minor": 1000,
+      "occurred_at": "2025-01-15T09:30:00Z"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 201 && json.contribution) {
+          pm.collectionVariables.set("contributionId", json.contribution.id);
+          console.log("✅ contributionId saved: " + json.contribution.id);
+      }

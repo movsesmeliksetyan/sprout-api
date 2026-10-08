@@ -100,6 +100,32 @@ func TestStats_StreakCountsDaysInTheUsersTimezone(t *testing.T) {
 	assert.Equal(t, 2, getStats(t, server, user).StreakDays, "in Yerevan the 19th and the 20th, yesterday, have one each")
 }
 
+func TestStats_StreakCountsContributions(t *testing.T) {
+	t.Parallel()
+	pool := testutil.NewDB(t)
+	server := newStatsServer(t, pool)
+	user := testutil.NewTestUser(t, pool)
+	goal := testutil.NewGoal(t, pool, user.ID)
+	contributedAt := func(createdAt time.Time) {
+		contribution := testutil.NewContribution(t, pool, user.User, goal.ID, "topup", 100,
+			time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC))
+		_, err := pool.Exec(context.Background(),
+			"UPDATE goal_contributions SET created_at = $1 WHERE id = $2", createdAt, contribution.ID)
+		require.NoError(t, err)
+	}
+	addedAt(t, pool, user, daysAgo(0))
+	addedAt(t, pool, user, daysAgo(2))
+
+	assert.Equal(t, 1, getStats(t, server, user).StreakDays, "nothing yesterday")
+
+	contributedAt(daysAgo(1))
+	assert.Equal(t, 3, getStats(t, server, user).StreakDays, "a contribution fills the day between")
+
+	contributedAt(daysAgo(0))
+	contributedAt(daysAgo(3))
+	assert.Equal(t, 4, getStats(t, server, user).StreakDays, "a day with both counts once")
+}
+
 func TestStats_StreakIgnoresOtherUsers(t *testing.T) {
 	t.Parallel()
 	pool := testutil.NewDB(t)

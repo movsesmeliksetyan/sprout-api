@@ -55,9 +55,10 @@ type Database interface {
 
 // Service holds the business logic for goals.
 type Service struct {
-	db     Database
-	now    func() time.Time
-	images *images
+	db          Database
+	now         func() time.Time
+	images      *images
+	onCompleted CompletionHook
 }
 
 // images is what the service needs to keep goal pictures.
@@ -78,14 +79,19 @@ func WithImages(uploadService *uploads.Service, store storage.Store, logger *slo
 	}
 }
 
-// WithClock sets the time a goal is recorded as completed at.
+// WithClock sets the time a goal is recorded as completed at, and the time a
+// contribution without one is given.
 func WithClock(now func() time.Time) Option {
 	return func(s *Service) { s.now = now }
 }
 
 // NewService returns a Service backed by database.
 func NewService(database Database, opts ...Option) *Service {
-	s := &Service{db: database, now: time.Now}
+	s := &Service{
+		db:          database,
+		now:         time.Now,
+		onCompleted: func(context.Context, db.Querier, db.Goal) error { return nil },
+	}
 	for _, opt := range opts {
 		opt(s)
 	}
@@ -344,7 +350,7 @@ func (s *Service) Update(ctx context.Context, userID, id uuid.UUID, patch Patch)
 		if err != nil {
 			return fmt.Errorf("goals: update: %w", err)
 		}
-		return nil
+		return s.completed(ctx, q, previous, updated)
 	})
 	if err != nil {
 		return Goal{}, err

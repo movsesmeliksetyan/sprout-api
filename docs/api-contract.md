@@ -314,11 +314,11 @@ Items cover every active category, plus any archived category that has spend in 
 | `GET` | `/goals/{id}` | Goal + `"recent_contributions": [Contribution]` (5 newest) |
 | `PATCH` | `/goals/{id}` | any of `title`, `emoji`, `image_upload_id`, `target_minor`, `status`, `sort_order` (≥ 0). `200` Goal |
 | `DELETE` | `/goals/{id}` | `204`; its contributions are removed and the money returns to balance |
-| `GET` | `/goals/{id}/contributions` | Paginated |
-| `POST` | `/goals/{id}/contributions` | `{ "kind": "topup", "amount_minor": 2500, "occurred_at"? }` → `201` `{ "contribution": Contribution, "goal": Goal }`. Idempotent. Withdrawal cannot exceed `saved_minor`. |
-| `DELETE` | `/goals/{id}/contributions/{cid}` | `200` Goal |
+| `GET` | `/goals/{id}/contributions` | Paginated, newest first (by `local_date`, then id) |
+| `POST` | `/goals/{id}/contributions` | `{ "kind": "topup", "amount_minor": 2500, "occurred_at"? }` → `201` `{ "contribution": Contribution, "goal": Goal }`. Idempotent. Withdrawal cannot exceed `saved_minor` (`422` on `amount_minor`). |
+| `DELETE` | `/goals/{id}/contributions/{cid}` | `200` Goal. `409` for a top-up whose removal would leave `saved_minor` below `0` |
 
-Contribution: `{ "id", "kind", "amount_minor", "occurred_at", "local_date" }`. A goal becomes `completed` automatically when `saved_minor ≥ target_minor`.
+Contribution: `{ "id", "kind", "amount_minor", "occurred_at", "local_date" }`. A goal becomes `completed` automatically when `saved_minor ≥ target_minor`, and `active` again when a withdrawal or a deleted top-up takes it below. A completed goal can still be topped up. An archived goal takes contributions too and stays archived.
 
 ### 2.9 Categorisation
 

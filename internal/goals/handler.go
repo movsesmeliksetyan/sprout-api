@@ -163,6 +163,78 @@ func (h *Handler) DeleteGoal(ctx context.Context, request httpx.DeleteGoalReques
 	return httpx.DeleteGoal204Response{}, nil
 }
 
+// ListContributions returns a page of a goal's contributions, newest first.
+func (h *Handler) ListContributions(ctx context.Context, request httpx.ListContributionsRequestObject) (httpx.ListContributionsResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	// An empty cursor is the first page, as no cursor is.
+	var after *httpx.Cursor
+	if request.Params.Cursor != nil && *request.Params.Cursor != "" {
+		cursor, err := httpx.DecodeCursor(*request.Params.Cursor)
+		if err != nil {
+			return nil, err
+		}
+		after = &cursor
+	}
+
+	page, err := h.service.ListContributions(ctx, user.ID, request.ID, request.Params.Limit, after)
+	if err != nil {
+		return nil, err
+	}
+	list := httpx.ContributionList{Items: make([]httpx.Contribution, 0, len(page.Items))}
+	for _, contribution := range page.Items {
+		list.Items = append(list.Items, ContributionToAPI(contribution))
+	}
+	if page.Next != nil {
+		next := httpx.EncodeCursor(*page.Next)
+		list.NextCursor = &next
+	}
+	return httpx.ListContributions200JSONResponse(list), nil
+}
+
+// CreateContribution tops one of the user's goals up or withdraws from it.
+func (h *Handler) CreateContribution(ctx context.Context, request httpx.CreateContributionRequestObject) (httpx.CreateContributionResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	if request.Body == nil {
+		return nil, httpx.ErrBadRequest
+	}
+	contribution, saved, err := h.service.Contribute(ctx, user, request.ID, ContributionParams{
+		Kind:        ContributionKind(request.Body.Kind),
+		AmountMinor: request.Body.AmountMinor,
+		OccurredAt:  request.Body.OccurredAt,
+	})
+	if err != nil {
+		return nil, err
+	}
+	goal, err := h.toAPI(ctx, saved)
+	if err != nil {
+		return nil, err
+	}
+	return httpx.CreateContribution201JSONResponse{Contribution: ContributionToAPI(contribution), Goal: goal}, nil
+}
+
+// DeleteContribution removes a contribution from one of the user's goals.
+func (h *Handler) DeleteContribution(ctx context.Context, request httpx.DeleteContributionRequestObject) (httpx.DeleteContributionResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	updated, err := h.service.DeleteContribution(ctx, user.ID, request.ID, request.Cid)
+	if err != nil {
+		return nil, err
+	}
+	goal, err := h.toAPI(ctx, updated)
+	if err != nil {
+		return nil, err
+	}
+	return httpx.DeleteContribution200JSONResponse(goal), nil
+}
+
 func (h *Handler) toAPI(ctx context.Context, goal Goal) (httpx.Goal, error) {
 	imageURL, err := h.service.ImageURL(ctx, goal.Goal)
 	if err != nil {

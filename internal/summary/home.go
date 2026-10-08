@@ -44,7 +44,7 @@ func NewService(database db.DBTX, ledger *transactions.Service, opts ...Option) 
 // Home is everything the Home screen shows.
 type Home struct {
 	// BalanceMinor is what the user has: the starting balance and every
-	// transaction since. It may be negative.
+	// transaction since, less what is put away in goals. It may be negative.
 	BalanceMinor int64
 	Month        Month
 	// Recent holds the newest transactions and the totals of their days.
@@ -87,10 +87,13 @@ func (s *Service) Home(ctx context.Context, user db.User) (Home, error) {
 	}
 	q := db.New(s.db)
 
-	// Goal contributions join the balance once goals exist (BE-26).
 	net, err := q.LedgerNet(ctx, user.ID)
 	if err != nil {
 		return Home{}, fmt.Errorf("summary: ledger net: %w", err)
+	}
+	saved, err := q.SavedInGoals(ctx, user.ID)
+	if err != nil {
+		return Home{}, fmt.Errorf("summary: saved in goals: %w", err)
 	}
 	month, err := s.month(ctx, q, user.ID, current)
 	if err != nil {
@@ -104,7 +107,7 @@ func (s *Service) Home(ctx context.Context, user db.User) (Home, error) {
 	recent.Next = nil
 
 	return Home{
-		BalanceMinor: user.StartingBalanceMinor + net,
+		BalanceMinor: user.StartingBalanceMinor + net - saved,
 		Month:        month,
 		Recent:       recent,
 		// Until there is an inbox (BE-56) nothing is unread.

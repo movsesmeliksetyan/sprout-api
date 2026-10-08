@@ -54,10 +54,26 @@ DELETE FROM goals WHERE id = $1 AND user_id = $2;
 -- The newest contributions of one of the user's goals.
 SELECT * FROM goal_contributions
 WHERE goal_id = $1 AND user_id = $2
-ORDER BY occurred_at DESC, id DESC
+ORDER BY local_date DESC, id DESC
+LIMIT sqlc.arg(row_limit);
+
+-- name: ListContributions :many
+-- A page of the contributions of one of the user's goals, newest first. The
+-- cursor is the last row of the previous page.
+SELECT * FROM goal_contributions
+WHERE goal_id = sqlc.arg(goal_id) AND user_id = sqlc.arg(user_id)
+  AND (sqlc.narg(cursor_date)::date IS NULL
+       OR (local_date, id) < (sqlc.narg(cursor_date)::date, sqlc.narg(cursor_id)::uuid))
+ORDER BY local_date DESC, id DESC
 LIMIT sqlc.arg(row_limit);
 
 -- name: CreateContribution :one
 INSERT INTO goal_contributions (id, user_id, goal_id, kind, amount_minor, occurred_at, local_date)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING *;
+
+-- name: DeleteContribution :one
+-- Removes a contribution of one of the user's goals and returns it.
+DELETE FROM goal_contributions
+WHERE id = $1 AND goal_id = $2 AND user_id = $3
 RETURNING *;

@@ -34,6 +34,9 @@ description: |-
     {{transactionId}}     – by "Create transaction"
     {{goalId}}            – by "Create goal", and by "List goals" when it
                             is still empty; cleared by "Delete goal"
+    {{contributionId}}    – by "Top up goal" and "Withdraw from goal", and by
+                            "List contributions" when it is still empty;
+                            cleared by "Delete contribution"
 auth:
   type: bearer
   credentials:
@@ -53,3 +56,4 @@ variables:
   categoryIds: "[]"
   transactionId: ""
   goalId: ""
+  contributionId: ""

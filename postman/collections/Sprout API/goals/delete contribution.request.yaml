@@ -1,0 +1,18 @@
+$kind: http-request
+name: 'Delete contribution'
+method: DELETE
+url: '{{baseUrl}}/v1/goals/{{goalId}}/contributions/{{contributionId}}'
+order: 4600
+pathVariables:
+  - key: goalId
+    value: '{{goalId}}'
+  - key: contributionId
+    value: '{{contributionId}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      if (pm.response.code === 200) {
+          pm.collectionVariables.set("contributionId", "");
+          console.log("✅ Deleted; contributionId cleared. \"List contributions\" or a top-up saves a new one.");
+      }
