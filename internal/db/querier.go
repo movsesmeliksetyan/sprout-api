@@ -50,6 +50,8 @@ type Querier interface {
 	// A null argument leaves its column as it is. Archiving an archived category
 	// keeps the time it was first archived.
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error)
+	// Sets the budget of ids[i] to amounts[i].
+	UpdateCategoryBudgets(ctx context.Context, arg UpdateCategoryBudgetsParams) error
 	// A null argument leaves its column as it is.
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }

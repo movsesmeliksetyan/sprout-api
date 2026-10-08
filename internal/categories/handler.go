@@ -111,6 +111,27 @@ func (h *Handler) ReorderCategories(ctx context.Context, request httpx.ReorderCa
 	return httpx.ReorderCategories200JSONResponse(toList(reordered)), nil
 }
 
+// UpdateBudgets sets the monthly budgets of several categories at once.
+func (h *Handler) UpdateBudgets(ctx context.Context, request httpx.UpdateBudgetsRequestObject) (httpx.UpdateBudgetsResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	if request.Body == nil {
+		return nil, httpx.ErrBadRequest
+	}
+
+	budgets := make([]Budget, 0, len(request.Body.Items))
+	for _, item := range request.Body.Items {
+		budgets = append(budgets, Budget{CategoryID: item.CategoryID, MonthlyBudgetMinor: item.MonthlyBudgetMinor})
+	}
+	updated, err := h.service.UpdateBudgets(ctx, user.ID, budgets)
+	if err != nil {
+		return nil, err
+	}
+	return httpx.UpdateBudgets200JSONResponse(toList(updated)), nil
+}
+
 func toList(categories []db.Category) httpx.CategoryList {
 	items := make([]httpx.Category, 0, len(categories))
 	for _, category := range categories {

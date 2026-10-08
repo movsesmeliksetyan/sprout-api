@@ -351,7 +351,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-16 · Budgets bulk update**
 - Do: `PUT /budgets` updating many categories atomically (all-or-nothing validation; amounts ≥ 0).
-- Files: `internal/categories/budgets.go`
+- Files: `internal/categories/budgets.go`, `internal/db/queries/categories.sql`
+- Notes: an item must name one of the user's active categories, once; an unknown, archived, foreign or repeated id is `422` like a bad amount, not `404`, since the request names many resources. Errors are keyed `items.<index>.category_id` and `items.<index>.monthly_budget_minor`, all reported together. Amounts have the same upper limit as in BE-15. The response holds only the categories in the request, in display order; an empty `items` answers `200` with an empty list.
 - Done when: one invalid item rejects the whole request; response returns updated categories.
 - Needs: BE-15
 

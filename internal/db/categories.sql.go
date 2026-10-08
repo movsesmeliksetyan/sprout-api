@@ -323,3 +323,22 @@ func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) 
 	)
 	return i, err
 }
+
+const updateCategoryBudgets = `-- name: UpdateCategoryBudgets :exec
+UPDATE categories c
+SET monthly_budget_minor = b.amount
+FROM (SELECT unnest($2::uuid[]) AS id, unnest($3::bigint[]) AS amount) AS b
+WHERE c.id = b.id AND c.user_id = $1
+`
+
+type UpdateCategoryBudgetsParams struct {
+	UserID  uuid.UUID
+	Ids     []uuid.UUID
+	Amounts []int64
+}
+
+// Sets the budget of ids[i] to amounts[i].
+func (q *Queries) UpdateCategoryBudgets(ctx context.Context, arg UpdateCategoryBudgetsParams) error {
+	_, err := q.db.Exec(ctx, updateCategoryBudgets, arg.UserID, arg.Ids, arg.Amounts)
+	return err
+}

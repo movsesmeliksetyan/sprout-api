@@ -62,3 +62,10 @@ UPDATE categories c
 SET sort_order = (o.position - 1)::integer
 FROM unnest(sqlc.arg(ids)::uuid[]) WITH ORDINALITY AS o (id, position)
 WHERE c.id = o.id AND c.user_id = sqlc.arg(user_id);
+
+-- name: UpdateCategoryBudgets :exec
+-- Sets the budget of ids[i] to amounts[i].
+UPDATE categories c
+SET monthly_budget_minor = b.amount
+FROM (SELECT unnest(sqlc.arg(ids)::uuid[]) AS id, unnest(sqlc.arg(amounts)::bigint[]) AS amount) AS b
+WHERE c.id = b.id AND c.user_id = sqlc.arg(user_id);
