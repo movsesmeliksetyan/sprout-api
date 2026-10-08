@@ -1,0 +1,4 @@
+$kind: collection
+name: summary
+description: 'Spending aggregated over a week, month or year.'
+order: 7000

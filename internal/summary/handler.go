@@ -59,6 +59,41 @@ func (h *Handler) GetHome(ctx context.Context, _ httpx.GetHomeRequestObject) (ht
 	}, nil
 }
 
+// GetCategoriesSummary returns the signed-in user's spending per category
+// for a period, against the budgets.
+func (h *Handler) GetCategoriesSummary(ctx context.Context, request httpx.GetCategoriesSummaryRequestObject) (httpx.GetCategoriesSummaryResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	overview, err := h.service.Categories(ctx, user, string(request.Params.Period), request.Params.Offset)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]httpx.CategorySummaryItem, 0, len(overview.Items))
+	for _, item := range overview.Items {
+		items = append(items, httpx.CategorySummaryItem{
+			CategoryID:     item.CategoryID,
+			SpentMinor:     item.SpentMinor,
+			BudgetMinor:    item.BudgetMinor,
+			RemainingMinor: item.RemainingMinor,
+			OverBudget:     item.OverBudget,
+			BudgetUsedPct:  item.BudgetUsedPct,
+			SharePct:       item.SharePct,
+			TxnCount:       item.TxnCount,
+			TrendPct:       item.TrendPct,
+		})
+	}
+	return httpx.GetCategoriesSummary200JSONResponse{
+		Range:            toRange(overview.Range),
+		TotalSpentMinor:  overview.TotalSpentMinor,
+		TotalBudgetMinor: overview.TotalBudgetMinor,
+		BudgetUsedPct:    overview.BudgetUsedPct,
+		Items:            items,
+	}, nil
+}
+
 func toRange(r period.Range) httpx.Range {
 	return httpx.Range{
 		Period:    httpx.Period(r.Kind),

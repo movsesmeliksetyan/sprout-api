@@ -390,7 +390,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-21 · Categories overview summary**
 - Do: `GET /summary/categories`: per-category spent, scaled budget, remaining, over-budget flag, % used, share of total, txn count, trend vs previous period; totals row. Includes active categories with zero spend. Sorted by spend desc, then sort_order.
-- Files: `internal/summary/categories.go`, `queries/summary.sql`
+- Files: `internal/summary/categories.go`, `internal/db/queries/summary.sql`
+- Notes: an archived category is an item in a period it has spend in, as it is a Home segment, so the total equals Home's month figure; it keeps its stored budget. `total_budget_minor` is the sum of the items' scaled budgets, so the rows add up to it even for a week, where each is rounded. `remaining_minor` is budget minus spend whatever the budget; `over_budget` needs a budget, so a category with none is never over and its `budget_used_pct` is `null`. Spending exactly the budget is not over it. Equal spend comes in display order. `share_pct` is all `0` when nothing was spent. An unknown `period` and an `offset` below 0 or above 1200 are `400 bad_request`, checked by the summary service for all three summary endpoints. One query reads the period and the one before it.
 - Done when: fixture test matches the design's numbers for month (Food $482.50 / $500 = 97 %, Self-care over by $10) and correct scaling for week/year; `share_pct` sums to 100.
 - Needs: BE-08, BE-17
 

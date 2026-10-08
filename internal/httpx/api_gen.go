@@ -801,7 +801,9 @@ type CategorySummaryItem struct {
 	// BudgetUsedPct Null when the budget is 0.
 	BudgetUsedPct *int               `json:"budget_used_pct"`
 	CategoryID    openapi_types.UUID `json:"category_id"`
-	OverBudget    bool               `json:"over_budget"`
+
+	// OverBudget Whether more than the budget was spent; always false when the budget is 0.
+	OverBudget bool `json:"over_budget"`
 
 	// RemainingMinor Signed; negative when over budget.
 	RemainingMinor int64 `json:"remaining_minor"`

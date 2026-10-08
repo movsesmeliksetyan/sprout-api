@@ -244,7 +244,7 @@ All take `?period=&offset=`.
 }
 ```
 
-Items cover every active category, sorted by `spent_minor` desc. `remaining_minor` is negative when over budget. `budget_used_pct` is `null` when the budget is 0.
+Items cover every active category, plus any archived category that has spend in the period, sorted by `spent_minor` desc (ties in display order). `budget_minor` is the monthly budget scaled to the period (§1.2) and `total_budget_minor` is the sum of the items' budgets. `remaining_minor` is `budget_minor − spent_minor`, negative when more was spent. `budget_used_pct` is `null` when the budget is 0, and a category with no budget is never `over_budget`. `share_pct` sums to 100 across the items (all `0` when nothing was spent). An unknown `period`, or an `offset` outside 0–1200, is `400 bad_request`.
 
 `GET /summary/categories/{id}`
 
