@@ -7,9 +7,134 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
+
+const categoryNameTaken = `-- name: CategoryNameTaken :one
+SELECT EXISTS (
+    SELECT 1 FROM categories
+    WHERE user_id = $1 AND archived_at IS NULL AND lower(name) = lower($2::text) AND id <> $3
+)
+`
+
+type CategoryNameTakenParams struct {
+	UserID   uuid.UUID
+	Name     string
+	ExceptID uuid.UUID
+}
+
+// Whether another active category of the user has this name, in any case.
+func (q *Queries) CategoryNameTaken(ctx context.Context, arg CategoryNameTakenParams) (bool, error) {
+	row := q.db.QueryRow(ctx, categoryNameTaken, arg.UserID, arg.Name, arg.ExceptID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const countActiveCategories = `-- name: CountActiveCategories :one
+SELECT count(*) FROM categories WHERE user_id = $1 AND archived_at IS NULL
+`
+
+func (q *Queries) CountActiveCategories(ctx context.Context, userID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countActiveCategories, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const createCategory = `-- name: CreateCategory :one
+INSERT INTO categories (id, user_id, name, icon, shade, sort_order, monthly_budget_minor, category_type, archived_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, user_id, name, icon, shade, sort_order, monthly_budget_minor, category_type, archived_at, created_at, updated_at
+`
+
+type CreateCategoryParams struct {
+	ID                 uuid.UUID
+	UserID             uuid.UUID
+	Name               string
+	Icon               string
+	Shade              int16
+	SortOrder          int32
+	MonthlyBudgetMinor int64
+	CategoryType       *string
+	ArchivedAt         *time.Time
+}
+
+func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
+	row := q.db.QueryRow(ctx, createCategory,
+		arg.ID,
+		arg.UserID,
+		arg.Name,
+		arg.Icon,
+		arg.Shade,
+		arg.SortOrder,
+		arg.MonthlyBudgetMinor,
+		arg.CategoryType,
+		arg.ArchivedAt,
+	)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Icon,
+		&i.Shade,
+		&i.SortOrder,
+		&i.MonthlyBudgetMinor,
+		&i.CategoryType,
+		&i.ArchivedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const deleteCategory = `-- name: DeleteCategory :execrows
+DELETE FROM categories WHERE id = $1 AND user_id = $2
+`
+
+type DeleteCategoryParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+func (q *Queries) DeleteCategory(ctx context.Context, arg DeleteCategoryParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteCategory, arg.ID, arg.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getCategory = `-- name: GetCategory :one
+SELECT id, user_id, name, icon, shade, sort_order, monthly_budget_minor, category_type, archived_at, created_at, updated_at FROM categories WHERE id = $1 AND user_id = $2
+`
+
+type GetCategoryParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+func (q *Queries) GetCategory(ctx context.Context, arg GetCategoryParams) (Category, error) {
+	row := q.db.QueryRow(ctx, getCategory, arg.ID, arg.UserID)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Icon,
+		&i.Shade,
+		&i.SortOrder,
+		&i.MonthlyBudgetMinor,
+		&i.CategoryType,
+		&i.ArchivedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
 
 const listCategories = `-- name: ListCategories :many
 SELECT id, user_id, name, icon, shade, sort_order, monthly_budget_minor, category_type, archived_at, created_at, updated_at FROM categories
@@ -79,6 +204,37 @@ func (q *Queries) ListCategoryTypes(ctx context.Context) ([]CategoryType, error)
 	return items, nil
 }
 
+const nextCategorySortOrder = `-- name: NextCategorySortOrder :one
+SELECT (COALESCE(max(sort_order), -1) + 1)::integer FROM categories
+WHERE user_id = $1 AND archived_at IS NULL
+`
+
+// The position after the user's last active category.
+func (q *Queries) NextCategorySortOrder(ctx context.Context, userID uuid.UUID) (int32, error) {
+	row := q.db.QueryRow(ctx, nextCategorySortOrder, userID)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const reorderCategories = `-- name: ReorderCategories :exec
+UPDATE categories c
+SET sort_order = (o.position - 1)::integer
+FROM unnest($2::uuid[]) WITH ORDINALITY AS o (id, position)
+WHERE c.id = o.id AND c.user_id = $1
+`
+
+type ReorderCategoriesParams struct {
+	UserID uuid.UUID
+	Ids    []uuid.UUID
+}
+
+// Puts the user's categories in the order of ids.
+func (q *Queries) ReorderCategories(ctx context.Context, arg ReorderCategoriesParams) error {
+	_, err := q.db.Exec(ctx, reorderCategories, arg.UserID, arg.Ids)
+	return err
+}
+
 const seedCategory = `-- name: SeedCategory :exec
 INSERT INTO categories (id, user_id, name, icon, shade, sort_order, category_type)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -107,4 +263,63 @@ func (q *Queries) SeedCategory(ctx context.Context, arg SeedCategoryParams) erro
 		arg.CategoryType,
 	)
 	return err
+}
+
+const updateCategory = `-- name: UpdateCategory :one
+UPDATE categories
+SET name                 = COALESCE($1, name),
+    icon                 = COALESCE($2, icon),
+    shade                = COALESCE($3, shade),
+    sort_order           = COALESCE($4, sort_order),
+    monthly_budget_minor = COALESCE($5, monthly_budget_minor),
+    category_type        = COALESCE($6, category_type),
+    archived_at          = CASE
+                               WHEN $7::boolean IS NULL THEN archived_at
+                               WHEN $7::boolean THEN COALESCE(archived_at, now())
+                           END
+WHERE id = $8 AND user_id = $9
+RETURNING id, user_id, name, icon, shade, sort_order, monthly_budget_minor, category_type, archived_at, created_at, updated_at
+`
+
+type UpdateCategoryParams struct {
+	Name               *string
+	Icon               *string
+	Shade              *int16
+	SortOrder          *int32
+	MonthlyBudgetMinor *int64
+	CategoryType       *string
+	Archived           *bool
+	ID                 uuid.UUID
+	UserID             uuid.UUID
+}
+
+// A null argument leaves its column as it is. Archiving an archived category
+// keeps the time it was first archived.
+func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error) {
+	row := q.db.QueryRow(ctx, updateCategory,
+		arg.Name,
+		arg.Icon,
+		arg.Shade,
+		arg.SortOrder,
+		arg.MonthlyBudgetMinor,
+		arg.CategoryType,
+		arg.Archived,
+		arg.ID,
+		arg.UserID,
+	)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Icon,
+		&i.Shade,
+		&i.SortOrder,
+		&i.MonthlyBudgetMinor,
+		&i.CategoryType,
+		&i.ArchivedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

@@ -181,7 +181,7 @@ func runAPI(c cli, _ []string) error {
 			users.Middleware(userService, responder),
 			httpx.Idempotency(pool, responder, logger, httpx.IdempotencyConfig{Routes: idempotentRoutes}),
 		),
-		httpx.WithAPI(newAPI(userService, uploadService)),
+		httpx.WithAPI(newAPI(userService, uploadService, categories.NewService(pool))),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))
