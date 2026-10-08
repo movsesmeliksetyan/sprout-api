@@ -27,7 +27,10 @@ description: |-
     {{uploadId}}, {{uploadUrl}}, {{uploadContentType}}
                           – by "1 - Request presigned upload"
     {{categoryId}}        – by "Create category", and by "List categories"
-                            when it is still empty
+                            when it is still empty; cleared by "Delete
+                            category"
+    {{categoryIds}}       – by "List categories" and "Reorder categories":
+                            the order the next reorder sends
     {{transactionId}}     – by "Create transaction"
 auth:
   type: bearer
@@ -45,4 +48,5 @@ variables:
   uploadUrl: ""
   uploadContentType: ""
   categoryId: ""
+  categoryIds: "[]"
   transactionId: ""

@@ -5,7 +5,7 @@ url: '{{baseUrl}}/v1/categories'
 order: 1000
 queryParams:
   - key: include_archived
-    value: 'false'
+    value: 'true'
     description: 'Include archived categories'
     disabled: true
 scripts:
@@ -13,7 +13,14 @@ scripts:
     language: text/javascript
     code: |-
       const json = pm.response.json();
-      if (pm.response.code === 200 && json.items && json.items.length > 0 && !pm.collectionVariables.get("categoryId")) {
-          pm.collectionVariables.set("categoryId", json.items[0].id);
-          console.log("✅ categoryId was empty; saved the first category: " + json.items[0].id);
+      if (pm.response.code === 200 && json.items) {
+          const active = json.items.filter((c) => !c.archived).map((c) => c.id);
+          // "Reorder categories" sends this: the current order with the first
+          // category moved to the end.
+          pm.collectionVariables.set("categoryIds", JSON.stringify(active.slice(1).concat(active.slice(0, 1))));
+          console.log("✅ categoryIds saved for the next reorder (" + active.length + " active)");
+          if (json.items.length > 0 && !pm.collectionVariables.get("categoryId")) {
+              pm.collectionVariables.set("categoryId", json.items[0].id);
+              console.log("✅ categoryId was empty; saved the first category: " + json.items[0].id);
+          }
       }

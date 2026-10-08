@@ -23,4 +23,6 @@ scripts:
       if (pm.response.code === 201 && json.id) {
           pm.collectionVariables.set("categoryId", json.id);
           console.log("✅ categoryId saved: " + json.id);
+      } else {
+          console.error("❌ Category was not created:", JSON.stringify(json));
       }

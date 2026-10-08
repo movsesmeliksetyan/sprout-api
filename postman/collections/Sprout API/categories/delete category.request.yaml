@@ -6,3 +6,11 @@ order: 5000
 pathVariables:
   - key: categoryId
     value: '{{categoryId}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      if (pm.response.code === 204) {
+          pm.collectionVariables.set("categoryId", "");
+          console.log("✅ Deleted; categoryId cleared. \"List categories\" or \"Create category\" saves a new one.");
+      }
