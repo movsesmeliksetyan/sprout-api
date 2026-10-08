@@ -19,6 +19,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/auth"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
+	"github.com/movsesmeliksetyan/sprout-api/internal/session"
 	"github.com/movsesmeliksetyan/sprout-api/internal/testutil"
 	"github.com/movsesmeliksetyan/sprout-api/internal/users"
 )
@@ -305,7 +306,7 @@ func TestMiddleware(t *testing.T) {
 		logger := testutil.Logger(t)
 		var got db.User
 		next := http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
-			got, _ = users.FromContext(r.Context())
+			got, _ = session.User(r.Context())
 		})
 		handler := users.Middleware(users.NewService(pool), httpx.NewResponder(logger))(next)
 		req := testutil.JSONRequest(t, http.MethodGet, "/v1/me", nil)
@@ -324,10 +325,4 @@ func TestMiddleware(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 		assert.NotContains(t, rec.Body.String(), "closed pool")
 	})
-}
-
-func TestFromContext_OutsideARequest(t *testing.T) {
-	_, ok := users.FromContext(context.Background())
-
-	assert.False(t, ok)
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
+	"github.com/movsesmeliksetyan/sprout-api/internal/session"
 )
 
 // Middleware turns the verified claims of a request into its user, creating
@@ -27,7 +28,7 @@ func Middleware(service *Service, responder *httpx.Responder) func(http.Handler)
 				return
 			}
 
-			ctx := WithUser(r.Context(), user)
+			ctx := session.WithUser(r.Context(), user)
 			ctx = logging.With(ctx, slog.String("user_id", user.ID.String()))
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -43,17 +44,21 @@ type Handler struct {
 func NewHandler(service *Service) *Handler { return &Handler{service: service} }
 
 // GetMe returns the signed-in user.
-func (*Handler) GetMe(ctx context.Context, _ httpx.GetMeRequestObject) (httpx.GetMeResponseObject, error) {
-	user, ok := FromContext(ctx)
+func (h *Handler) GetMe(ctx context.Context, _ httpx.GetMeRequestObject) (httpx.GetMeResponseObject, error) {
+	user, ok := session.User(ctx)
 	if !ok {
 		return nil, httpx.ErrUnauthenticated
 	}
-	return httpx.GetMe200JSONResponse(toMe(user)), nil
+	me, err := h.toMe(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	return httpx.GetMe200JSONResponse(me), nil
 }
 
 // UpdateMe changes any subset of the signed-in user's profile.
 func (h *Handler) UpdateMe(ctx context.Context, request httpx.UpdateMeRequestObject) (httpx.UpdateMeResponseObject, error) {
-	user, ok := FromContext(ctx)
+	user, ok := session.User(ctx)
 	if !ok {
 		return nil, httpx.ErrUnauthenticated
 	}
@@ -65,7 +70,11 @@ func (h *Handler) UpdateMe(ctx context.Context, request httpx.UpdateMeRequestObj
 	if err != nil {
 		return nil, err
 	}
-	return httpx.UpdateMe200JSONResponse(toMe(updated)), nil
+	me, err := h.toMe(ctx, updated)
+	if err != nil {
+		return nil, err
+	}
+	return httpx.UpdateMe200JSONResponse(me), nil
 }
 
 func toPatch(body httpx.UpdateMeRequest) Patch {
@@ -91,14 +100,17 @@ func toPatch(body httpx.UpdateMeRequest) Patch {
 	return patch
 }
 
-func toMe(user db.User) httpx.Me {
+func (h *Handler) toMe(ctx context.Context, user db.User) (httpx.Me, error) {
+	avatarURL, err := h.service.AvatarURL(ctx, user)
+	if err != nil {
+		return httpx.Me{}, err
+	}
 	return httpx.Me{
-		ID:        user.ID,
-		Name:      user.Name,
-		FirstName: FirstName(user.Name),
-		Email:     user.Email,
-		// The avatar arrives with uploads (BE-12).
-		AvatarURL:            nil,
+		ID:                   user.ID,
+		Name:                 user.Name,
+		FirstName:            FirstName(user.Name),
+		Email:                user.Email,
+		AvatarURL:            avatarURL,
 		Currency:             user.Currency,
 		Timezone:             user.Timezone,
 		StartingBalanceMinor: user.StartingBalanceMinor,
@@ -111,5 +123,5 @@ func toMe(user db.User) httpx.Me {
 		// Counted once categories, goals and the streak exist (BE-20).
 		Stats:     httpx.ProfileStats{},
 		CreatedAt: httpx.Instant(user.CreatedAt),
-	}
+	}, nil
 }

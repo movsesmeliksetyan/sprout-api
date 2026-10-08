@@ -19,6 +19,8 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
+	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
+	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
 	"github.com/movsesmeliksetyan/sprout-api/internal/users"
 )
 
@@ -134,15 +136,26 @@ func runAPI(c cli, _ []string) error {
 	}
 	logger.Info("listening", "addr", ln.Addr().String())
 
+	store := storage.NewS3(storage.Config{
+		Endpoint:        cfg.S3.Endpoint,
+		Region:          cfg.S3.Region,
+		Bucket:          cfg.S3.Bucket,
+		AccessKeyID:     cfg.S3.AccessKeyID,
+		SecretAccessKey: cfg.S3.SecretAccessKey.Reveal(),
+		UsePathStyle:    cfg.S3.UsePathStyle,
+	})
+
 	responder := httpx.NewResponder(logger)
-	userService := users.NewService(pool)
+	uploadService := uploads.NewService(pool, store)
+	userService := users.NewService(pool, users.WithAvatars(uploadService, store, logger))
 	opts := []httpx.Option{
 		httpx.WithReadinessCheck("postgres", db.Ready(pool)),
+		httpx.WithReadinessCheck("storage", store.Ready),
 		httpx.WithAPIMiddleware(
 			auth.Middleware(verifier, responder, logger),
 			users.Middleware(userService, responder),
 		),
-		httpx.WithAPI(newAPI(userService)),
+		httpx.WithAPI(newAPI(userService, uploadService)),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))

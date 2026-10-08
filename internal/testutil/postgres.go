@@ -1,6 +1,6 @@
 // Package testutil is the shared harness for integration tests: a real
-// Postgres per test package, an isolated database per test, and small HTTP
-// helpers.
+// Postgres per test package, an isolated database per test, object storage
+// on a real MinIO, and small HTTP helpers.
 //
 // A package that needs a database adds:
 //
@@ -63,6 +63,8 @@ func Main(m *testing.M) int {
 			fmt.Fprintf(os.Stderr, "testutil: stop Postgres: %v\n", err)
 		}
 	}()
+
+	defer stopStore()
 
 	server.adminURL, err = container.ConnectionString(ctx, "sslmode=disable")
 	if err != nil {
