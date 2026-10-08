@@ -18,6 +18,8 @@ description: |-
     {{receiptId}}     – UUID of an existing receipt
     {{deviceId}}      – client-generated device UUID
     {{uploadId}}      – UUID returned by POST /uploads
+    {{uploadUrl}}     – presigned URL returned by POST /uploads
+    {{uploadContentType}} – Content-Type to send to that URL
     {{idempotencyKey}}– UUID for idempotent mutations
 auth:
   type: bearer
@@ -28,3 +30,6 @@ variables:
   bearerToken: ""
   authEmail: you@example.com
   authOtp: ""
+  uploadId: ""
+  uploadUrl: ""
+  uploadContentType: ""

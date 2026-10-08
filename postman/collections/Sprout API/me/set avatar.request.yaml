@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'Set avatar from upload'
+method: PATCH
+url: '{{baseUrl}}/v1/me'
+order: 2100
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "avatar_upload_id": "{{uploadId}}"
+    }

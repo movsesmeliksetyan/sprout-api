@@ -1,4 +1,20 @@
 $kind: collection
 name: uploads
-description: 'Presigned uploads for avatars, receipts and statements.'
+description: |-
+  Presigned uploads for avatars, receipts and statements.
+
+  1. "1 - Request presigned upload": set size_bytes to the exact size of the
+     file in bytes and content_type to its type. The response's id, upload_url
+     and Content-Type are saved to {{uploadId}}, {{uploadUrl}} and
+     {{uploadContentType}}.
+  2. "2 - Upload the file": in the Body tab choose "binary" and select the
+     file, then send. It goes straight to object storage, without the Bearer
+     token. 200 means stored; 403 means the file's size or type differs from
+     what step 1 declared, or the URL (valid 15 minutes) has expired.
+  3. Hand {{uploadId}} to the endpoint that uses it, e.g. "Set avatar from
+     upload" in the me folder. An upload can be used once.
+
+  Limits: avatar 5 MB and receipt 10 MB (image/jpeg, image/png, image/heic);
+  statement 15 MB (text/csv, application/x-ofx, xlsx, application/pdf,
+  application/octet-stream).
 order: 3000

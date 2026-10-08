@@ -1,5 +1,5 @@
 $kind: http-request
-name: 'Request presigned upload'
+name: '1 - Request presigned upload'
 method: POST
 url: '{{baseUrl}}/v1/uploads'
 order: 1000
@@ -10,8 +10,26 @@ body:
   type: json
   content: |-
     {
-      "purpose": "receipt",
+      "purpose": "avatar",
       "content_type": "image/jpeg",
       "size_bytes": 204800,
-      "filename": "receipt.jpg"
+      "filename": "avatar.jpg"
     }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 201 && json.id) {
+          // The environment's placeholder uploadId would hide a collection
+          // variable, so set it there too when an environment is selected.
+          if (pm.environment.name) {
+              pm.environment.set("uploadId", json.id);
+          }
+          pm.collectionVariables.set("uploadId", json.id);
+          pm.collectionVariables.set("uploadUrl", json.upload_url);
+          pm.collectionVariables.set("uploadContentType", json.headers["Content-Type"]);
+          console.log("✅ uploadId, uploadUrl and uploadContentType saved; the URL works until " + json.expires_at);
+      } else {
+          console.error("❌ Upload request failed:", JSON.stringify(json));
+      }
