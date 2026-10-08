@@ -210,6 +210,18 @@ func TestSpecEndpoint(t *testing.T) {
 		s, _ := newTestServer(t)
 
 		requireEnvelope(t, get(s, specPath), http.StatusNotFound, codeNotFound)
+		requireEnvelope(t, get(s, docsPath), http.StatusNotFound, codeNotFound)
+	})
+
+	t.Run("comes with a Swagger UI page that loads it", func(t *testing.T) {
+		s, _ := newTestServer(t, WithSpec(api.Spec))
+
+		rec := get(s, docsPath)
+
+		require.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, "text/html; charset=utf-8", rec.Header().Get("Content-Type"))
+		assert.Contains(t, rec.Body.String(), `url: "/v1/openapi.yaml"`)
+		assert.Equal(t, 2, strings.Count(rec.Body.String(), `integrity="sha384-`), "both assets are pinned")
 	})
 }
 

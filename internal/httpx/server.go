@@ -76,8 +76,8 @@ func WithAPIMiddleware(middleware ...func(http.Handler) http.Handler) Option {
 	return func(s *Server) { s.apiMiddleware = append(s.apiMiddleware, middleware...) }
 }
 
-// WithSpec serves the OpenAPI document at /v1/openapi.yaml. Without it that
-// path does not exist.
+// WithSpec serves the OpenAPI document at /v1/openapi.yaml and a Swagger UI
+// page for it at /v1/docs. Without it neither path exists.
 func WithSpec(spec []byte) Option {
 	return func(s *Server) { s.spec = spec }
 }
@@ -145,6 +145,7 @@ func (s *Server) mountAPI(r chi.Router) {
 			w.Header().Set("Content-Type", "application/yaml")
 			_, _ = w.Write(s.spec)
 		})
+		r.Get(docsPath, handleDocs)
 	}
 }
 
