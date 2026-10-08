@@ -1,0 +1,50 @@
+name: Sprout Local
+values:
+  - key: baseUrl
+    value: 'http://localhost:8080'
+    enabled: true
+    type: default
+  - key: bearerToken
+    value: ''
+    enabled: true
+    type: default
+  - key: categoryId
+    value: '00000000-0000-0000-0000-000000000001'
+    enabled: true
+    type: default
+  - key: transactionId
+    value: '00000000-0000-0000-0000-000000000002'
+    enabled: true
+    type: default
+  - key: goalId
+    value: '00000000-0000-0000-0000-000000000003'
+    enabled: true
+    type: default
+  - key: contributionId
+    value: '00000000-0000-0000-0000-000000000004'
+    enabled: true
+    type: default
+  - key: importId
+    value: '00000000-0000-0000-0000-000000000005'
+    enabled: true
+    type: default
+  - key: importRowId
+    value: '00000000-0000-0000-0000-000000000006'
+    enabled: true
+    type: default
+  - key: receiptId
+    value: '00000000-0000-0000-0000-000000000007'
+    enabled: true
+    type: default
+  - key: deviceId
+    value: '00000000-0000-0000-0000-000000000008'
+    enabled: true
+    type: default
+  - key: uploadId
+    value: '00000000-0000-0000-0000-000000000009'
+    enabled: true
+    type: default
+  - key: idempotencyKey
+    value: '00000000-0000-0000-0000-000000000010'
+    enabled: true
+    type: default

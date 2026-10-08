@@ -1,0 +1,16 @@
+$kind: http-request
+name: 'Reorder categories'
+method: PUT
+url: '{{baseUrl}}/v1/categories/order'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "ids": [
+        "{{categoryId}}"
+      ]
+    }

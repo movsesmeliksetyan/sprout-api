@@ -1,0 +1,19 @@
+$kind: http-request
+name: 'Update transaction'
+method: PATCH
+url: '{{baseUrl}}/v1/transactions/{{transactionId}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: transactionId
+    value: '{{transactionId}}'
+body:
+  type: json
+  content: |-
+    {
+      "merchant": "Blue Bottle Coffee",
+      "note": "Updated note",
+      "amount_minor": 1500
+    }

@@ -1,0 +1,4 @@
+$kind: collection
+name: uploads
+description: 'Presigned uploads for avatars, receipts and statements.'
+order: 3000

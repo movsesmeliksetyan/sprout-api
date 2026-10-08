@@ -1,0 +1,21 @@
+$kind: http-request
+name: 'Create transaction'
+method: POST
+url: '{{baseUrl}}/v1/transactions'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Idempotency-Key
+    value: '{{idempotencyKey}}'
+body:
+  type: json
+  content: |-
+    {
+      "kind": "expense",
+      "amount_minor": 1250,
+      "category_id": "{{categoryId}}",
+      "merchant": "Blue Bottle Coffee",
+      "note": "Morning coffee",
+      "occurred_at": "2025-01-15T09:30:00Z"
+    }

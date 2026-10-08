@@ -1,0 +1,10 @@
+$kind: http-request
+name: 'List categories'
+method: GET
+url: '{{baseUrl}}/v1/categories'
+order: 1000
+queryParams:
+  - key: include_archived
+    value: 'false'
+    description: 'Include archived categories'
+    disabled: true

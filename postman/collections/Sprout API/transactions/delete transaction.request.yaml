@@ -1,0 +1,8 @@
+$kind: http-request
+name: 'Delete transaction'
+method: DELETE
+url: '{{baseUrl}}/v1/transactions/{{transactionId}}'
+order: 5000
+pathVariables:
+  - key: transactionId
+    value: '{{transactionId}}'

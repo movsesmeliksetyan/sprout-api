@@ -1,0 +1,7 @@
+$kind: http-request
+name: 'Readiness probe'
+method: GET
+url: '{{baseUrl}}/readyz'
+order: 2000
+auth:
+  type: noauth

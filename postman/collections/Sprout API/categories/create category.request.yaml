@@ -1,0 +1,17 @@
+$kind: http-request
+name: 'Create category'
+method: POST
+url: '{{baseUrl}}/v1/categories'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Groceries",
+      "icon": "cart",
+      "shade": 2,
+      "monthly_budget_minor": 50000
+    }

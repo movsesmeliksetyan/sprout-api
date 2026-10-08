@@ -1,0 +1,21 @@
+$kind: http-request
+name: 'Update category'
+method: PATCH
+url: '{{baseUrl}}/v1/categories/{{categoryId}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: categoryId
+    value: '{{categoryId}}'
+body:
+  type: json
+  content: |-
+    {
+      "name": "Food & Drink",
+      "icon": "utensils",
+      "shade": 3,
+      "monthly_budget_minor": 60000,
+      "archived": false
+    }
