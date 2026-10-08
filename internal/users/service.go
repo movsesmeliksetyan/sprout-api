@@ -6,17 +6,28 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
 	"github.com/movsesmeliksetyan/sprout-api/internal/auth"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
+	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
+	"github.com/movsesmeliksetyan/sprout-api/internal/money"
 )
 
-// provisionAttempts bounds how often Provision starts over after losing the
-// race to create a user whose creation was then rolled back.
-const provisionAttempts = 3
+const (
+	// provisionAttempts bounds how often Provision starts over after losing
+	// the race to create a user whose creation was then rolled back.
+	provisionAttempts = 3
+
+	maxNameLength = 100
+	// maxStartingBalanceMinor bounds the starting balance in either
+	// direction, far below where sums of amounts could overflow.
+	maxStartingBalanceMinor = 1_000_000_000_000
+)
 
 // Database is what the service needs from the pool: queries, and
 // transactions for the writes that must happen together.
@@ -30,10 +41,15 @@ type Database interface {
 // undoes the user.
 type CreatedHook func(ctx context.Context, q db.Querier, user db.User) error
 
+// TransactionCheck reports whether the user has any transactions. q reads
+// through the transaction that is about to change the user.
+type TransactionCheck func(ctx context.Context, q db.Querier, userID uuid.UUID) (bool, error)
+
 // Service holds the business logic for users.
 type Service struct {
-	db        Database
-	onCreated CreatedHook
+	db              Database
+	onCreated       CreatedHook
+	hasTransactions TransactionCheck
 }
 
 // Option customises a Service.
@@ -44,9 +60,19 @@ func WithOnUserCreated(hook CreatedHook) Option {
 	return func(s *Service) { s.onCreated = hook }
 }
 
+// WithTransactionCheck sets how the service learns that a user has
+// transactions, which is when their currency can no longer change. Without
+// it no user has any.
+func WithTransactionCheck(check TransactionCheck) Option {
+	return func(s *Service) { s.hasTransactions = check }
+}
+
 // NewService returns a Service working on database.
 func NewService(database Database, opts ...Option) *Service {
-	s := &Service{db: database}
+	s := &Service{
+		db:              database,
+		hasTransactions: func(context.Context, db.Querier, uuid.UUID) (bool, error) { return false, nil },
+	}
 	for _, opt := range opts {
 		opt(s)
 	}
@@ -132,6 +158,131 @@ func initialName(claim string) string {
 		return ""
 	}
 	return name
+}
+
+// Patch is a partial update of a user's profile. A nil field is left as it
+// is.
+type Patch struct {
+	Name                 *string
+	Currency             *string
+	Timezone             *string
+	StartingBalanceMinor *int64
+	OnboardingCompleted  *bool
+	NotificationsEnabled *bool
+	BudgetAlerts         *bool
+	WeeklyRecap          *bool
+
+	// AvatarUploadID is the upload to use as the avatar; ClearAvatar removes
+	// the current one.
+	AvatarUploadID *uuid.UUID
+	ClearAvatar    bool
+}
+
+// Update applies patch to the user and returns the result. Invalid values
+// are reported together in an *httpx.ValidationError and nothing is written.
+// The currency cannot change once the user has transactions: their amounts
+// were entered in it.
+func (s *Service) Update(ctx context.Context, userID uuid.UUID, patch Patch) (db.User, error) {
+	params, err := validate(patch)
+	if err != nil {
+		return db.User{}, err
+	}
+	params.ID = userID
+
+	var updated db.User
+	err = db.WithTx(ctx, s.db, func(tx pgx.Tx) error {
+		q := db.New(tx)
+		current, err := q.GetUserForUpdate(ctx, userID)
+		if err != nil {
+			return fmt.Errorf("users: lock for update: %w", err)
+		}
+
+		if params.Currency != nil && *params.Currency != current.Currency {
+			locked, err := s.hasTransactions(ctx, q, userID)
+			if err != nil {
+				return fmt.Errorf("users: transaction check: %w", err)
+			}
+			if locked {
+				return httpx.WithMessage(httpx.ErrConflict,
+					"The currency cannot be changed once you have transactions.")
+			}
+		}
+
+		updated, err = q.UpdateUser(ctx, params)
+		if err != nil {
+			return fmt.Errorf("users: update: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return db.User{}, err
+	}
+	return updated, nil
+}
+
+// validate checks patch and turns it into the update's arguments, with
+// values in the form they are stored in.
+func validate(patch Patch) (db.UpdateUserParams, error) {
+	fields := map[string]string{}
+	params := db.UpdateUserParams{
+		StartingBalanceMinor: patch.StartingBalanceMinor,
+		OnboardingCompleted:  patch.OnboardingCompleted,
+		NotificationsEnabled: patch.NotificationsEnabled,
+		BudgetAlerts:         patch.BudgetAlerts,
+		WeeklyRecap:          patch.WeeklyRecap,
+		ClearAvatar:          patch.ClearAvatar,
+	}
+
+	if patch.Name != nil {
+		name := strings.TrimSpace(*patch.Name)
+		switch {
+		case name == "":
+			fields["name"] = "must not be empty"
+		case utf8.RuneCountInString(name) > maxNameLength:
+			fields["name"] = fmt.Sprintf("must be at most %d characters", maxNameLength)
+		}
+		params.Name = &name
+	}
+
+	if patch.Currency != nil {
+		code := strings.ToUpper(strings.TrimSpace(*patch.Currency))
+		if !money.Supported(code) {
+			fields["currency"] = "is not a supported currency"
+		}
+		params.Currency = &code
+	}
+
+	if patch.Timezone != nil {
+		zone := strings.TrimSpace(*patch.Timezone)
+		if !validTimezone(zone) {
+			fields["timezone"] = "must be an IANA timezone such as Europe/London"
+		}
+		params.Timezone = &zone
+	}
+
+	if b := patch.StartingBalanceMinor; b != nil && (*b > maxStartingBalanceMinor || *b < -maxStartingBalanceMinor) {
+		fields["starting_balance_minor"] = "is out of range"
+	}
+
+	// Uploads arrive with BE-12; until then no upload id can exist.
+	if patch.AvatarUploadID != nil {
+		fields["avatar_upload_id"] = "upload not found"
+	}
+
+	if len(fields) > 0 {
+		return db.UpdateUserParams{}, &httpx.ValidationError{Fields: fields}
+	}
+	return params, nil
+}
+
+// validTimezone reports whether zone names an IANA timezone. The empty name
+// and "Local" load too, but mean the server's zone, not the user's.
+func validTimezone(zone string) bool {
+	if zone == "" || zone == "Local" {
+		return false
+	}
+	_, err := time.LoadLocation(zone)
+	return err == nil
 }
 
 // FirstName returns the first word of a full name.

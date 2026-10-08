@@ -78,3 +78,92 @@ func (q *Queries) GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User,
 	)
 	return i, err
 }
+
+const getUserForUpdate = `-- name: GetUserForUpdate :one
+SELECT id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at FROM users WHERE id = $1 FOR UPDATE
+`
+
+// Locks the row until the transaction ends.
+func (q *Queries) GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserForUpdate, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Auth0Sub,
+		&i.Email,
+		&i.Name,
+		&i.AvatarKey,
+		&i.Currency,
+		&i.Timezone,
+		&i.StartingBalanceMinor,
+		&i.OnboardingCompleted,
+		&i.NotificationsEnabled,
+		&i.BudgetAlerts,
+		&i.WeeklyRecap,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET name                   = COALESCE($1, name),
+    currency               = COALESCE($2, currency),
+    timezone               = COALESCE($3, timezone),
+    starting_balance_minor = COALESCE($4, starting_balance_minor),
+    onboarding_completed   = COALESCE($5, onboarding_completed),
+    notifications_enabled  = COALESCE($6, notifications_enabled),
+    budget_alerts          = COALESCE($7, budget_alerts),
+    weekly_recap           = COALESCE($8, weekly_recap),
+    avatar_key             = CASE WHEN $9::boolean THEN NULL ELSE avatar_key END
+WHERE id = $10
+RETURNING id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at
+`
+
+type UpdateUserParams struct {
+	Name                 *string
+	Currency             *string
+	Timezone             *string
+	StartingBalanceMinor *int64
+	OnboardingCompleted  *bool
+	NotificationsEnabled *bool
+	BudgetAlerts         *bool
+	WeeklyRecap          *bool
+	ClearAvatar          bool
+	ID                   uuid.UUID
+}
+
+// A null argument leaves its column as it is.
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.Name,
+		arg.Currency,
+		arg.Timezone,
+		arg.StartingBalanceMinor,
+		arg.OnboardingCompleted,
+		arg.NotificationsEnabled,
+		arg.BudgetAlerts,
+		arg.WeeklyRecap,
+		arg.ClearAvatar,
+		arg.ID,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Auth0Sub,
+		&i.Email,
+		&i.Name,
+		&i.AvatarKey,
+		&i.Currency,
+		&i.Timezone,
+		&i.StartingBalanceMinor,
+		&i.OnboardingCompleted,
+		&i.NotificationsEnabled,
+		&i.BudgetAlerts,
+		&i.WeeklyRecap,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

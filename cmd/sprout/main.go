@@ -135,13 +135,14 @@ func runAPI(c cli, _ []string) error {
 	logger.Info("listening", "addr", ln.Addr().String())
 
 	responder := httpx.NewResponder(logger)
+	userService := users.NewService(pool)
 	opts := []httpx.Option{
 		httpx.WithReadinessCheck("postgres", db.Ready(pool)),
 		httpx.WithAPIMiddleware(
 			auth.Middleware(verifier, responder, logger),
-			users.Middleware(users.NewService(pool), responder),
+			users.Middleware(userService, responder),
 		),
-		httpx.WithAPI(newAPI()),
+		httpx.WithAPI(newAPI(userService)),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))

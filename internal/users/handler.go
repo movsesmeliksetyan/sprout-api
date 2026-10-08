@@ -35,10 +35,12 @@ func Middleware(service *Service, responder *httpx.Responder) func(http.Handler)
 }
 
 // Handler implements the /me operations.
-type Handler struct{}
+type Handler struct {
+	service *Service
+}
 
 // NewHandler returns the handler for the /me operations.
-func NewHandler() *Handler { return &Handler{} }
+func NewHandler(service *Service) *Handler { return &Handler{service: service} }
 
 // GetMe returns the signed-in user.
 func (*Handler) GetMe(ctx context.Context, _ httpx.GetMeRequestObject) (httpx.GetMeResponseObject, error) {
@@ -47,6 +49,46 @@ func (*Handler) GetMe(ctx context.Context, _ httpx.GetMeRequestObject) (httpx.Ge
 		return nil, httpx.ErrUnauthenticated
 	}
 	return httpx.GetMe200JSONResponse(toMe(user)), nil
+}
+
+// UpdateMe changes any subset of the signed-in user's profile.
+func (h *Handler) UpdateMe(ctx context.Context, request httpx.UpdateMeRequestObject) (httpx.UpdateMeResponseObject, error) {
+	user, ok := FromContext(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	if request.Body == nil {
+		return nil, httpx.ErrBadRequest
+	}
+
+	updated, err := h.service.Update(ctx, user.ID, toPatch(*request.Body))
+	if err != nil {
+		return nil, err
+	}
+	return httpx.UpdateMe200JSONResponse(toMe(updated)), nil
+}
+
+func toPatch(body httpx.UpdateMeRequest) Patch {
+	patch := Patch{
+		Name:                 body.Name,
+		Currency:             body.Currency,
+		Timezone:             body.Timezone,
+		StartingBalanceMinor: body.StartingBalanceMinor,
+		OnboardingCompleted:  body.OnboardingCompleted,
+	}
+	if prefs := body.Preferences; prefs != nil {
+		patch.NotificationsEnabled = prefs.NotificationsEnabled
+		patch.BudgetAlerts = prefs.BudgetAlerts
+		patch.WeeklyRecap = prefs.WeeklyRecap
+	}
+	switch avatar := body.AvatarUploadID; {
+	case avatar.IsNull():
+		patch.ClearAvatar = true
+	case avatar.IsSpecified():
+		id := avatar.MustGet()
+		patch.AvatarUploadID = &id
+	}
+	return patch
 }
 
 func toMe(user db.User) httpx.Me {

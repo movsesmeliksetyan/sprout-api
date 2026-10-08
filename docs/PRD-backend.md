@@ -315,6 +315,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-11 · `PATCH /me`, preferences, onboarding**
 - Do: Partial update with validation (IANA timezone, ISO 4217 currency from an allow-list, name length). Currency change rejected with `conflict` once any transaction exists. Changing timezone does **not** rewrite historic `local_date`s.
 - Files: `internal/users/service.go`, `internal/users/handler.go`
+- Notes: supported currencies are the ones `internal/money` formats (USD, EUR, GBP, JPY, CAD, AUD, AMD; `money.Supported`), accepted in any case and stored upper-case. `name` is trimmed, 1–100 characters. `starting_balance_minor` may be negative and is limited to ±1 000 000 000 000. Every invalid field is reported in one `422`, and nothing is written. The currency lock asks an injected `TransactionCheck` (default: no transactions) until BE-17 supplies the real query; sending the current currency is not a change. `avatar_upload_id: null` clears the avatar; an id is answered `422` until BE-12 wires uploads in.
 - Done when: tests cover each field, invalid values (`422` with `fields`), and the currency lock.
 - Needs: BE-10
 
@@ -673,4 +674,4 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 1. Hosting target (Fly.io, Render, AWS, GCP)? Affects BE-62 only.
 2. Auth0 email login: passwordless code or password? Affects `auth0-setup.md` only.
 3. Is sending masked statement samples and receipt images to a third-party LLM acceptable for the privacy policy, or is a self-hosted model required? The `llm.Client` interface allows either.
-4. Supported currencies at launch (the allow-list in BE-11).
+4. ~~Supported currencies at launch (the allow-list in BE-11).~~ Answered 2026-10-08: USD, EUR, GBP, JPY, CAD, AUD, AMD.

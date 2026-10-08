@@ -197,16 +197,17 @@ type api struct {
 
 type rest struct{ httpx.NotImplemented }
 
-func newServer(t *testing.T, pool *pgxpool.Pool) http.Handler {
+func newServer(t *testing.T, pool *pgxpool.Pool, opts ...users.Option) http.Handler {
 	t.Helper()
 	logger := testutil.Logger(t)
 	responder := httpx.NewResponder(logger)
+	service := users.NewService(pool, opts...)
 	return httpx.NewServer(logger,
 		httpx.WithAPIMiddleware(
 			auth.Middleware(testutil.TokenVerifier(), responder, logger),
-			users.Middleware(users.NewService(pool), responder),
+			users.Middleware(service, responder),
 		),
-		httpx.WithAPI(api{Handler: users.NewHandler()}),
+		httpx.WithAPI(api{Handler: users.NewHandler(service)}),
 	).Handler()
 }
 

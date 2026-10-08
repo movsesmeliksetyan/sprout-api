@@ -6,13 +6,19 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
 	// Returns no row when a user with this auth0_sub already exists.
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
+	// Locks the row until the transaction ends.
+	GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, error)
 	Ping(ctx context.Context) (int32, error)
+	// A null argument leaves its column as it is.
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)
