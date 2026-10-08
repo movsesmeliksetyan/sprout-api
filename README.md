@@ -48,7 +48,7 @@ Run `make` to list every target.
 | `make migrate-up` / `make migrate-down` | Apply all pending migrations / roll back the latest one |
 | `make eval` | Run the deterministic categorisation evaluation |
 
-The API is described by [api/openapi.yaml](api/openapi.yaml), served at `/v1/openapi.yaml` outside production. Every `/v1` operation exists and answers `501` until its task in the PRD implements it.
+The API is described by [api/openapi.yaml](api/openapi.yaml), served at `/v1/openapi.yaml` outside production, with a Swagger UI page for browsing and trying it at `/v1/docs`. Every `/v1` operation exists and answers `501` until its task in the PRD implements it.
 
 `sprout migrate up|down|status` needs only `DATABASE_URL`. The `worker` subcommand is a stub for now and exits with "not implemented yet"; it and the evaluation set are filled in by later tasks in the PRD.
 

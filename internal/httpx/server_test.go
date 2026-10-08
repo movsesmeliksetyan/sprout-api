@@ -184,7 +184,7 @@ func TestWithAPIMiddleware(t *testing.T) {
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
-	for _, target := range []string{healthzPath, readyzPath, specPath, "/v1/no-such-route"} {
+	for _, target := range []string{healthzPath, readyzPath, specPath, docsPath, "/v1/no-such-route"} {
 		t.Run("does not cover "+target, func(t *testing.T) {
 			calls = nil
 			get(s, target)
