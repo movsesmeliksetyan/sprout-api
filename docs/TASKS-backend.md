@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 27 / 63**
+**Progress: 28 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -66,7 +66,7 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 ## Milestone 7 — Categorisation engine (§5)
 
-- [ ] BE-28 · LLM client abstraction
+- [x] BE-28 · LLM client abstraction — 2026-10-16, 7ce1ea3
 - [ ] BE-29 · Merchant normaliser
 - [ ] BE-30 · Rule stores and seeds
 - [ ] BE-31 · Engine pipeline (deterministic layers)
