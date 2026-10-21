@@ -1,9 +1,9 @@
 name: backend
 
+# Checks run locally with `make check` before every commit and PR; this
+# workflow runs only when started by hand from the Actions tab.
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,8 +12,8 @@ concurrency:
   group: backend-${{ github.ref }}
   cancel-in-progress: true
 
-# Every job runs a make target, so CI and a local run do the same thing with
-# the same pinned tool versions.
+# Every job runs a make target, so this workflow and `make check` do the
+# same thing with the same pinned tool versions.
 jobs:
   generate:
     name: Generated code is up to date

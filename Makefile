@@ -11,7 +11,7 @@ GOLANGCI_LINT := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v
 # Paths written by `make generate`.
 GENERATED := internal/db internal/httpx/api_gen.go
 
-.PHONY: help build run worker test lint lint-spec generate generate-check migrate-up migrate-down seed perf-notes eval
+.PHONY: help build run worker test lint lint-spec generate generate-check check migrate-up migrate-down seed perf-notes eval
 
 help: ## List the available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -46,6 +46,8 @@ generate-check: generate ## Fail if the committed generated code is out of date
 		echo "$$status"; \
 		exit 1; \
 	fi
+
+check: generate-check lint test ## Everything a change must pass before it is committed (needs Docker)
 
 migrate-up: ## Apply all pending migrations
 	go run ./cmd/sprout migrate up
