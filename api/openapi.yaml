@@ -955,7 +955,10 @@ paths:
       operationId: markNotificationsRead
       tags: [notifications]
       summary: Mark notifications as read
-      description: Send either `ids` or `all`.
+      description: >-
+        Send exactly one of `ids` (at most 200) or `all`, otherwise 422.
+        Marking a read notification again is fine; an id that is not the
+        caller's makes the whole request 404, marking nothing.
       requestBody:
         description: Either the ids to mark, or `all`.
         required: true

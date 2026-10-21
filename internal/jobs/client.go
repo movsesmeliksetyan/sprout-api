@@ -18,6 +18,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/categorize"
 	"github.com/movsesmeliksetyan/sprout-api/internal/imports"
 	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
+	"github.com/movsesmeliksetyan/sprout-api/internal/notify"
 	"github.com/movsesmeliksetyan/sprout-api/internal/receipts"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
 )
@@ -57,19 +58,28 @@ type Deps struct {
 	// Engine categorises imported rows; nil is one without a language
 	// model.
 	Engine *categorize.Engine
+	// Pusher delivers notifications; notify.Discard when APNs is not
+	// configured.
+	Pusher notify.Pusher
 }
 
 // NewWorker returns a client that runs every job, the periodic ones
 // included, for `sprout worker`.
 func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, error) {
+	// The jobs enqueue jobs of their own through c, whose river client is
+	// set once it exists; nothing runs before then.
+	c := &Client{}
+	notifier := notify.NewService(pool, c, notify.WithPusher(deps.Pusher))
 	workers := river.NewWorkers()
-	river.AddWorker(workers, &processImport{pool: pool, logger: logger, processor: imports.NewProcessor(pool, deps.Store, deps.LLM, imports.WithEngine(deps.Engine))})
+	river.AddWorker(workers, &processImport{pool: pool, logger: logger, processor: imports.NewProcessor(pool, deps.Store, deps.LLM,
+		imports.WithEngine(deps.Engine), imports.WithReadyHook(notifier.ImportReady))})
 	river.AddWorker(workers, &processReceipt{pool: pool, logger: logger, processor: receipts.NewProcessor(pool, deps.Store, deps.LLM, deps.Engine)})
 	river.AddWorker(workers, &promoteDictionary{pool: pool, logger: logger})
 	river.AddWorker(workers, &purgeIdempotencyKeys{pool: pool, logger: logger})
 	river.AddWorker(workers, &purgeUploadFiles{pool: pool, store: deps.Store, logger: logger})
 	river.AddWorker(workers, &purgeReceipts{pool: pool, logger: logger})
 	river.AddWorker(workers, &refreshInsights{pool: pool, logger: logger})
+	river.AddWorker(workers, &sendPush{logger: logger, service: notifier})
 
 	client, err := river.NewClient(riverpgxv5.New(pool), &river.Config{
 		Logger:       logger,
@@ -96,7 +106,8 @@ func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, err
 	if err != nil {
 		return nil, fmt.Errorf("jobs: worker: %w", err)
 	}
-	return &Client{river: client}, nil
+	c.river = client
+	return c, nil
 }
 
 // nightly schedules a periodic job at 03:00 UTC, when few users are

@@ -44,6 +44,8 @@ description: |-
     {{deviceId}}          – by "Register device" when it is still empty: a
                             new UUID standing for this phone; cleared by
                             "Delete device"
+    {{notificationId}}    – by "List notifications": the newest one, for
+                            "Mark notifications read" (or send {"all": true})
 auth:
   type: bearer
   credentials:
@@ -68,3 +70,4 @@ variables:
   importRowId: ""
   receiptId: ""
   deviceId: ""
+  notificationId: ""

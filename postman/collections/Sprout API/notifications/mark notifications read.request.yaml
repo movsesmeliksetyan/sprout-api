@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'Mark notifications read'
+method: POST
+url: '{{baseUrl}}/v1/notifications/read'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "ids": ["{{notificationId}}"]
+    }

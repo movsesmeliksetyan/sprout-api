@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -161,7 +162,7 @@ func TestCreateContribution_Idempotent(t *testing.T) {
 func TestContributions_CompleteAndReopenTheGoal(t *testing.T) {
 	t.Parallel()
 	var completed []uuid.UUID
-	f := newFixture(t, goals.WithCompletionHook(func(_ context.Context, _ db.Querier, goal db.Goal) error {
+	f := newFixture(t, goals.WithCompletionHook(func(_ context.Context, _ pgx.Tx, goal db.Goal) error {
 		completed = append(completed, goal.ID)
 		return nil
 	}))

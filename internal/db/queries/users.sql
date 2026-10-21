@@ -26,3 +26,6 @@ SET name                   = COALESCE(sqlc.narg(name), name),
     avatar_key             = CASE WHEN sqlc.arg(clear_avatar)::boolean THEN NULL ELSE COALESCE(sqlc.narg(avatar_key), avatar_key) END
 WHERE id = sqlc.arg(id)
 RETURNING *;
+
+-- name: GetUser :one
+SELECT * FROM users WHERE id = $1;
