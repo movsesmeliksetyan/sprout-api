@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -112,6 +113,9 @@ func (s *Service) Create(ctx context.Context, userID, uploadID uuid.UUID, period
 		if err != nil {
 			return fmt.Errorf("imports: create: %w", err)
 		}
+		if err := keepFile(ctx, q, upload.ID, AbandonedFileTTL); err != nil {
+			return err
+		}
 		return s.jobs.EnqueueImport(ctx, tx, created.ID)
 	})
 	if err != nil {
@@ -132,25 +136,51 @@ func (s *Service) Get(ctx context.Context, userID, id uuid.UUID) (db.Import, err
 	return found, nil
 }
 
-// Delete discards an import and its rows. A committed import is the
-// ledger's now and cannot be discarded.
+// Delete discards an import and its rows; its statement file goes after
+// ClosedFileTTL. A committed import is the ledger's now and cannot be
+// discarded.
 func (s *Service) Delete(ctx context.Context, userID, id uuid.UUID) error {
-	found, err := s.Get(ctx, userID, id)
-	if err != nil {
-		return err
-	}
-	if Status(found.Status) == StatusCommitted {
-		return httpx.ErrConflict
-	}
-	n, err := db.New(s.db).DeleteImport(ctx, db.DeleteImportParams{ID: id, UserID: userID})
-	if err != nil {
-		return fmt.Errorf("imports: delete: %w", err)
-	}
-	if n == 0 {
-		return httpx.ErrConflict // committed in the meantime
+	return db.WithTx(ctx, s.db, func(tx pgx.Tx) error {
+		q := db.New(tx)
+		found, err := q.GetImportForUpdate(ctx, db.GetImportForUpdateParams{ID: id, UserID: userID})
+		if errors.Is(err, pgx.ErrNoRows) {
+			return httpx.ErrNotFound
+		}
+		if err != nil {
+			return fmt.Errorf("imports: delete: %w", err)
+		}
+		if Status(found.Status) == StatusCommitted {
+			return httpx.ErrConflict
+		}
+		if err := keepFile(ctx, q, found.UploadID, ClosedFileTTL); err != nil {
+			return err
+		}
+		if _, err := q.DeleteImport(ctx, db.DeleteImportParams{ID: id, UserID: userID}); err != nil {
+			return fmt.Errorf("imports: delete: %w", err)
+		}
+		return nil
+	})
+}
+
+// How long a statement file is kept (PRD §4.5).
+const (
+	// AbandonedFileTTL is from the import's creation, for an import that
+	// is never committed or discarded.
+	AbandonedFileTTL = 7 * 24 * time.Hour
+	// ClosedFileTTL is from its commit or discard.
+	ClosedFileTTL = 24 * time.Hour
+)
+
+// keepFile sets when the statement file of upload is deleted from storage:
+// ttl from now.
+func keepFile(ctx context.Context, q db.Querier, uploadID uuid.UUID, ttl time.Duration) error {
+	if err := q.SetUploadPurgeAfter(ctx, db.SetUploadPurgeAfterParams{ID: uploadID, PurgeAfter: ptr(time.Now().Add(ttl))}); err != nil {
+		return fmt.Errorf("imports: file retention: %w", err)
 	}
 	return nil
 }
+
+func ptr[T any](v T) *T { return &v }
 
 // summaryOf reads an import's stored summary.
 func summaryOf(row db.Import) (Summary, error) {

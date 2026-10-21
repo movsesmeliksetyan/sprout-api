@@ -120,3 +120,57 @@ WHERE import_id = @import_id;
 
 -- name: SetImportSummary :exec
 UPDATE imports SET summary = @summary WHERE id = @id;
+
+-- name: SetUploadPurgeAfter :exec
+-- When the import's statement file is deleted from storage.
+UPDATE uploads SET purge_after = @purge_after WHERE id = @id AND purged_at IS NULL;
+
+-- name: ListIncompleteExpenseRows :many
+-- The included expenses of an import that have no category, which block
+-- its commit.
+SELECT id FROM import_rows
+WHERE import_id = @import_id AND included AND kind = 'expense' AND category_id IS NULL
+ORDER BY row_index;
+
+-- name: CommitImportRows :execrows
+-- Writes an import's included expenses and income to the ledger, each
+-- transaction with its row's id.
+INSERT INTO transactions (id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at,
+                          local_date, source, import_id, dedup_hash, external_ref)
+SELECT r.id, r.user_id, r.kind, r.amount_minor, CASE WHEN r.kind = 'expense' THEN r.category_id END, r.merchant,
+       r.merchant_key, r.note, r.occurred_at, r.local_date, 'import', r.import_id, r.dedup_hash, r.external_ref
+FROM import_rows r
+WHERE r.import_id = @import_id AND r.included AND r.kind IN ('expense', 'income');
+
+-- name: ListCommittedVotes :many
+-- The merchants and categories of an import's committed expenses.
+SELECT merchant_key, coalesce(merchant, '')::text AS display_name, category_id::uuid AS category_id
+FROM import_rows
+WHERE import_id = @import_id AND included AND kind = 'expense' AND category_id IS NOT NULL AND merchant_key <> ''
+ORDER BY row_index;
+
+-- name: MarkImportCommitted :exec
+UPDATE imports SET status = 'committed', committed_at = @committed_at WHERE id = @id;
+
+-- name: CountCommittedRows :one
+-- What a commit wrote: the included expenses and income, from rows that
+-- no longer change.
+SELECT count(*) FILTER (WHERE included AND kind IN ('expense', 'income'))::int AS created_count,
+       count(*)::int AS row_count
+FROM import_rows
+WHERE import_id = @import_id;
+
+-- name: ListUploadsToPurge :many
+-- Statement files whose time has come, oldest first.
+SELECT id, object_key FROM uploads
+WHERE purge_after <= @now AND purged_at IS NULL
+ORDER BY purge_after
+LIMIT @row_limit;
+
+-- name: MarkUploadPurged :exec
+-- Records that the file is gone, and forgets the rows' raw cells.
+WITH purged AS (
+    UPDATE uploads SET purged_at = @now WHERE uploads.id = @id RETURNING uploads.id
+)
+UPDATE import_rows SET raw = NULL
+WHERE raw IS NOT NULL AND import_id IN (SELECT i.id FROM imports i JOIN purged p ON p.id = i.upload_id);

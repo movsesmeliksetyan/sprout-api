@@ -34,6 +34,9 @@ type Querier interface {
 	// The user's expenses in one category on the calendar days from_date to
 	// to_date, both included, day by day; days without any are left out.
 	CategorySpentByDay(ctx context.Context, arg CategorySpentByDayParams) ([]CategorySpentByDayRow, error)
+	// Writes an import's included expenses and income to the ledger, each
+	// transaction with its row's id.
+	CommitImportRows(ctx context.Context, importID uuid.UUID) (int64, error)
 	// Stores the response to replay. locked_until tells the owner apart from a
 	// request that took the key over.
 	CompleteIdempotencyKey(ctx context.Context, arg CompleteIdempotencyKeyParams) (int64, error)
@@ -48,6 +51,9 @@ type Querier interface {
 	CopyTransactions(ctx context.Context, arg []CopyTransactionsParams) (int64, error)
 	CountActiveCategories(ctx context.Context, userID uuid.UUID) (int64, error)
 	CountActiveGoals(ctx context.Context, userID uuid.UUID) (int64, error)
+	// What a commit wrote: the included expenses and income, from rows that
+	// no longer change.
+	CountCommittedRows(ctx context.Context, importID uuid.UUID) (CountCommittedRowsRow, error)
 	// How many goals the user's list shows: the active and the completed ones.
 	CountGoals(ctx context.Context, userID uuid.UUID) (int64, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
@@ -108,6 +114,8 @@ type Querier interface {
 	// Active categories in display order, then the archived ones when asked for.
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListCategoryTypes(ctx context.Context) ([]CategoryType, error)
+	// The merchants and categories of an import's committed expenses.
+	ListCommittedVotes(ctx context.Context, importID uuid.UUID) ([]ListCommittedVotesRow, error)
 	// A page of the contributions of one of the user's goals, newest first. The
 	// cursor is the last row of the previous page.
 	ListContributions(ctx context.Context, arg ListContributionsParams) ([]GoalContribution, error)
@@ -126,6 +134,9 @@ type Querier interface {
 	// without a category first, then newest first, rows without a date last.
 	// The cursor is the last row of the previous page.
 	ListImportRows(ctx context.Context, arg ListImportRowsParams) ([]ListImportRowsRow, error)
+	// The included expenses of an import that have no category, which block
+	// its commit.
+	ListIncompleteExpenseRows(ctx context.Context, importID uuid.UUID) ([]uuid.UUID, error)
 	// Every keyword rule, in the order they are tried.
 	ListKeywordRules(ctx context.Context) ([]KeywordRule, error)
 	// The user's transactions a statement's rows may duplicate: those with one
@@ -145,6 +156,11 @@ type Querier interface {
 	// The user's active categories that have a type, each with how many
 	// transactions it holds, in display order.
 	ListTypedCategories(ctx context.Context, userID uuid.UUID) ([]ListTypedCategoriesRow, error)
+	// Statement files whose time has come, oldest first.
+	ListUploadsToPurge(ctx context.Context, arg ListUploadsToPurgeParams) ([]ListUploadsToPurgeRow, error)
+	MarkImportCommitted(ctx context.Context, arg MarkImportCommittedParams) error
+	// Records that the file is gone, and forgets the rows' raw cells.
+	MarkUploadPurged(ctx context.Context, arg MarkUploadPurgedParams) error
 	// The position after the user's last active category.
 	NextCategorySortOrder(ctx context.Context, userID uuid.UUID) (int32, error)
 	// The position after the user's last goal.
@@ -188,6 +204,8 @@ type Querier interface {
 	// every code added or changed.
 	SeedMCCMap(ctx context.Context, arg SeedMCCMapParams) ([]bool, error)
 	SetImportSummary(ctx context.Context, arg SetImportSummaryParams) error
+	// When the import's statement file is deleted from storage.
+	SetUploadPurgeAfter(ctx context.Context, arg SetUploadPurgeAfterParams) error
 	// The user's expenses on the calendar days from_date to to_date, both
 	// included.
 	SpentBetween(ctx context.Context, arg SpentBetweenParams) (int64, error)

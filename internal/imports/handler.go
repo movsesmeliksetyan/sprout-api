@@ -102,6 +102,19 @@ func (h *Handler) SetImportMapping(ctx context.Context, request httpx.SetImportM
 	return httpx.SetImportMapping202JSONResponse(out), nil
 }
 
+// CommitImport writes the import's included rows to the ledger.
+func (h *Handler) CommitImport(ctx context.Context, request httpx.CommitImportRequestObject) (httpx.CommitImportResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	result, err := h.service.Commit(ctx, user.ID, request.ID)
+	if err != nil {
+		return nil, err
+	}
+	return httpx.CommitImport200JSONResponse{CreatedCount: result.Created, SkippedCount: result.Skipped}, nil
+}
+
 // ListImportRows returns a page of an import's rows for review.
 func (h *Handler) ListImportRows(ctx context.Context, request httpx.ListImportRowsRequestObject) (httpx.ListImportRowsResponseObject, error) {
 	user, ok := session.User(ctx)

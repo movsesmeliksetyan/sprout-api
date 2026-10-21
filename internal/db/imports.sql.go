@@ -12,6 +12,46 @@ import (
 	"github.com/google/uuid"
 )
 
+const commitImportRows = `-- name: CommitImportRows :execrows
+INSERT INTO transactions (id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at,
+                          local_date, source, import_id, dedup_hash, external_ref)
+SELECT r.id, r.user_id, r.kind, r.amount_minor, CASE WHEN r.kind = 'expense' THEN r.category_id END, r.merchant,
+       r.merchant_key, r.note, r.occurred_at, r.local_date, 'import', r.import_id, r.dedup_hash, r.external_ref
+FROM import_rows r
+WHERE r.import_id = $1 AND r.included AND r.kind IN ('expense', 'income')
+`
+
+// Writes an import's included expenses and income to the ledger, each
+// transaction with its row's id.
+func (q *Queries) CommitImportRows(ctx context.Context, importID uuid.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, commitImportRows, importID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const countCommittedRows = `-- name: CountCommittedRows :one
+SELECT count(*) FILTER (WHERE included AND kind IN ('expense', 'income'))::int AS created_count,
+       count(*)::int AS row_count
+FROM import_rows
+WHERE import_id = $1
+`
+
+type CountCommittedRowsRow struct {
+	CreatedCount int32
+	RowCount     int32
+}
+
+// What a commit wrote: the included expenses and income, from rows that
+// no longer change.
+func (q *Queries) CountCommittedRows(ctx context.Context, importID uuid.UUID) (CountCommittedRowsRow, error) {
+	row := q.db.QueryRow(ctx, countCommittedRows, importID)
+	var i CountCommittedRowsRow
+	err := row.Scan(&i.CreatedCount, &i.RowCount)
+	return i, err
+}
+
 const createImport = `-- name: CreateImport :one
 INSERT INTO imports (id, user_id, upload_id, period, filename)
 VALUES ($1, $2, $3, $4, $5)
@@ -383,6 +423,40 @@ type InsertImportRowsParams struct {
 	Note               *string
 }
 
+const listCommittedVotes = `-- name: ListCommittedVotes :many
+SELECT merchant_key, coalesce(merchant, '')::text AS display_name, category_id::uuid AS category_id
+FROM import_rows
+WHERE import_id = $1 AND included AND kind = 'expense' AND category_id IS NOT NULL AND merchant_key <> ''
+ORDER BY row_index
+`
+
+type ListCommittedVotesRow struct {
+	MerchantKey string
+	DisplayName string
+	CategoryID  uuid.UUID
+}
+
+// The merchants and categories of an import's committed expenses.
+func (q *Queries) ListCommittedVotes(ctx context.Context, importID uuid.UUID) ([]ListCommittedVotesRow, error) {
+	rows, err := q.db.Query(ctx, listCommittedVotes, importID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListCommittedVotesRow
+	for rows.Next() {
+		var i ListCommittedVotesRow
+		if err := rows.Scan(&i.MerchantKey, &i.DisplayName, &i.CategoryID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listImportRows = `-- name: ListImportRows :many
 SELECT r.id, r.import_id, r.user_id, r.row_index, r.raw, r.status, r.included, r.kind, r.amount_minor, r.occurred_at, r.local_date, r.merchant, r.merchant_key, r.raw_description, r.mcc, r.external_ref, r.category_id, r.category_confidence, r.category_source, r.dedup_hash, r.duplicate_of, r.error, r.created_at, r.updated_at, r.note,
        (CASE WHEN r.included AND r.kind = 'expense' AND r.category_id IS NULL THEN 0 ELSE 1 END)::int AS sort_rank,
@@ -495,6 +569,34 @@ func (q *Queries) ListImportRows(ctx context.Context, arg ListImportRowsParams) 
 	return items, nil
 }
 
+const listIncompleteExpenseRows = `-- name: ListIncompleteExpenseRows :many
+SELECT id FROM import_rows
+WHERE import_id = $1 AND included AND kind = 'expense' AND category_id IS NULL
+ORDER BY row_index
+`
+
+// The included expenses of an import that have no category, which block
+// its commit.
+func (q *Queries) ListIncompleteExpenseRows(ctx context.Context, importID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, listIncompleteExpenseRows, importID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listLedgerMatches = `-- name: ListLedgerMatches :many
 SELECT id, dedup_hash, external_ref
 FROM transactions
@@ -537,6 +639,77 @@ func (q *Queries) ListLedgerMatches(ctx context.Context, arg ListLedgerMatchesPa
 	return items, nil
 }
 
+const listUploadsToPurge = `-- name: ListUploadsToPurge :many
+SELECT id, object_key FROM uploads
+WHERE purge_after <= $1 AND purged_at IS NULL
+ORDER BY purge_after
+LIMIT $2
+`
+
+type ListUploadsToPurgeParams struct {
+	Now      *time.Time
+	RowLimit int32
+}
+
+type ListUploadsToPurgeRow struct {
+	ID        uuid.UUID
+	ObjectKey string
+}
+
+// Statement files whose time has come, oldest first.
+func (q *Queries) ListUploadsToPurge(ctx context.Context, arg ListUploadsToPurgeParams) ([]ListUploadsToPurgeRow, error) {
+	rows, err := q.db.Query(ctx, listUploadsToPurge, arg.Now, arg.RowLimit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUploadsToPurgeRow
+	for rows.Next() {
+		var i ListUploadsToPurgeRow
+		if err := rows.Scan(&i.ID, &i.ObjectKey); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const markImportCommitted = `-- name: MarkImportCommitted :exec
+UPDATE imports SET status = 'committed', committed_at = $1 WHERE id = $2
+`
+
+type MarkImportCommittedParams struct {
+	CommittedAt *time.Time
+	ID          uuid.UUID
+}
+
+func (q *Queries) MarkImportCommitted(ctx context.Context, arg MarkImportCommittedParams) error {
+	_, err := q.db.Exec(ctx, markImportCommitted, arg.CommittedAt, arg.ID)
+	return err
+}
+
+const markUploadPurged = `-- name: MarkUploadPurged :exec
+WITH purged AS (
+    UPDATE uploads SET purged_at = $1 WHERE uploads.id = $2 RETURNING uploads.id
+)
+UPDATE import_rows SET raw = NULL
+WHERE raw IS NOT NULL AND import_id IN (SELECT i.id FROM imports i JOIN purged p ON p.id = i.upload_id)
+`
+
+type MarkUploadPurgedParams struct {
+	Now *time.Time
+	ID  uuid.UUID
+}
+
+// Records that the file is gone, and forgets the rows' raw cells.
+func (q *Queries) MarkUploadPurged(ctx context.Context, arg MarkUploadPurgedParams) error {
+	_, err := q.db.Exec(ctx, markUploadPurged, arg.Now, arg.ID)
+	return err
+}
+
 const setImportSummary = `-- name: SetImportSummary :exec
 UPDATE imports SET summary = $1 WHERE id = $2
 `
@@ -548,6 +721,21 @@ type SetImportSummaryParams struct {
 
 func (q *Queries) SetImportSummary(ctx context.Context, arg SetImportSummaryParams) error {
 	_, err := q.db.Exec(ctx, setImportSummary, arg.Summary, arg.ID)
+	return err
+}
+
+const setUploadPurgeAfter = `-- name: SetUploadPurgeAfter :exec
+UPDATE uploads SET purge_after = $1 WHERE id = $2 AND purged_at IS NULL
+`
+
+type SetUploadPurgeAfterParams struct {
+	PurgeAfter *time.Time
+	ID         uuid.UUID
+}
+
+// When the import's statement file is deleted from storage.
+func (q *Queries) SetUploadPurgeAfter(ctx context.Context, arg SetUploadPurgeAfterParams) error {
+	_, err := q.db.Exec(ctx, setUploadPurgeAfter, arg.PurgeAfter, arg.ID)
 	return err
 }
 
