@@ -30,7 +30,7 @@ The API listens on `HTTP_ADDR` (default `:8080`). `GET /healthz` answers while t
 
 Configuration comes from environment variables; [.env.example](.env.example) lists every key. A `.env` file in the working directory is loaded on start-up, and real environment variables win over it.
 
-`sprout api` and `sprout worker` validate the configuration before doing anything else and print one line per missing or invalid key. With `ENV=dev`, `LLM_API_KEY` and the `APNS_*` keys may be left empty; `staging` and `prod` require all of them.
+`sprout api` and `sprout worker` validate the configuration before doing anything else and print one line per missing or invalid key. With `ENV=dev`, `LLM_API_KEY` and the `APNS_*` keys may be left empty; `staging` and `prod` require all of them. The language model is Groq's `qwen/qwen3.8-27b` (`LLM_PROVIDER=groq`, a key from console.groq.com); `LLM_PROVIDER=anthropic` with a Claude model id is the alternative.
 
 ## Commands
 

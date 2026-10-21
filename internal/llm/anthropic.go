@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -58,7 +57,7 @@ func (a *Anthropic) Complete(ctx context.Context, call Call) (Completion, error)
 		Messages:  []anthropic.BetaMessageParam{anthropic.NewBetaUserMessage(content...)},
 		OutputConfig: anthropic.BetaOutputConfigParam{
 			Format: anthropic.BetaJSONOutputFormatParam{Schema: call.Schema.constrained},
-			Effort: anthropic.BetaOutputConfigEffort(call.Effort),
+			Effort: anthropicEffort(call.Effort),
 		},
 		Fallbacks: anthropic.BetaFallbacksParamUnion{OfDefault: constant.ValueOf[constant.Default]()},
 		Betas:     []anthropic.AnthropicBeta{anthropic.AnthropicBetaServerSideFallback2026_07_01},
@@ -106,9 +105,14 @@ func retryAfter(apiErr *anthropic.Error) time.Duration {
 	if apiErr.Response == nil {
 		return 0
 	}
-	seconds, err := strconv.Atoi(apiErr.Response.Header.Get("Retry-After"))
-	if err != nil || seconds < 0 {
-		return 0
+	return retryAfterSeconds(apiErr.Response.Header)
+}
+
+// anthropicEffort is the effort to send. Thinking cannot be switched off on
+// the current models, so EffortNone asks for as little as there is.
+func anthropicEffort(effort Effort) anthropic.BetaOutputConfigEffort {
+	if effort == EffortNone {
+		return anthropic.BetaOutputConfigEffortLow
 	}
-	return time.Duration(seconds) * time.Second
+	return anthropic.BetaOutputConfigEffort(effort)
 }

@@ -62,7 +62,7 @@ make eval-llm            # on demand only; calls the real LLM
 - **Idempotency.** `Idempotency-Key` on every `POST` that creates ledger data, keyed on (`user_id`, key), 24 h TTL.
 - **Confirmation.** Imports and receipts never write to `transactions` without an explicit commit/confirm call.
 - **Privacy.** Send the LLM only the minimum (headers + sample rows, merchant strings, the receipt image). Mask account numbers, IBANs, card PANs and emails first. No statement content in logs; secrets never in logged config.
-- **LLM.** Always behind `llm.Client`; model ids come from config. The LLM decides *how to read* a file — deterministic Go does the reading. LLM failures degrade (`none`, `needs_mapping`), they never fail an import. Check the provider's current Go SDK docs before implementing rather than relying on memory.
+- **LLM.** Always behind `llm.Client`; model ids come from config. The LLM decides *how to read* a file — deterministic Go does the reading. LLM failures degrade (`none`, `needs_mapping`), they never fail an import. The v1 provider is Groq (`qwen/qwen3.8-27b`), called over its OpenAI-compatible HTTP API because it has no Go SDK. Check the provider's current API docs (and its Go SDK, where there is one) before implementing rather than relying on memory.
 
 ## Testing
 

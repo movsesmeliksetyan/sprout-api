@@ -12,22 +12,25 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/movsesmeliksetyan/sprout-api/internal/config"
 	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
 	"github.com/movsesmeliksetyan/sprout-api/internal/testutil"
 )
 
-// TestLive_CompleteJSON calls the real API: go test -tags=live ./internal/llm
-// with LLM_API_KEY and LLM_MODEL_TEXT set. It costs a fraction of a cent.
+// TestLive_CompleteJSON calls the configured provider for real:
+// go test -tags=live ./internal/llm with LLM_PROVIDER, LLM_API_KEY and
+// LLM_MODEL_TEXT set. It costs a fraction of a cent.
 func TestLive_CompleteJSON(t *testing.T) {
-	key, model := os.Getenv("LLM_API_KEY"), os.Getenv("LLM_MODEL_TEXT")
-	if key == "" || model == "" {
-		t.Skip("LLM_API_KEY and LLM_MODEL_TEXT are needed for the live test")
+	cfg := config.LLM{
+		Provider:  os.Getenv("LLM_PROVIDER"),
+		APIKey:    config.Secret(os.Getenv("LLM_API_KEY")),
+		ModelText: os.Getenv("LLM_MODEL_TEXT"),
 	}
-	client := llm.New(llm.NewAnthropic(llm.AnthropicConfig{APIKey: key}), llm.Options{
-		TextModel: model,
-		Timeout:   2 * time.Minute,
-		Logger:    testutil.Logger(t),
-	})
+	if cfg.Provider == "" || cfg.APIKey == "" || cfg.ModelText == "" {
+		t.Skip("LLM_PROVIDER, LLM_API_KEY and LLM_MODEL_TEXT are needed for the live test")
+	}
+	client, err := llm.NewFromConfig(cfg, llm.Options{Timeout: 2 * time.Minute, Logger: testutil.Logger(t)})
+	require.NoError(t, err)
 	schema := llm.MustSchema("live_category", []byte(`{
 		"type": "object",
 		"additionalProperties": false,
