@@ -1,0 +1,4 @@
+$kind: collection
+name: categorization
+description: 'Category suggestions for what the user is typing, from their own rules and the global merchant knowledge. Never waits on a language model.'
+order: 9000
