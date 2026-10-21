@@ -19,10 +19,13 @@ require (
 	github.com/pressly/goose/v3 v3.28.0
 	github.com/riverqueue/river v0.49.0
 	github.com/riverqueue/river/riverdriver/riverdatabasesql v0.49.0
+	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.49.0
+	github.com/riverqueue/river/rivertype v0.49.0
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/stretchr/testify v1.12.1
 	github.com/testcontainers/testcontainers-go v0.44.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0
+	golang.org/x/text v0.42.0
 )
 
 require (
@@ -91,9 +94,7 @@ require (
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/riverqueue/river/riverdriver v0.49.0 // indirect
-	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.49.0 // indirect
 	github.com/riverqueue/river/rivershared v0.49.0 // indirect
-	github.com/riverqueue/river/rivertype v0.49.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/sethvargo/go-retry v0.4.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.6 // indirect
@@ -118,5 +119,4 @@ require (
 	golang.org/x/crypto v0.55.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
 )
