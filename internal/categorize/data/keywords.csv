@@ -151,6 +151,9 @@ diy,housing,20
 hardware,housing,20
 
 # Travel
+rent a car,travel,30
+car rental,travel,30
+car hire,travel,30
 hotel*,travel,30
 hostel,travel,30
 airline*,travel,30

@@ -42,6 +42,11 @@ func (c *counting) ListMCCTypes(ctx context.Context, mccs []string) ([]db.MccMap
 	return c.Querier.ListMCCTypes(ctx, mccs)
 }
 
+func (c *counting) ListTypedCategories(ctx context.Context, userID uuid.UUID) ([]db.ListTypedCategoriesRow, error) {
+	c.queries++
+	return c.Querier.ListTypedCategories(ctx, userID)
+}
+
 func (c *counting) ListKeywordRules(ctx context.Context) ([]db.KeywordRule, error) {
 	c.queries++
 	return c.Querier.ListKeywordRules(ctx)
