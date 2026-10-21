@@ -97,6 +97,7 @@ func (r iteratorForInsertImportRows) Values() ([]interface{}, error) {
 		r.rows[0].DedupHash,
 		r.rows[0].DuplicateOf,
 		r.rows[0].Error,
+		r.rows[0].Note,
 	}, nil
 }
 
@@ -105,5 +106,5 @@ func (r iteratorForInsertImportRows) Err() error {
 }
 
 func (q *Queries) InsertImportRows(ctx context.Context, arg []InsertImportRowsParams) (int64, error) {
-	return q.db.CopyFrom(ctx, []string{"import_rows"}, []string{"id", "import_id", "user_id", "row_index", "raw", "status", "included", "kind", "amount_minor", "occurred_at", "local_date", "merchant", "merchant_key", "raw_description", "mcc", "external_ref", "category_id", "category_confidence", "category_source", "dedup_hash", "duplicate_of", "error"}, &iteratorForInsertImportRows{rows: arg})
+	return q.db.CopyFrom(ctx, []string{"import_rows"}, []string{"id", "import_id", "user_id", "row_index", "raw", "status", "included", "kind", "amount_minor", "occurred_at", "local_date", "merchant", "merchant_key", "raw_description", "mcc", "external_ref", "category_id", "category_confidence", "category_source", "dedup_hash", "duplicate_of", "error", "note"}, &iteratorForInsertImportRows{rows: arg})
 }

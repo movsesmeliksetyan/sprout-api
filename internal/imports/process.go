@@ -24,10 +24,32 @@ const MaxFileBytes = 15 << 20
 
 // Processor runs the statement pipeline for imports (PRD §4.3).
 type Processor struct {
-	db    Database
-	store storage.Store
-	llm   llm.Client
-	now   func() time.Time
+	db      Database
+	store   storage.Store
+	llm     llm.Client
+	engine  *categorize.Engine
+	onReady ReadyHook
+	now     func() time.Time
+}
+
+// ReadyNoticeAfter is how long processing may take before the user is told
+// when the import is ready: under it they are still watching.
+const ReadyNoticeAfter = 10 * time.Second
+
+// ReadyHook runs when an import that took longer than ReadyNoticeAfter is
+// ready for review.
+type ReadyHook func(ctx context.Context, userID, importID uuid.UUID) error
+
+// WithEngine sets the categorisation engine; the default, and nil, is one
+// without a language model.
+func WithEngine(engine *categorize.Engine) ProcessorOption {
+	return func(p *Processor) { p.engine = engine }
+}
+
+// WithReadyHook sets what runs when a slow import is ready, the import_ready
+// notification.
+func WithReadyHook(hook ReadyHook) ProcessorOption {
+	return func(p *Processor) { p.onReady = hook }
 }
 
 // ProcessorOption configures a Processor.
@@ -46,6 +68,9 @@ func NewProcessor(database Database, store storage.Store, client llm.Client, opt
 	p := &Processor{db: database, store: store, llm: client, now: time.Now}
 	for _, opt := range opts {
 		opt(p)
+	}
+	if p.engine == nil {
+		p.engine = categorize.NewEngine(db.New(database))
 	}
 	return p
 }
@@ -81,6 +106,7 @@ func (p *Processor) Process(ctx context.Context, importID uuid.UUID) error {
 	if Status(source.Status) == StatusCommitted {
 		return nil
 	}
+	started := p.now()
 	if err := q.StartImportProcessing(ctx, importID); err != nil {
 		return fmt.Errorf("imports: process: %w", err)
 	}
@@ -116,7 +142,109 @@ func (p *Processor) Process(ctx context.Context, importID uuid.UUID) error {
 			result = validate(result, window, loc)
 		}
 	}
-	return p.save(ctx, importID, source, loc, result)
+	var rows []db.InsertImportRowsParams
+	if result.status == StatusReady {
+		if rows, err = p.draft(ctx, importID, source, loc, result.rows); err != nil {
+			return err
+		}
+	}
+	if err := p.save(ctx, importID, result, rows); err != nil {
+		return err
+	}
+	if result.status == StatusReady && p.onReady != nil && p.now().Sub(started) > ReadyNoticeAfter {
+		return p.onReady(ctx, source.UserID, importID)
+	}
+	return nil
+}
+
+// draft turns the rows read into import rows and runs the stages that
+// look at the user's data, outside any transaction since the last may ask
+// the language model: de-duplication, kinds and categorisation.
+func (p *Processor) draft(ctx context.Context, importID uuid.UUID, source db.GetImportSourceRow, loc *time.Location, read []statements.Row) ([]db.InsertImportRowsParams, error) {
+	rows, err := draftRows(importID, source.UserID, loc, read)
+	if err != nil {
+		return nil, err
+	}
+	if err := markDuplicates(ctx, db.New(p.db), source.UserID, rows); err != nil {
+		return nil, err
+	}
+	if err := p.detectKinds(ctx, source, rows); err != nil {
+		return nil, err
+	}
+	if err := p.categorize(ctx, source.UserID, rows); err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
+// detectKinds decides which readable rows are transfers, left out by
+// default, and which credits are refunds (PRD §5.4).
+func (p *Processor) detectKinds(ctx context.Context, source db.GetImportSourceRow, rows []db.InsertImportRowsParams) error {
+	var readable []int
+	var in []categorize.KindInput
+	for i, row := range rows {
+		if row.Kind == nil {
+			continue
+		}
+		direction := categorize.DirectionDebit
+		if *row.Kind == string(transactions.KindIncome) {
+			direction = categorize.DirectionCredit
+		}
+		readable = append(readable, i)
+		in = append(in, categorize.KindInput{RawDescription: row.RawDescription, AmountMinor: *row.AmountMinor,
+			Direction: direction, OccurredAt: *row.OccurredAt})
+	}
+	if len(in) == 0 {
+		return nil
+	}
+	kinds, err := p.engine.DetectKinds(ctx, source.UserID, source.Name, in)
+	if err != nil {
+		return fmt.Errorf("imports: kinds: %w", err)
+	}
+	for j, i := range readable {
+		kind := string(kinds[j].Kind)
+		rows[i].Kind = &kind
+		rows[i].Included = rows[i].Included && kinds[j].Included
+		if kinds[j].Note != "" {
+			note := kinds[j].Note
+			rows[i].Note = &note
+		}
+	}
+	return nil
+}
+
+// categorize files the expenses, all in one batch.
+func (p *Processor) categorize(ctx context.Context, userID uuid.UUID, rows []db.InsertImportRowsParams) error {
+	var expenses []int
+	var in []categorize.Input
+	for i, row := range rows {
+		if row.Kind == nil || *row.Kind != string(transactions.KindExpense) {
+			continue
+		}
+		expenses = append(expenses, i)
+		input := categorize.Input{RawDescription: row.RawDescription, AmountMinor: *row.AmountMinor, Direction: categorize.DirectionDebit}
+		if row.Mcc != nil {
+			input.MCC = *row.Mcc
+		}
+		in = append(in, input)
+	}
+	if len(in) == 0 {
+		return nil
+	}
+	results, err := p.engine.Classify(ctx, userID, in, categorize.Options{AllowLLM: true})
+	if err != nil {
+		return fmt.Errorf("imports: categorize: %w", err)
+	}
+	for j, i := range expenses {
+		result := results[j]
+		source := string(result.Source)
+		rows[i].CategorySource = &source
+		if result.CategoryID != nil {
+			confidence := result.Confidence
+			rows[i].CategoryID, rows[i].CategoryConfidence = result.CategoryID, &confidence
+		}
+	}
+	return nil
 }
 
 // read runs the stages that need no database writes: detect, extract,
@@ -182,9 +310,9 @@ func validate(result outcome, window statements.Window, loc *time.Location) outc
 	return result
 }
 
-// save replaces the import's rows with the outcome's and records what was
-// found, in one transaction.
-func (p *Processor) save(ctx context.Context, importID uuid.UUID, source db.GetImportSourceRow, loc *time.Location, result outcome) error {
+// save replaces the import's rows with the drafted ones and records what
+// was found, in one transaction.
+func (p *Processor) save(ctx context.Context, importID uuid.UUID, result outcome, rows []db.InsertImportRowsParams) error {
 	return db.WithTx(ctx, p.db, func(tx pgx.Tx) error {
 		q := db.New(tx)
 		if err := q.DeleteImportRows(ctx, importID); err != nil {
@@ -193,20 +321,16 @@ func (p *Processor) save(ctx context.Context, importID uuid.UUID, source db.GetI
 		if result.failure != nil {
 			return fail(ctx, q, importID, *result.failure)
 		}
-		rows, err := draftRows(importID, source.UserID, loc, result.rows)
-		if err != nil {
-			return err
-		}
-		if err := markDuplicates(ctx, q, source.UserID, rows); err != nil {
-			return err
-		}
-		summary := summarize(rows)
-		summary.OutOfPeriodCount = result.outOfPeriod
 		if len(rows) > 0 {
 			if _, err := q.InsertImportRows(ctx, rows); err != nil {
 				return fmt.Errorf("imports: rows: %w", err)
 			}
 		}
+		summary, err := countRows(ctx, q, importID)
+		if err != nil {
+			return err
+		}
+		summary.OutOfPeriodCount = result.outOfPeriod
 		params := db.FinishImportParams{ID: importID, Status: string(result.status), BankHint: result.bankHint}
 		if result.format != "" {
 			format := string(result.format)
@@ -230,6 +354,21 @@ func (p *Processor) save(ctx context.Context, importID uuid.UUID, source db.GetI
 		}
 		return q.FinishImport(ctx, params)
 	})
+}
+
+// countRows is an import's summary as its rows stand, but for the rows
+// outside its period, which are not stored.
+func countRows(ctx context.Context, q db.Querier, importID uuid.UUID) (Summary, error) {
+	counts, err := q.ImportRowCounts(ctx, importID)
+	if err != nil {
+		return Summary{}, fmt.Errorf("imports: summary: %w", err)
+	}
+	return Summary{
+		RowCount: int(counts.RowCount), IncludedCount: int(counts.IncludedCount),
+		TotalExpenseMinor: counts.TotalExpenseMinor, TotalIncomeMinor: counts.TotalIncomeMinor,
+		DuplicateCount: int(counts.DuplicateCount), UncategorizedCount: int(counts.UncategorizedCount),
+		ErrorCount: int(counts.ErrorCount),
+	}, nil
 }
 
 // draftRows turns the pipeline's rows into import rows.
@@ -321,33 +460,6 @@ func markDuplicates(ctx context.Context, q db.Querier, userID uuid.UUID, rows []
 		}
 	}
 	return nil
-}
-
-// summarize counts an import's rows; the totals are of the included ones.
-func summarize(rows []db.InsertImportRowsParams) Summary {
-	var summary Summary
-	for _, row := range rows {
-		summary.RowCount++
-		switch row.Status {
-		case "error":
-			summary.ErrorCount++
-		case "duplicate":
-			summary.DuplicateCount++
-		}
-		if !row.Included {
-			continue
-		}
-		summary.IncludedCount++
-		if *row.Kind == string(transactions.KindIncome) {
-			summary.TotalIncomeMinor += *row.AmountMinor
-			continue
-		}
-		summary.TotalExpenseMinor += *row.AmountMinor
-		if row.CategoryID == nil {
-			summary.UncategorizedCount++
-		}
-	}
-	return summary
 }
 
 func jsonOrNil(v any) ([]byte, error) {

@@ -239,6 +239,49 @@ func (q *Queries) GetImportForUpdate(ctx context.Context, arg GetImportForUpdate
 	return i, err
 }
 
+const getImportRowForUpdate = `-- name: GetImportRowForUpdate :one
+SELECT id, import_id, user_id, row_index, raw, status, included, kind, amount_minor, occurred_at, local_date, merchant, merchant_key, raw_description, mcc, external_ref, category_id, category_confidence, category_source, dedup_hash, duplicate_of, error, created_at, updated_at, note FROM import_rows WHERE id = $1 AND import_id = $2 AND user_id = $3 FOR UPDATE
+`
+
+type GetImportRowForUpdateParams struct {
+	ID       uuid.UUID
+	ImportID uuid.UUID
+	UserID   uuid.UUID
+}
+
+func (q *Queries) GetImportRowForUpdate(ctx context.Context, arg GetImportRowForUpdateParams) (ImportRow, error) {
+	row := q.db.QueryRow(ctx, getImportRowForUpdate, arg.ID, arg.ImportID, arg.UserID)
+	var i ImportRow
+	err := row.Scan(
+		&i.ID,
+		&i.ImportID,
+		&i.UserID,
+		&i.RowIndex,
+		&i.Raw,
+		&i.Status,
+		&i.Included,
+		&i.Kind,
+		&i.AmountMinor,
+		&i.OccurredAt,
+		&i.LocalDate,
+		&i.Merchant,
+		&i.MerchantKey,
+		&i.RawDescription,
+		&i.Mcc,
+		&i.ExternalRef,
+		&i.CategoryID,
+		&i.CategoryConfidence,
+		&i.CategorySource,
+		&i.DedupHash,
+		&i.DuplicateOf,
+		&i.Error,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Note,
+	)
+	return i, err
+}
+
 const getImportSource = `-- name: GetImportSource :one
 SELECT i.id, i.user_id, i.status, i.period, u.object_key, usr.timezone, usr.currency, usr.name
 FROM imports i
@@ -276,6 +319,44 @@ func (q *Queries) GetImportSource(ctx context.Context, id uuid.UUID) (GetImportS
 	return i, err
 }
 
+const importRowCounts = `-- name: ImportRowCounts :one
+SELECT count(*)::int                                                                  AS row_count,
+       count(*) FILTER (WHERE included)::int                                          AS included_count,
+       coalesce(sum(amount_minor) FILTER (WHERE included AND kind = 'expense'), 0)::bigint AS total_expense_minor,
+       coalesce(sum(amount_minor) FILTER (WHERE included AND kind = 'income'), 0)::bigint  AS total_income_minor,
+       count(*) FILTER (WHERE status = 'duplicate')::int                              AS duplicate_count,
+       count(*) FILTER (WHERE included AND kind = 'expense' AND category_id IS NULL)::int AS uncategorized_count,
+       count(*) FILTER (WHERE status = 'error')::int                                  AS error_count
+FROM import_rows
+WHERE import_id = $1
+`
+
+type ImportRowCountsRow struct {
+	RowCount           int32
+	IncludedCount      int32
+	TotalExpenseMinor  int64
+	TotalIncomeMinor   int64
+	DuplicateCount     int32
+	UncategorizedCount int32
+	ErrorCount         int32
+}
+
+// An import's summary as its rows stand; totals are of the included rows.
+func (q *Queries) ImportRowCounts(ctx context.Context, importID uuid.UUID) (ImportRowCountsRow, error) {
+	row := q.db.QueryRow(ctx, importRowCounts, importID)
+	var i ImportRowCountsRow
+	err := row.Scan(
+		&i.RowCount,
+		&i.IncludedCount,
+		&i.TotalExpenseMinor,
+		&i.TotalIncomeMinor,
+		&i.DuplicateCount,
+		&i.UncategorizedCount,
+		&i.ErrorCount,
+	)
+	return i, err
+}
+
 type InsertImportRowsParams struct {
 	ID                 uuid.UUID
 	ImportID           uuid.UUID
@@ -299,6 +380,119 @@ type InsertImportRowsParams struct {
 	DedupHash          []byte
 	DuplicateOf        *uuid.UUID
 	Error              *string
+	Note               *string
+}
+
+const listImportRows = `-- name: ListImportRows :many
+SELECT r.id, r.import_id, r.user_id, r.row_index, r.raw, r.status, r.included, r.kind, r.amount_minor, r.occurred_at, r.local_date, r.merchant, r.merchant_key, r.raw_description, r.mcc, r.external_ref, r.category_id, r.category_confidence, r.category_source, r.dedup_hash, r.duplicate_of, r.error, r.created_at, r.updated_at, r.note,
+       (CASE WHEN r.included AND r.kind = 'expense' AND r.category_id IS NULL THEN 0 ELSE 1 END)::int AS sort_rank,
+       coalesce(r.local_date, '0001-01-01'::date)::date AS sort_date
+FROM import_rows r
+WHERE r.import_id = $1
+  AND r.user_id = $2
+  AND ($3::uuid IS NULL
+       OR (CASE WHEN r.included AND r.kind = 'expense' AND r.category_id IS NULL THEN 0 ELSE 1 END) > $4::int
+       OR ((CASE WHEN r.included AND r.kind = 'expense' AND r.category_id IS NULL THEN 0 ELSE 1 END) = $4::int
+           AND (coalesce(r.local_date, '0001-01-01'::date), r.id) < ($5::date, $3::uuid)))
+ORDER BY sort_rank, sort_date DESC, r.id DESC
+LIMIT $6
+`
+
+type ListImportRowsParams struct {
+	ImportID   uuid.UUID
+	UserID     uuid.UUID
+	CursorID   *uuid.UUID
+	CursorRank int32
+	CursorDate *time.Time
+	RowLimit   int32
+}
+
+type ListImportRowsRow struct {
+	ID                 uuid.UUID
+	ImportID           uuid.UUID
+	UserID             uuid.UUID
+	RowIndex           int32
+	Raw                []byte
+	Status             string
+	Included           bool
+	Kind               *string
+	AmountMinor        *int64
+	OccurredAt         *time.Time
+	LocalDate          *time.Time
+	Merchant           *string
+	MerchantKey        string
+	RawDescription     string
+	Mcc                *string
+	ExternalRef        *string
+	CategoryID         *uuid.UUID
+	CategoryConfidence *float64
+	CategorySource     *string
+	DedupHash          []byte
+	DuplicateOf        *uuid.UUID
+	Error              *string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+	Note               *string
+	SortRank           int32
+	SortDate           time.Time
+}
+
+// A page of an import's rows for review: the included expenses still
+// without a category first, then newest first, rows without a date last.
+// The cursor is the last row of the previous page.
+func (q *Queries) ListImportRows(ctx context.Context, arg ListImportRowsParams) ([]ListImportRowsRow, error) {
+	rows, err := q.db.Query(ctx, listImportRows,
+		arg.ImportID,
+		arg.UserID,
+		arg.CursorID,
+		arg.CursorRank,
+		arg.CursorDate,
+		arg.RowLimit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListImportRowsRow
+	for rows.Next() {
+		var i ListImportRowsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ImportID,
+			&i.UserID,
+			&i.RowIndex,
+			&i.Raw,
+			&i.Status,
+			&i.Included,
+			&i.Kind,
+			&i.AmountMinor,
+			&i.OccurredAt,
+			&i.LocalDate,
+			&i.Merchant,
+			&i.MerchantKey,
+			&i.RawDescription,
+			&i.Mcc,
+			&i.ExternalRef,
+			&i.CategoryID,
+			&i.CategoryConfidence,
+			&i.CategorySource,
+			&i.DedupHash,
+			&i.DuplicateOf,
+			&i.Error,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Note,
+			&i.SortRank,
+			&i.SortDate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listLedgerMatches = `-- name: ListLedgerMatches :many
@@ -343,6 +537,20 @@ func (q *Queries) ListLedgerMatches(ctx context.Context, arg ListLedgerMatchesPa
 	return items, nil
 }
 
+const setImportSummary = `-- name: SetImportSummary :exec
+UPDATE imports SET summary = $1 WHERE id = $2
+`
+
+type SetImportSummaryParams struct {
+	Summary []byte
+	ID      uuid.UUID
+}
+
+func (q *Queries) SetImportSummary(ctx context.Context, arg SetImportSummaryParams) error {
+	_, err := q.db.Exec(ctx, setImportSummary, arg.Summary, arg.ID)
+	return err
+}
+
 const startImportProcessing = `-- name: StartImportProcessing :exec
 UPDATE imports
 SET status = 'processing', format = NULL, bank_hint = NULL, mapping_source = NULL,
@@ -355,4 +563,76 @@ WHERE id = $1 AND status <> 'committed'
 func (q *Queries) StartImportProcessing(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, startImportProcessing, id)
 	return err
+}
+
+const updateImportRow = `-- name: UpdateImportRow :one
+UPDATE import_rows
+SET included            = $1,
+    kind                = $2,
+    merchant            = $3,
+    merchant_key        = $4,
+    note                = $5,
+    category_id         = $6,
+    category_confidence = $7,
+    category_source     = $8,
+    dedup_hash          = $9
+WHERE id = $10
+RETURNING id, import_id, user_id, row_index, raw, status, included, kind, amount_minor, occurred_at, local_date, merchant, merchant_key, raw_description, mcc, external_ref, category_id, category_confidence, category_source, dedup_hash, duplicate_of, error, created_at, updated_at, note
+`
+
+type UpdateImportRowParams struct {
+	Included           bool
+	Kind               *string
+	Merchant           *string
+	MerchantKey        string
+	Note               *string
+	CategoryID         *uuid.UUID
+	CategoryConfidence *float64
+	CategorySource     *string
+	DedupHash          []byte
+	ID                 uuid.UUID
+}
+
+func (q *Queries) UpdateImportRow(ctx context.Context, arg UpdateImportRowParams) (ImportRow, error) {
+	row := q.db.QueryRow(ctx, updateImportRow,
+		arg.Included,
+		arg.Kind,
+		arg.Merchant,
+		arg.MerchantKey,
+		arg.Note,
+		arg.CategoryID,
+		arg.CategoryConfidence,
+		arg.CategorySource,
+		arg.DedupHash,
+		arg.ID,
+	)
+	var i ImportRow
+	err := row.Scan(
+		&i.ID,
+		&i.ImportID,
+		&i.UserID,
+		&i.RowIndex,
+		&i.Raw,
+		&i.Status,
+		&i.Included,
+		&i.Kind,
+		&i.AmountMinor,
+		&i.OccurredAt,
+		&i.LocalDate,
+		&i.Merchant,
+		&i.MerchantKey,
+		&i.RawDescription,
+		&i.Mcc,
+		&i.ExternalRef,
+		&i.CategoryID,
+		&i.CategoryConfidence,
+		&i.CategorySource,
+		&i.DedupHash,
+		&i.DuplicateOf,
+		&i.Error,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Note,
+	)
+	return i, err
 }

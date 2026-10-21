@@ -28,9 +28,12 @@ const (
 // SourceManual marks a transaction the user entered by hand.
 const SourceManual = "manual"
 
+// MaxMerchantLength is the longest merchant name, typed or edited on an
+// import row.
+const MaxMerchantLength = 80
+
 const (
-	maxMerchantLength = 80
-	maxNoteLength     = 140
+	maxNoteLength = 140
 	// maxAmountMinor bounds one amount, far below where sums of amounts
 	// could overflow.
 	maxAmountMinor = 1_000_000_000_000
@@ -118,7 +121,7 @@ func (s *Service) Create(ctx context.Context, user db.User, params CreateParams)
 	fields := map[string]string{}
 	checkKind(fields, params.Kind)
 	checkAmount(fields, params.AmountMinor)
-	merchant := checkText(fields, "merchant", params.Merchant, maxMerchantLength)
+	merchant := checkText(fields, "merchant", params.Merchant, MaxMerchantLength)
 	note := checkText(fields, "note", params.Note, maxNoteLength)
 	checkCategoryFitsKind(fields, params.Kind, params.CategoryID)
 
@@ -239,7 +242,7 @@ func (s *Service) Update(ctx context.Context, user db.User, id uuid.UUID, patch 
 			params.AmountMinor = *patch.AmountMinor
 		}
 		if patch.Merchant.Set {
-			params.Merchant = checkText(fields, "merchant", patch.Merchant.Value, maxMerchantLength)
+			params.Merchant = checkText(fields, "merchant", patch.Merchant.Value, MaxMerchantLength)
 		}
 		if patch.Note.Set {
 			params.Note = checkText(fields, "note", patch.Note.Value, maxNoteLength)

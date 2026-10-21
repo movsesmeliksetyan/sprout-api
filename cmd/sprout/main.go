@@ -219,7 +219,8 @@ func runWorker(c cli, _ []string) error {
 	if err != nil {
 		return err
 	}
-	worker, err := jobs.NewWorker(pool, logger, jobs.Deps{Store: newStore(cfg), LLM: llmClient})
+	engine := categorize.NewEngine(db.New(pool), categorize.WithLLM(llmClient, logger), categorize.WithLLMBatch(cfg.LLM.CategorizeBatch))
+	worker, err := jobs.NewWorker(pool, logger, jobs.Deps{Store: newStore(cfg), LLM: llmClient, Engine: engine})
 	if err != nil {
 		return err
 	}

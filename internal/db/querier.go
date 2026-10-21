@@ -86,6 +86,7 @@ type Querier interface {
 	// An import by id alone, for the job that processes it.
 	GetImportByID(ctx context.Context, id uuid.UUID) (Import, error)
 	GetImportForUpdate(ctx context.Context, arg GetImportForUpdateParams) (Import, error)
+	GetImportRowForUpdate(ctx context.Context, arg GetImportRowForUpdateParams) (ImportRow, error)
 	// What processing an import needs: the stored file and the user's
 	// timezone and currency.
 	GetImportSource(ctx context.Context, id uuid.UUID) (GetImportSourceRow, error)
@@ -99,6 +100,8 @@ type Querier interface {
 	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
 	// Locks the row until the transaction ends.
 	GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, error)
+	// An import's summary as its rows stand; totals are of the included rows.
+	ImportRowCounts(ctx context.Context, importID uuid.UUID) (ImportRowCountsRow, error)
 	InsertImportRows(ctx context.Context, arg []InsertImportRowsParams) (int64, error)
 	// Everything the user's transactions add up to: income minus expense.
 	LedgerNet(ctx context.Context, userID uuid.UUID) (int64, error)
@@ -119,6 +122,10 @@ type Querier interface {
 	// The user's active and completed goals in display order, each with what is
 	// saved in it: top-ups minus withdrawals.
 	ListGoals(ctx context.Context, userID uuid.UUID) ([]ListGoalsRow, error)
+	// A page of an import's rows for review: the included expenses still
+	// without a category first, then newest first, rows without a date last.
+	// The cursor is the last row of the previous page.
+	ListImportRows(ctx context.Context, arg ListImportRowsParams) ([]ListImportRowsRow, error)
 	// Every keyword rule, in the order they are tried.
 	ListKeywordRules(ctx context.Context) ([]KeywordRule, error)
 	// The user's transactions a statement's rows may duplicate: those with one
@@ -180,6 +187,7 @@ type Querier interface {
 	// Writes the seed codes, leaving unchanged ones alone. Returns a row for
 	// every code added or changed.
 	SeedMCCMap(ctx context.Context, arg SeedMCCMapParams) ([]bool, error)
+	SetImportSummary(ctx context.Context, arg SetImportSummaryParams) error
 	// The user's expenses on the calendar days from_date to to_date, both
 	// included.
 	SpentBetween(ctx context.Context, arg SpentBetweenParams) (int64, error)
@@ -201,6 +209,7 @@ type Querier interface {
 	// Writes the goal as given: the caller reads it, changes what it must and
 	// sends every column back.
 	UpdateGoal(ctx context.Context, arg UpdateGoalParams) (Goal, error)
+	UpdateImportRow(ctx context.Context, arg UpdateImportRowParams) (ImportRow, error)
 	// Writes every field a user can change; the caller sends the ones that stay
 	// as they are.
 	UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) (Transaction, error)
