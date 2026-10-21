@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -95,6 +96,30 @@ func (s *S3) Head(ctx context.Context, key string) (Object, error) {
 		Size:        aws.ToInt64(out.ContentLength),
 		ContentType: aws.ToString(out.ContentType),
 	}, nil
+}
+
+// Get implements Store.
+func (s *S3) Get(ctx context.Context, key string, maxBytes int64) ([]byte, error) {
+	out, err := s.client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		var noKey *types.NoSuchKey
+		if errors.As(err, &noKey) {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("storage: get: %w", err)
+	}
+	defer func() { _ = out.Body.Close() }()
+	data, err := io.ReadAll(io.LimitReader(out.Body, maxBytes+1))
+	if err != nil {
+		return nil, fmt.Errorf("storage: get: %w", err)
+	}
+	if int64(len(data)) > maxBytes {
+		return nil, ErrTooLarge
+	}
+	return data, nil
 }
 
 // Delete implements Store.

@@ -83,6 +83,9 @@ func Detect(data []byte) (Detection, error) {
 
 	delimiter, records, ok := bestDelimiter(text)
 	if !ok {
+		if headerOnly(text) {
+			return Detection{}, ErrEmptyFile
+		}
 		return Detection{}, ErrUnsupportedFormat
 	}
 	return Detection{
@@ -189,6 +192,18 @@ func bestDelimiter(text string) (rune, [][]string, bool) {
 		}
 	}
 	return best, bestRecords, bestCount > 0
+}
+
+// headerOnly reports whether text is one record of several cells: a
+// table's header with nothing under it.
+func headerOnly(text string) bool {
+	for _, delimiter := range delimiters {
+		records := readRecords(text, delimiter, 2)
+		if len(records) == 1 && len(nonEmptyTail(records[0])) >= 2 {
+			return true
+		}
+	}
+	return false
 }
 
 // readRecords reads up to limit records of delimited text, tolerantly:

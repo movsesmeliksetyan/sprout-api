@@ -14,6 +14,10 @@ import (
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
 	"github.com/riverqueue/river/rivertype"
+
+	"github.com/movsesmeliksetyan/sprout-api/internal/imports"
+	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
+	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
 )
 
 const (
@@ -41,11 +45,20 @@ func NewInserter(pool *pgxpool.Pool, logger *slog.Logger) (*Client, error) {
 	return &Client{river: client}, nil
 }
 
+// Deps are what the jobs work with besides the database.
+type Deps struct {
+	// Store holds uploaded files.
+	Store storage.Store
+	// LLM reads the statements the deterministic stages cannot; nil leaves
+	// them to the user.
+	LLM llm.Client
+}
+
 // NewWorker returns a client that runs every job, the periodic ones
 // included, for `sprout worker`.
-func NewWorker(pool *pgxpool.Pool, logger *slog.Logger) (*Client, error) {
+func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, error) {
 	workers := river.NewWorkers()
-	river.AddWorker(workers, &processImport{pool: pool, logger: logger})
+	river.AddWorker(workers, &processImport{pool: pool, logger: logger, processor: imports.NewProcessor(pool, deps.Store, deps.LLM)})
 	river.AddWorker(workers, &promoteDictionary{pool: pool, logger: logger})
 	river.AddWorker(workers, &purgeIdempotencyKeys{pool: pool, logger: logger})
 

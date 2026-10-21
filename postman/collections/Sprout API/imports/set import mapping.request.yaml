@@ -1,0 +1,23 @@
+$kind: http-request
+name: 'Set import mapping'
+method: PUT
+url: '{{baseUrl}}/v1/imports/{{importId}}/mapping'
+order: 3000
+pathVariables:
+  - key: importId
+    value: '{{importId}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "columns": [
+        { "index": 0, "role": "date" },
+        { "index": 1, "role": "description" },
+        { "index": 2, "role": "amount" }
+      ],
+      "date_format": "DD.MM.YYYY",
+      "amount_sign": "negative_is_expense"
+    }

@@ -8,6 +8,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/session"
+	"github.com/movsesmeliksetyan/sprout-api/internal/statements"
 )
 
 // Handler implements the import operations of the API.
@@ -67,6 +68,36 @@ func (h *Handler) DeleteImport(ctx context.Context, request httpx.DeleteImportRe
 		return nil, err
 	}
 	return httpx.DeleteImport204Response{}, nil
+}
+
+// SetImportMapping says how to read a statement that needs a mapping.
+func (h *Handler) SetImportMapping(ctx context.Context, request httpx.SetImportMappingRequestObject) (httpx.SetImportMappingResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	if request.Body == nil {
+		return nil, httpx.ErrBadRequest
+	}
+	mapping := Mapping{AmountSign: statements.NegativeIsExpense}
+	for _, c := range request.Body.Columns {
+		mapping.Columns = append(mapping.Columns, statements.ColumnRole{Index: c.Index, Role: string(c.Role)})
+	}
+	if request.Body.DateFormat != nil {
+		mapping.DateFormat = *request.Body.DateFormat
+	}
+	if request.Body.AmountSign != nil {
+		mapping.AmountSign = statements.AmountSign(*request.Body.AmountSign)
+	}
+	updated, err := h.service.SetMapping(ctx, user.ID, request.ID, mapping)
+	if err != nil {
+		return nil, err
+	}
+	out, err := ToAPI(updated)
+	if err != nil {
+		return nil, err
+	}
+	return httpx.SetImportMapping202JSONResponse(out), nil
 }
 
 // ToAPI is an import on the wire.

@@ -70,6 +70,8 @@ func TestDetect_Refuses(t *testing.T) {
 	}
 	_, err := statements.Detect(nil)
 	assert.ErrorIs(t, err, statements.ErrEmptyFile)
+	_, err = statements.Detect([]byte("Date;Description;Amount\n"))
+	assert.ErrorIs(t, err, statements.ErrEmptyFile, "a header alone")
 }
 
 func TestDetect_UTF16WithoutBOM(t *testing.T) {

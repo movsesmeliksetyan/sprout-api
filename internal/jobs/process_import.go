@@ -44,14 +44,15 @@ var _ imports.Enqueuer = (*Client)(nil)
 
 type processImport struct {
 	river.WorkerDefaults[ProcessImportArgs]
-	pool   *pgxpool.Pool
-	logger *slog.Logger
+	pool      *pgxpool.Pool
+	logger    *slog.Logger
+	processor *imports.Processor
 }
 
 // Work runs the import's pipeline. When the last attempt fails too, the
 // import is marked failed so the app stops polling.
 func (w *processImport) Work(ctx context.Context, job *river.Job[ProcessImportArgs]) error {
-	err := imports.Process(ctx, w.pool, job.Args.ImportID)
+	err := w.processor.Process(ctx, job.Args.ImportID)
 	if err == nil || job.Attempt < job.MaxAttempts {
 		return err
 	}

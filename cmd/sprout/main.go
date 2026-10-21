@@ -151,14 +151,7 @@ func runAPI(c cli, _ []string) error {
 	}
 	logger.Info("listening", "addr", ln.Addr().String())
 
-	store := storage.NewS3(storage.Config{
-		Endpoint:        cfg.S3.Endpoint,
-		Region:          cfg.S3.Region,
-		Bucket:          cfg.S3.Bucket,
-		AccessKeyID:     cfg.S3.AccessKeyID,
-		SecretAccessKey: cfg.S3.SecretAccessKey.Reveal(),
-		UsePathStyle:    cfg.S3.UsePathStyle,
-	})
+	store := newStore(cfg)
 
 	idempotentRoutes, err := api.IdempotentRoutes()
 	if err != nil {
@@ -222,7 +215,11 @@ func runWorker(c cli, _ []string) error {
 	}
 	defer pool.Close()
 
-	worker, err := jobs.NewWorker(pool, logger)
+	llmClient, err := llm.NewFromConfig(cfg.LLM, llm.Options{Logger: logger})
+	if err != nil {
+		return err
+	}
+	worker, err := jobs.NewWorker(pool, logger, jobs.Deps{Store: newStore(cfg), LLM: llmClient})
 	if err != nil {
 		return err
 	}
@@ -287,4 +284,16 @@ func runSeedRules(c cli, args []string) error {
 			table.name, table.counts.Added, table.counts.Updated, table.counts.Removed)
 	}
 	return nil
+}
+
+// newStore is the object storage the configuration names.
+func newStore(cfg config.Config) *storage.S3 {
+	return storage.NewS3(storage.Config{
+		Endpoint:        cfg.S3.Endpoint,
+		Region:          cfg.S3.Region,
+		Bucket:          cfg.S3.Bucket,
+		AccessKeyID:     cfg.S3.AccessKeyID,
+		SecretAccessKey: cfg.S3.SecretAccessKey.Reveal(),
+		UsePathStyle:    cfg.S3.UsePathStyle,
+	})
 }

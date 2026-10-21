@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sync"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -19,6 +19,8 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/imports"
 	"github.com/movsesmeliksetyan/sprout-api/internal/jobs"
+	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
+	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
 	"github.com/movsesmeliksetyan/sprout-api/internal/testutil"
 	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
 	"github.com/movsesmeliksetyan/sprout-api/internal/users"
@@ -34,9 +36,36 @@ type api struct {
 type rest struct{ httpx.NotImplemented }
 
 type fixture struct {
-	pool    *pgxpool.Pool
-	uploads *uploads.Service
-	server  http.Handler
+	pool      *pgxpool.Pool
+	store     *storage.S3
+	uploads   *uploads.Service
+	server    http.Handler
+	model     *model
+	processor *imports.Processor
+}
+
+// model is a fake language model with one answer for every mapping
+// question, counting the questions.
+type model struct {
+	mu     sync.Mutex
+	answer string
+	calls  int
+}
+
+func (m *model) Complete(context.Context, llm.Call) (llm.Completion, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.calls++
+	if m.answer == "" {
+		return llm.Completion{}, llm.ErrRefused
+	}
+	return llm.Completion{Text: m.answer}, nil
+}
+
+func (m *model) asked() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.calls
 }
 
 func newFixture(t *testing.T) fixture {
@@ -57,7 +86,32 @@ func newFixture(t *testing.T) fixture {
 		),
 		httpx.WithAPI(api{Handler: imports.NewHandler(imports.NewService(pool, uploadService, inserter))}),
 	).Handler()
-	return fixture{pool: pool, uploads: uploadService, server: server}
+	m := &model{}
+	processor := imports.NewProcessor(pool, store, llm.New(m, llm.Options{TextModel: "test", MaxAttempts: 1}))
+	return fixture{pool: pool, store: store, uploads: uploadService, server: server, model: m, processor: processor}
+}
+
+// file uploads a statement with the given name and content.
+func (f fixture) file(t *testing.T, user testutil.TestUser, name, content string) uuid.UUID {
+	t.Helper()
+	return testutil.Upload(t, f.uploads, user.ID, uploads.PurposeStatement, "text/csv", name, []byte(content))
+}
+
+// imported creates an import of content and processes it, returning it.
+func (f fixture) imported(t *testing.T, user testutil.TestUser, content string) httpx.Import {
+	t.Helper()
+	rec := f.do(t, user, http.MethodPost, "/imports", map[string]any{"upload_id": f.file(t, user, "statement.csv", content), "period": "all"})
+	require.Equal(t, http.StatusAccepted, rec.Code, "body: %s", rec.Body.String())
+	return f.process(t, user, testutil.DecodeJSON[httpx.Import](t, rec).ID)
+}
+
+// process runs the pipeline for an import and returns it.
+func (f fixture) process(t *testing.T, user testutil.TestUser, id uuid.UUID) httpx.Import {
+	t.Helper()
+	require.NoError(t, f.processor.Process(context.Background(), id))
+	rec := f.do(t, user, http.MethodGet, "/imports/"+id.String(), nil)
+	require.Equal(t, http.StatusOK, rec.Code)
+	return testutil.DecodeJSON[httpx.Import](t, rec)
 }
 
 func (f fixture) do(t *testing.T, user testutil.TestUser, method, path string, body any) *httptest.ResponseRecorder {
@@ -162,47 +216,6 @@ func TestDeleteImport(t *testing.T) {
 	_, err := f.pool.Exec(context.Background(), `UPDATE imports SET status = 'committed' WHERE id = $1`, committed.ID)
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusConflict, f.do(t, user, http.MethodDelete, "/imports/"+committed.ID.String(), nil).Code)
-}
-
-func TestProcess_RunsInTheWorkerAndIsIdempotent(t *testing.T) {
-	t.Parallel()
-	f := newFixture(t)
-	user := testutil.NewTestUser(t, f.pool)
-	created := f.create(t, user)
-
-	// Rows an earlier attempt left behind are wiped by the next.
-	_, err := f.pool.Exec(context.Background(), `INSERT INTO import_rows (id, import_id, user_id, row_index, status, included)
-		VALUES ($1, $2, $3, 0, 'ok', true)`, uuid.Must(uuid.NewV7()), created.ID, user.ID)
-	require.NoError(t, err)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	worker, err := jobs.NewWorker(f.pool, testutil.Logger(t))
-	require.NoError(t, err)
-	stopped := make(chan error, 1)
-	go func() { stopped <- worker.Run(ctx) }()
-	t.Cleanup(func() {
-		cancel()
-		require.NoError(t, <-stopped)
-	})
-
-	require.Eventually(t, func() bool {
-		return f.count(t, `SELECT count(*) FROM imports WHERE id = $1 AND status = 'failed'`, created.ID) == 1
-	}, 10*time.Second, 20*time.Millisecond, "the worker processes the import")
-	got := testutil.DecodeJSON[httpx.Import](t, f.do(t, user, http.MethodGet, "/imports/"+created.ID.String(), nil))
-	require.NotNil(t, got.Failure)
-	assert.Equal(t, httpx.ImportFailureCode("internal"), got.Failure.Code)
-	assert.Equal(t, 0, f.count(t, `SELECT count(*) FROM import_rows WHERE import_id = $1`, created.ID))
-
-	// Running it again gives the same result.
-	require.NoError(t, imports.Process(context.Background(), f.pool, created.ID))
-	require.NoError(t, imports.Process(context.Background(), f.pool, created.ID))
-	assert.Equal(t, 1, f.count(t, `SELECT count(*) FROM imports WHERE id = $1 AND status = 'failed'`, created.ID))
-
-	// A committed import is left alone.
-	_, err = f.pool.Exec(context.Background(), `UPDATE imports SET status = 'committed', failure = NULL WHERE id = $1`, created.ID)
-	require.NoError(t, err)
-	require.NoError(t, imports.Process(context.Background(), f.pool, created.ID))
-	assert.Equal(t, 1, f.count(t, `SELECT count(*) FROM imports WHERE id = $1 AND status = 'committed'`, created.ID))
 }
 
 // withoutVolatile drops the fields a test cannot know.

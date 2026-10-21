@@ -76,12 +76,19 @@ type Querier interface {
 	// of at least @min_voters votes for the key.
 	DemoteDictionaryEntries(ctx context.Context, minVoters int64) (int64, error)
 	FailImport(ctx context.Context, arg FailImportParams) error
+	// Records what processing found, unless the import was committed or
+	// discarded meanwhile.
+	FinishImport(ctx context.Context, arg FinishImportParams) error
 	GetCategory(ctx context.Context, arg GetCategoryParams) (Category, error)
 	GetGoal(ctx context.Context, arg GetGoalParams) (GetGoalRow, error)
 	GetIdempotencyKey(ctx context.Context, arg GetIdempotencyKeyParams) (IdempotencyKey, error)
 	GetImport(ctx context.Context, arg GetImportParams) (Import, error)
 	// An import by id alone, for the job that processes it.
 	GetImportByID(ctx context.Context, id uuid.UUID) (Import, error)
+	GetImportForUpdate(ctx context.Context, arg GetImportForUpdateParams) (Import, error)
+	// What processing an import needs: the stored file and the user's
+	// timezone and currency.
+	GetImportSource(ctx context.Context, id uuid.UUID) (GetImportSourceRow, error)
 	// The template for a header fingerprint, unless it has been disabled: a
 	// success rate under 80 % over at least 5 uses.
 	GetMappingTemplate(ctx context.Context, headerFingerprint string) (MappingTemplate, error)
@@ -92,6 +99,7 @@ type Querier interface {
 	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
 	// Locks the row until the transaction ends.
 	GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, error)
+	InsertImportRows(ctx context.Context, arg []InsertImportRowsParams) (int64, error)
 	// Everything the user's transactions add up to: income minus expense.
 	LedgerNet(ctx context.Context, userID uuid.UUID) (int64, error)
 	// Active categories in display order, then the archived ones when asked for.
