@@ -193,7 +193,7 @@ func runAPI(c cli, _ []string) error {
 	if err != nil {
 		return err
 	}
-	engine := categorize.NewEngine(db.New(pool), categorize.WithLLM(llmClient, logger))
+	engine := categorize.NewEngine(db.New(pool), categorize.WithLLM(llmClient, logger), categorize.WithLLMBatch(cfg.LLM.CategorizeBatch))
 	opts := []httpx.Option{
 		httpx.WithReadinessCheck("postgres", db.Ready(pool)),
 		httpx.WithReadinessCheck("storage", store.Ready),

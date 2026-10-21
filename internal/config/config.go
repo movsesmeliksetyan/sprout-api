@@ -61,7 +61,15 @@ type LLM struct {
 	APIKey      Secret
 	ModelText   string
 	ModelVision string
+	// CategorizeBatch is how many merchants one categorisation call asks
+	// about (1–50, default 50): fewer when the provider's tier caps output
+	// tokens a minute below what 50 answers take.
+	CategorizeBatch int
 }
+
+// MaxCategorizeBatch is the most merchants one categorisation call asks
+// about (PRD §5.2).
+const MaxCategorizeBatch = 50
 
 // APNS configures token-based Apple push delivery. KeyPath points at the .p8 file.
 type APNS struct {
@@ -95,6 +103,7 @@ func (c Config) LogValue() slog.Value {
 			slog.Any("api_key", c.LLM.APIKey),
 			slog.String("model_text", c.LLM.ModelText),
 			slog.String("model_vision", c.LLM.ModelVision),
+			slog.Int("categorize_batch", c.LLM.CategorizeBatch),
 		),
 		slog.Group("apns",
 			slog.String("key_id", c.APNS.KeyID),
@@ -192,10 +201,11 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		UsePathStyle:    l.boolean("S3_USE_PATH_STYLE", false),
 	}
 	cfg.LLM = LLM{
-		Provider:    l.llmProvider(),
-		APIKey:      Secret(l.requiredIf(strict, "LLM_API_KEY")),
-		ModelText:   l.required("LLM_MODEL_TEXT"),
-		ModelVision: l.required("LLM_MODEL_VISION"),
+		Provider:        l.llmProvider(),
+		APIKey:          Secret(l.requiredIf(strict, "LLM_API_KEY")),
+		ModelText:       l.required("LLM_MODEL_TEXT"),
+		ModelVision:     l.required("LLM_MODEL_VISION"),
+		CategorizeBatch: l.intRange("LLM_CATEGORIZE_BATCH", MaxCategorizeBatch, 1, MaxCategorizeBatch),
 	}
 	cfg.APNS = l.apns(strict)
 
@@ -253,6 +263,20 @@ func (l *loader) boolean(key string, def bool) bool {
 		return def
 	}
 	return b
+}
+
+// intRange reads a whole number from lo to hi, def when unset.
+func (l *loader) intRange(key string, def, lo, hi int) int {
+	v := l.get(key)
+	if v == "" {
+		return def
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil || n < lo || n > hi {
+		l.fail(key, "must be a whole number from %d to %d (got %q)", lo, hi, v)
+		return def
+	}
+	return n
 }
 
 func (l *loader) env() Env {

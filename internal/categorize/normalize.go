@@ -353,7 +353,9 @@ func stripCodes(words []string) []token {
 		case isDateOrTime(word), isReference(word):
 		case isNumber(word) && (i > 0 || next == "" || len(word) > 3):
 		case isDomain(word):
-			if i > 0 {
+			// A web address is the name when it comes first, codes such as a
+			// date before it aside; after the name it is noise.
+			if len(tokens) > 0 {
 				break
 			}
 			tokens = append(tokens, token{text: host(word), removedBefore: pending})

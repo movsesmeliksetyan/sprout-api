@@ -126,6 +126,7 @@ func TestGroq_Failures(t *testing.T) {
 		}
 		_, err := llm.NewGroq(llm.GroqConfig{BaseURL: s.serve(t)}).Complete(context.Background(), groqCall())
 		require.ErrorIs(t, err, llm.ErrInvalidOutput)
+		require.ErrorIs(t, err, llm.ErrGenerationFailed)
 	})
 	t.Run("server error without a body", func(t *testing.T) {
 		t.Parallel()

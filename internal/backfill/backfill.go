@@ -24,6 +24,9 @@ func Migrations() []*goose.Migration {
 		// lower-cased merchant. Down leaves the keys as they are: either
 		// form is a valid key.
 		goose.NewGoMigration(12, &goose.GoFunc{RunTx: MerchantKeys}, nil),
+		// 00015: the normaliser takes a web address after a date as the
+		// name (BE-36).
+		goose.NewGoMigration(15, &goose.GoFunc{RunTx: MerchantKeys}, nil),
 	}
 }
 
