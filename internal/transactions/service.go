@@ -25,8 +25,13 @@ const (
 	KindIncome  Kind = "income"
 )
 
-// SourceManual marks a transaction the user entered by hand.
-const SourceManual = "manual"
+// The sources of a transaction.
+const (
+	// SourceManual marks a transaction the user entered by hand.
+	SourceManual = "manual"
+	// SourceReceipt marks one confirmed from a scanned receipt.
+	SourceReceipt = "receipt"
+)
 
 // MaxMerchantLength is the longest merchant name, typed or edited on an
 // import row.
@@ -104,11 +109,29 @@ type CreateParams struct {
 	Merchant    *string
 	Note        *string
 	OccurredAt  *time.Time
+	// ReceiptID is the receipt being confirmed, which makes the source
+	// receipt; nil for a manual transaction.
+	ReceiptID *uuid.UUID
 }
 
 // Create adds a manual transaction to the user's ledger. Invalid values are
 // reported together in an *httpx.ValidationError.
 func (s *Service) Create(ctx context.Context, user db.User, params CreateParams) (db.Transaction, error) {
+	var created db.Transaction
+	err := db.WithTx(ctx, s.db, func(tx pgx.Tx) error {
+		var err error
+		created, err = s.CreateIn(ctx, db.New(tx), user, params)
+		return err
+	})
+	if err != nil {
+		return db.Transaction{}, err
+	}
+	return created, nil
+}
+
+// CreateIn is Create inside the caller's database transaction, for a
+// feature that writes a transaction with its own rows (receipt confirm).
+func (s *Service) CreateIn(ctx context.Context, q db.Querier, user db.User, params CreateParams) (db.Transaction, error) {
 	loc, err := location(user)
 	if err != nil {
 		return db.Transaction{}, err
@@ -131,39 +154,39 @@ func (s *Service) Create(ctx context.Context, user db.User, params CreateParams)
 	}
 	localDate := period.LocalDate(occurredAt, loc)
 	merchantKey := key(merchant)
+	source := SourceManual
+	if params.ReceiptID != nil {
+		source = SourceReceipt
+	}
 
-	var created db.Transaction
-	err = db.WithTx(ctx, s.db, func(tx pgx.Tx) error {
-		q := db.New(tx)
-		if _, bad := fields["category_id"]; !bad && params.CategoryID != nil {
-			if err := checkCategoryActive(ctx, q, fields, user.ID, *params.CategoryID); err != nil {
-				return err
-			}
+	if _, bad := fields["category_id"]; !bad && params.CategoryID != nil {
+		if err := checkCategoryActive(ctx, q, fields, user.ID, *params.CategoryID); err != nil {
+			return db.Transaction{}, err
 		}
-		if len(fields) > 0 {
-			return &httpx.ValidationError{Fields: fields}
-		}
+	}
+	if len(fields) > 0 {
+		return db.Transaction{}, &httpx.ValidationError{Fields: fields}
+	}
 
-		created, err = q.CreateTransaction(ctx, db.CreateTransactionParams{
-			ID:          id,
-			UserID:      user.ID,
-			Kind:        string(params.Kind),
-			AmountMinor: params.AmountMinor,
-			CategoryID:  params.CategoryID,
-			Merchant:    merchant,
-			MerchantKey: merchantKey,
-			Note:        note,
-			OccurredAt:  occurredAt,
-			LocalDate:   localDate,
-			Source:      SourceManual,
-			DedupHash:   DedupHash(localDate, params.AmountMinor, params.Kind, merchantKey),
-		})
-		if err != nil {
-			return fmt.Errorf("transactions: create: %w", err)
-		}
-		return s.merchantRule(ctx, q, created)
+	created, err := q.CreateTransaction(ctx, db.CreateTransactionParams{
+		ID:          id,
+		UserID:      user.ID,
+		Kind:        string(params.Kind),
+		AmountMinor: params.AmountMinor,
+		CategoryID:  params.CategoryID,
+		Merchant:    merchant,
+		MerchantKey: merchantKey,
+		Note:        note,
+		OccurredAt:  occurredAt,
+		LocalDate:   localDate,
+		Source:      source,
+		ReceiptID:   params.ReceiptID,
+		DedupHash:   DedupHash(localDate, params.AmountMinor, params.Kind, merchantKey),
 	})
 	if err != nil {
+		return db.Transaction{}, fmt.Errorf("transactions: create: %w", err)
+	}
+	if err := s.merchantRule(ctx, q, created); err != nil {
 		return db.Transaction{}, err
 	}
 	return created, nil
@@ -298,9 +321,10 @@ func (s *Service) Delete(ctx context.Context, userID, id uuid.UUID) error {
 }
 
 // merchantRule runs the hook for a saved transaction that files a merchant
-// under a category by hand.
+// under a category by the user's own choice: typed by hand, or confirmed
+// from a receipt.
 func (s *Service) merchantRule(ctx context.Context, q db.Querier, saved db.Transaction) error {
-	if saved.Source != SourceManual || saved.CategoryID == nil || saved.MerchantKey == "" {
+	if (saved.Source != SourceManual && saved.Source != SourceReceipt) || saved.CategoryID == nil || saved.MerchantKey == "" {
 		return nil
 	}
 	if err := s.onMerchantRule(ctx, q, saved.UserID, saved.MerchantKey, *saved.CategoryID); err != nil {

@@ -189,7 +189,7 @@ func runAPI(c cli, _ []string) error {
 			summary.NewService(pool, transactionService),
 			goals.NewService(pool, goals.WithImages(uploadService, store, logger)), engine,
 			imports.NewService(pool, uploadService, inserter),
-			receipts.NewService(pool, uploadService, store, inserter))),
+			receipts.NewService(pool, uploadService, store, inserter, transactionService))),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))

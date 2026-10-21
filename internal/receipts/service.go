@@ -13,6 +13,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
+	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
 	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
 )
 
@@ -77,12 +78,14 @@ type Service struct {
 	uploads *uploads.Service
 	store   storage.Store
 	jobs    Enqueuer
+	ledger  *transactions.Service
 }
 
 // NewService returns a Service working on database, claiming images from
-// uploads, linking to them in store and processing them through jobs.
-func NewService(database Database, uploadService *uploads.Service, store storage.Store, jobs Enqueuer) *Service {
-	return &Service{db: database, uploads: uploadService, store: store, jobs: jobs}
+// uploads, linking to them in store, processing them through jobs and
+// confirming them into ledger.
+func NewService(database Database, uploadService *uploads.Service, store storage.Store, jobs Enqueuer, ledger *transactions.Service) *Service {
+	return &Service{db: database, uploads: uploadService, store: store, jobs: jobs, ledger: ledger}
 }
 
 // Receipt is a receipt with a link to its image, nil once the image is

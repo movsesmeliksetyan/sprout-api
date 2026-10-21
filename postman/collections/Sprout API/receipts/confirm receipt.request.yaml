@@ -1,0 +1,32 @@
+$kind: http-request
+name: 'Confirm receipt'
+method: POST
+url: '{{baseUrl}}/v1/receipts/{{receiptId}}/confirm'
+order: 3000
+pathVariables:
+  - key: receiptId
+    value: '{{receiptId}}'
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Idempotency-Key
+    value: '{{$guid}}'
+body:
+  type: json
+  content: |-
+    {
+      "amount_minor": 4280,
+      "category_id": "{{categoryId}}",
+      "occurred_at": "{{$isoTimestamp}}",
+      "merchant": "Tesco",
+      "note": null
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 201 && json.id) {
+          pm.collectionVariables.set("transactionId", json.id);
+          console.log("✅ receipt confirmed; transactionId saved: " + json.id);
+      }

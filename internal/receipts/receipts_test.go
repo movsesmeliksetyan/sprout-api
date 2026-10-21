@@ -15,11 +15,13 @@ import (
 
 	spec "github.com/movsesmeliksetyan/sprout-api/api"
 	"github.com/movsesmeliksetyan/sprout-api/internal/auth"
+	"github.com/movsesmeliksetyan/sprout-api/internal/categorize"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/jobs"
 	"github.com/movsesmeliksetyan/sprout-api/internal/receipts"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
 	"github.com/movsesmeliksetyan/sprout-api/internal/testutil"
+	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
 	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
 	"github.com/movsesmeliksetyan/sprout-api/internal/users"
 )
@@ -56,7 +58,8 @@ func newFixture(t *testing.T) fixture {
 			users.Middleware(users.NewService(pool), responder),
 			httpx.Idempotency(pool, responder, logger, httpx.IdempotencyConfig{Routes: routes}),
 		),
-		httpx.WithAPI(api{Handler: receipts.NewHandler(receipts.NewService(pool, uploadService, store, inserter))}),
+		httpx.WithAPI(api{Handler: receipts.NewHandler(receipts.NewService(pool, uploadService, store, inserter,
+			transactions.NewService(pool, transactions.WithMerchantRuleHook(categorize.Learn))))}),
 	).Handler()
 	return fixture{pool: pool, store: store, uploads: uploadService, server: server}
 }

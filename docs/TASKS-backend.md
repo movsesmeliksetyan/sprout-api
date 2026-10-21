@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 51 / 63**
+**Progress: 52 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -115,7 +115,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
   - Migration is 00021, not 00013. `DELETE` on a confirmed receipt is `409` (contract §2.11 now says so). The PRD's BE-50 notes have the details.
 - [x] BE-51 · Receipt extraction — 2026-10-21, 4b55ddf
   - The live fixtures are synthetic receipts rendered from text, not photos. HEIC decodes without cgo. The PRD's BE-51 notes have the details.
-- [ ] BE-52 · Receipt confirm and retention
+- [x] BE-52 · Receipt confirm and retention — 2026-10-21, 93727ba
+  - A failed scan can be confirmed with what the user typed. The statement-file purge became the generic `uploads.PurgeFiles` (`purge_upload_files`) for receipt photos too. The PRD's BE-52 notes have the details.
 
 ## Milestone 10 — Insights
 

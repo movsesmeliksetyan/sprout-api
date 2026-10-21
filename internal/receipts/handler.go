@@ -7,6 +7,7 @@ import (
 
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/session"
+	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
 )
 
 // Handler implements the receipt operations of the API.
@@ -54,6 +55,25 @@ func (h *Handler) GetReceipt(ctx context.Context, request httpx.GetReceiptReques
 		return nil, err
 	}
 	return httpx.GetReceipt200JSONResponse(out), nil
+}
+
+// ConfirmReceipt writes a receipt to the ledger as an expense.
+func (h *Handler) ConfirmReceipt(ctx context.Context, request httpx.ConfirmReceiptRequestObject) (httpx.ConfirmReceiptResponseObject, error) {
+	user, ok := session.User(ctx)
+	if !ok {
+		return nil, httpx.ErrUnauthenticated
+	}
+	if request.Body == nil {
+		return nil, httpx.ErrBadRequest
+	}
+	created, err := h.service.Confirm(ctx, user, request.ID, Confirmation{
+		AmountMinor: request.Body.AmountMinor, CategoryID: request.Body.CategoryID, OccurredAt: request.Body.OccurredAt,
+		Merchant: request.Body.Merchant, Note: request.Body.Note,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return httpx.ConfirmReceipt201JSONResponse(transactions.ToAPI(created)), nil
 }
 
 // DeleteReceipt discards a receipt that has not been confirmed.

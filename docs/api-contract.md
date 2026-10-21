@@ -415,7 +415,7 @@ Flow: `POST /uploads` (purpose `receipt`) → `PUT` image → `POST /receipts` �
 
 Poll every 1 s (server target: < 8 s). `failure.code` ∈ `not_a_receipt`, `unreadable`, `internal`. Any extracted field may be `null`; the client lets the user fill it in.
 
-`POST /receipts/{id}/confirm` — `{ "amount_minor", "category_id", "occurred_at", "merchant"?, "note"? }` → `201` Transaction (`source: "receipt"`). Idempotent.
+`POST /receipts/{id}/confirm` — `{ "amount_minor", "category_id", "occurred_at", "merchant"?, "note"? }` → `201` Transaction (`source: "receipt"`). Idempotent. Confirming again returns the same transaction. A receipt still `processing` is `409`; a `failed` one can be confirmed with what the user entered. The fields are validated as for `POST /transactions` (`422`), and the merchant's category is learned as for a manual expense.
 
 `DELETE /receipts/{id}` → `204` (discard; a confirmed receipt stays with its transaction, `409`).
 

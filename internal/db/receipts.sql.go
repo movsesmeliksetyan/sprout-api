@@ -12,6 +12,23 @@ import (
 	"github.com/google/uuid"
 )
 
+const confirmReceipt = `-- name: ConfirmReceipt :exec
+UPDATE receipts
+SET status = 'confirmed', transaction_id = $1, confirmed_at = $2
+WHERE id = $3
+`
+
+type ConfirmReceiptParams struct {
+	TransactionID *uuid.UUID
+	ConfirmedAt   *time.Time
+	ID            uuid.UUID
+}
+
+func (q *Queries) ConfirmReceipt(ctx context.Context, arg ConfirmReceiptParams) error {
+	_, err := q.db.Exec(ctx, confirmReceipt, arg.TransactionID, arg.ConfirmedAt, arg.ID)
+	return err
+}
+
 const createReceipt = `-- name: CreateReceipt :one
 INSERT INTO receipts (id, user_id, upload_id)
 VALUES ($1, $2, $3)
@@ -57,6 +74,20 @@ DELETE FROM receipts WHERE id = $1
 func (q *Queries) DeleteReceipt(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteReceipt, id)
 	return err
+}
+
+const deleteUnconfirmedReceipts = `-- name: DeleteUnconfirmedReceipts :execrows
+DELETE FROM receipts WHERE status <> 'confirmed' AND created_at < $1
+`
+
+// Receipts never confirmed within their time; their photos go with the
+// uploads' own retention.
+func (q *Queries) DeleteUnconfirmedReceipts(ctx context.Context, before time.Time) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteUnconfirmedReceipts, before)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const failReceipt = `-- name: FailReceipt :exec
