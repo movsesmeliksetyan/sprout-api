@@ -1,0 +1,23 @@
+$kind: http-request
+name: 'Create receipt'
+method: POST
+url: '{{baseUrl}}/v1/receipts'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "upload_id": "{{uploadId}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 202 && json.id) {
+          pm.collectionVariables.set("receiptId", json.id);
+          console.log("✅ receiptId saved: " + json.id + "; poll it with Get receipt");
+      }

@@ -27,6 +27,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/jobs/schema"
 	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
+	"github.com/movsesmeliksetyan/sprout-api/internal/receipts"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
 	"github.com/movsesmeliksetyan/sprout-api/internal/summary"
 	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
@@ -187,7 +188,8 @@ func runAPI(c cli, _ []string) error {
 		httpx.WithAPI(newAPI(userService, uploadService, categoryService, transactionService,
 			summary.NewService(pool, transactionService),
 			goals.NewService(pool, goals.WithImages(uploadService, store, logger)), engine,
-			imports.NewService(pool, uploadService, inserter))),
+			imports.NewService(pool, uploadService, inserter),
+			receipts.NewService(pool, uploadService, store, inserter))),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))

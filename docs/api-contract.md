@@ -417,7 +417,7 @@ Poll every 1 s (server target: < 8 s). `failure.code` ∈ `not_a_receipt`, `unre
 
 `POST /receipts/{id}/confirm` — `{ "amount_minor", "category_id", "occurred_at", "merchant"?, "note"? }` → `201` Transaction (`source: "receipt"`). Idempotent.
 
-`DELETE /receipts/{id}` → `204`.
+`DELETE /receipts/{id}` → `204` (discard; a confirmed receipt stays with its transaction, `409`).
 
 ### 2.12 Devices & notifications
 

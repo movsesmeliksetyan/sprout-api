@@ -1,0 +1,16 @@
+$kind: http-request
+name: 'Delete receipt'
+method: DELETE
+url: '{{baseUrl}}/v1/receipts/{{receiptId}}'
+order: 9000
+pathVariables:
+  - key: receiptId
+    value: '{{receiptId}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      if (pm.response.code === 204) {
+          pm.collectionVariables.set("receiptId", "");
+          console.log("✅ receipt discarded; receiptId cleared");
+      }
