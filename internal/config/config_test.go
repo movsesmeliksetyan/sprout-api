@@ -81,7 +81,7 @@ func TestLoad_Valid(t *testing.T) {
 		Region: "eu-west-2", Bucket: "sprout-prod", AccessKeyID: "AKIAEXAMPLE", SecretAccessKey: testS3Secret,
 	}, cfg.S3)
 	assert.Equal(t, LLM{
-		Provider: "groq", APIKey: testLLMKey, ModelText: "text-model", ModelVision: "vision-model",
+		Provider: "groq", APIKey: testLLMKey, ModelText: "text-model", ModelVision: "vision-model", CategorizeBatch: 50,
 	}, cfg.LLM)
 	assert.Equal(t, APNS{
 		KeyID: "ABC123DEFG", TeamID: "TEAM123456", BundleID: "app.sprout.ios", KeyPath: "/secrets/apns.p8",
@@ -90,13 +90,15 @@ func TestLoad_Valid(t *testing.T) {
 
 func TestLoad_OptionalValues(t *testing.T) {
 	cfg, err := Load(lookupIn(envWith(map[string]string{
-		"LOG_LEVEL":         "DEBUG",
-		"HTTP_ADDR":         "127.0.0.1:9090",
-		"S3_ENDPOINT":       "http://localhost:9000",
-		"S3_USE_PATH_STYLE": "true",
-		"AUTH0_AUDIENCE":    "  https://api.sprout.app  ",
+		"LOG_LEVEL":            "DEBUG",
+		"HTTP_ADDR":            "127.0.0.1:9090",
+		"S3_ENDPOINT":          "http://localhost:9000",
+		"S3_USE_PATH_STYLE":    "true",
+		"AUTH0_AUDIENCE":       "  https://api.sprout.app  ",
+		"LLM_CATEGORIZE_BATCH": "15",
 	})))
 	require.NoError(t, err)
+	assert.Equal(t, 15, cfg.LLM.CategorizeBatch)
 
 	assert.Equal(t, slog.LevelDebug, cfg.LogLevel)
 	assert.Equal(t, "127.0.0.1:9090", cfg.HTTPAddr)
@@ -162,6 +164,8 @@ func TestLoad_InvalidValues(t *testing.T) {
 		{"s3 endpoint without scheme", "S3_ENDPOINT", "localhost:9000", "must be an http:// or https:// URL"},
 		{"s3 endpoint wrong scheme", "S3_ENDPOINT", "s3://bucket", "must be an http:// or https:// URL"},
 		{"path style not a bool", "S3_USE_PATH_STYLE", "yes", `must be true or false (got "yes")`},
+		{"categorize batch too big", "LLM_CATEGORIZE_BATCH", "51", `must be a whole number from 1 to 50 (got "51")`},
+		{"categorize batch not a number", "LLM_CATEGORIZE_BATCH", "ten", `must be a whole number from 1 to 50 (got "ten")`},
 		{"unsupported llm provider", "LLM_PROVIDER", "openai", `must be groq or anthropic (got "openai")`},
 	}
 

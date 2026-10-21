@@ -1,0 +1,555 @@
+{"bank": "ameria", "lang": "hy", "description": "Ք: GOLDEN DRAGON RESTAURANT YEREVAN AM 975223", "mcc": "", "amount_minor": 23069, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE VIRGIN MEDIA #947 AUSTIN WA", "mcc": "", "amount_minor": 10609, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO VERIZON 1703 LEEDS GB ON 18-05", "mcc": "", "amount_minor": 16850, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 26/08 ODEON LUXE CINEMA LYON", "mcc": "", "amount_minor": 8199, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT VODAFONE UTRECHT NLD", "mcc": "", "amount_minor": 19329, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 06/09 GOLDEN DRAGON RESTAURANT LYON", "mcc": "", "amount_minor": 7763, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE APOTHEKE AM MARKT #8199 SEATTLE WA", "mcc": "", "amount_minor": 4587, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT JOHN LEWIS AMSTERDAM NLD", "mcc": "", "amount_minor": 5279, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 09/06 LEBARA MOBILE LYON", "mcc": "", "amount_minor": 12974, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO DISNEY PLUS 5788 MANCHESTER GB ON 23-03", "mcc": "", "amount_minor": 1228, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT WHOLE FOODS MARKET UTRECHT NLD", "mcc": "", "amount_minor": 17129, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 15/03 OAK FURNITURE PARIS", "mcc": "", "amount_minor": 11613, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Bolt", "mcc": "", "amount_minor": 3699, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "NOMINA ACME SL", "mcc": "", "amount_minor": 270685, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: TICKETMASTER YEREVAN AM 360175", "mcc": "", "amount_minor": 11666, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO BACKPACKERS HOSTEL 3727 MANCHESTER GB ON 02-09", "mcc": "", "amount_minor": 23216, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 01/04 NETFLIX.COM LYON", "mcc": "", "amount_minor": 4654, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Star Supermarket", "mcc": "", "amount_minor": 24075, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 08/04 HALCYON LYON", "mcc": "", "amount_minor": 4716, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT VODAFONE UTRECHT NLD", "mcc": "", "amount_minor": 15497, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 15/12 SMYTHS TOYS LYON", "mcc": "", "amount_minor": 17047, "direction": "debit", "category_type": "family", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG Q8 TANKSTATION BERLIN DE", "mcc": "5541", "amount_minor": 19802, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: ASOS YEREVAN AM 643443", "mcc": "", "amount_minor": 1444, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "INTERNAL TRANSFER TO JOINT", "mcc": "", "amount_minor": 62138, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "mixed", "lang": "", "description": "BONIFICO A CONTO DEPOSITO", "mcc": "", "amount_minor": 65871, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: WOLT YEREVAN AM 122962", "mcc": "", "amount_minor": 1245, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Curzon", "mcc": "", "amount_minor": 714, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE ICELAND #5045 SEATTLE WA", "mcc": "", "amount_minor": 18755, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "City Car Rental", "mcc": "", "amount_minor": 4819, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Esso", "mcc": "", "amount_minor": 11660, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA TRADER JOES MADRID", "mcc": "", "amount_minor": 12937, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG ROYAL INDIAN RESTAURANT BERLIN DE", "mcc": "", "amount_minor": 5183, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG BLOOMS FLORIST BERLIN DE", "mcc": "", "amount_minor": 17353, "direction": "debit", "category_type": "gifts", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Friseur Klein", "mcc": "", "amount_minor": 23588, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Pharmacie Centrale", "mcc": "", "amount_minor": 12015, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "TFR TO SAVINGS", "mcc": "", "amount_minor": 106040, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA 1PASSWORD BARCELONA", "mcc": "", "amount_minor": 14220, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG STARBUCKS HAMBURG DE", "mcc": "", "amount_minor": 8865, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT BELLA NAPOLI PIZZERIA AMSTERDAM NLD", "mcc": "", "amount_minor": 11473, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO STEAM 535 BRISTOL GB ON 27-12", "mcc": "", "amount_minor": 5553, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE PIZZA PILGRIMS #2500 BOSTON WA", "mcc": "5812", "amount_minor": 22862, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA NORWEGIAN AIR BARCELONA", "mcc": "", "amount_minor": 9827, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "BONIFICO A CONTO DEPOSITO", "mcc": "", "amount_minor": 224515, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: SEPHORA YEREVAN AM 435125", "mcc": "", "amount_minor": 7499, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 02/08 CINEWORLD PARIS", "mcc": "", "amount_minor": 8511, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO CHEWY 3666 LEEDS GB ON 11-10", "mcc": "", "amount_minor": 6492, "direction": "debit", "category_type": "pets", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS CURRYS LONDON GB", "mcc": "", "amount_minor": 653, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS CITYMAPPER MANCHESTER GB", "mcc": "", "amount_minor": 7240, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE BP #7735 SEATTLE WA", "mcc": "", "amount_minor": 12174, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Dia Supermercado", "mcc": "", "amount_minor": 2734, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA GRAND THEATRE BARCELONA", "mcc": "", "amount_minor": 2998, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Zorbas", "mcc": "", "amount_minor": 10136, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT UCOM UTRECHT NLD", "mcc": "", "amount_minor": 3894, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: ALDI YEREVAN AM 781295", "mcc": "", "amount_minor": 16789, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 07/02 LINGUA SCHOOL LYON", "mcc": "", "amount_minor": 10970, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA CARD FACTORY MADRID", "mcc": "", "amount_minor": 13881, "direction": "debit", "category_type": "gifts", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "HMRC TAX REFUND", "mcc": "", "amount_minor": 29205, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "monzo", "lang": "en", "description": "Strike Bowling", "mcc": "", "amount_minor": 21412, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 01/05 TESCO PARIS", "mcc": "", "amount_minor": 163, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG PETS AT HOME HAMBURG DE", "mcc": "", "amount_minor": 13807, "direction": "debit", "category_type": "pets", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE LUFTHANSA #494 BOSTON WA", "mcc": "", "amount_minor": 13626, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG YOUTUBE MUSIC BERLIN DE", "mcc": "5815", "amount_minor": 14133, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: RIVERSIDE BUTCHERS YEREVAN AM 882160", "mcc": "", "amount_minor": 17415, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS RIVERSIDE BUTCHERS BRISTOL GB", "mcc": "", "amount_minor": 2579, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO FLIXBUS 9217 BRISTOL GB ON 24-11", "mcc": "", "amount_minor": 7804, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS EUROWINGS BRISTOL GB", "mcc": "", "amount_minor": 17668, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA LYFT MADRID", "mcc": "", "amount_minor": 2887, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA TSIRANI MADRID", "mcc": "", "amount_minor": 13332, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 04/02 YOUTUBE MUSIC LYON", "mcc": "", "amount_minor": 2841, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA HALCYON MADRID", "mcc": "", "amount_minor": 24059, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Happy Toys", "mcc": "", "amount_minor": 22238, "direction": "debit", "category_type": "family", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA RENFE BARCELONA", "mcc": "", "amount_minor": 2606, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS B&Q MANCHESTER GB", "mcc": "", "amount_minor": 20087, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Bäckerei Schmidt", "mcc": "", "amount_minor": 20135, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT CITYMAPPER AMSTERDAM NLD", "mcc": "", "amount_minor": 5879, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG EASYJET MÜNCHEN DE", "mcc": "", "amount_minor": 15518, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA FARMACIA SAN JUAN BARCELONA", "mcc": "", "amount_minor": 3854, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: GREGGS YEREVAN AM 261354", "mcc": "", "amount_minor": 17610, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT MORRISONS UTRECHT NLD", "mcc": "", "amount_minor": 6194, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG BOULANGERIE DUPONT BERLIN DE", "mcc": "", "amount_minor": 11624, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT PRIMARK UTRECHT NLD", "mcc": "", "amount_minor": 14622, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: CARD FACTORY YEREVAN AM 802415", "mcc": "", "amount_minor": 3718, "direction": "debit", "category_type": "gifts", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA LLOYDS PHARMACY BARCELONA", "mcc": "", "amount_minor": 21040, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE ESSO #5876 BOSTON WA", "mcc": "", "amount_minor": 2863, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO CHIPOTLE 462 BRISTOL GB ON 07-08", "mcc": "", "amount_minor": 5998, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT TRAINLINE AMSTERDAM NLD", "mcc": "", "amount_minor": 12859, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: CITY PARKING YEREVAN AM 879722", "mcc": "", "amount_minor": 3704, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 28/08 GREENWAY DENTAL CARE PARIS", "mcc": "", "amount_minor": 2693, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO EUROWINGS 7589 BRISTOL GB ON 01-04", "mcc": "", "amount_minor": 21959, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS ALPHA PHARM LONDON GB", "mcc": "", "amount_minor": 17970, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: YANDEX.GO YEREVAN AM 332447", "mcc": "", "amount_minor": 2627, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE JUST EAT #6726 AUSTIN WA", "mcc": "", "amount_minor": 10255, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA GLOVO BARCELONA", "mcc": "", "amount_minor": 11390, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO FRANCO MANCA 6162 BRISTOL GB ON 05-09", "mcc": "", "amount_minor": 7293, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 15/01 EBAY LYON", "mcc": "", "amount_minor": 14016, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 28/06 APOTHEKE AM MARKT PARIS", "mcc": "", "amount_minor": 15021, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 04/04 BOULANGERIE DUPONT PARIS", "mcc": "", "amount_minor": 21611, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE LIDL #6942 AUSTIN WA", "mcc": "", "amount_minor": 6971, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT WALGREENS UTRECHT NLD", "mcc": "", "amount_minor": 12580, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: TRADER JOES YEREVAN AM 167242", "mcc": "", "amount_minor": 14158, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO TOP CUTS BARBER 9843 LONDON GB ON 27-05", "mcc": "", "amount_minor": 6408, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "ԱՇԽԱՏԱՎԱՐՁ ACME", "mcc": "", "amount_minor": 124939, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 27/10 SCHUH LYON", "mcc": "", "amount_minor": 12201, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO ADOBE 5254 MANCHESTER GB ON 15-01", "mcc": "", "amount_minor": 2617, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: BRITISH GAS YEREVAN AM 220913", "mcc": "", "amount_minor": 12760, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Seaside Hotel", "mcc": "", "amount_minor": 16445, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO LUFTHANSA 7618 LONDON GB ON 07-03", "mcc": "", "amount_minor": 20956, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE NANDOS #6891 BOSTON WA", "mcc": "", "amount_minor": 10927, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE SHELL #336 BOSTON WA", "mcc": "", "amount_minor": 23937, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT BACKPACKERS HOSTEL AMSTERDAM NLD", "mcc": "", "amount_minor": 23515, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "GEHALT ACME GMBH", "mcc": "", "amount_minor": 43233, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS BELLA NAPOLI PIZZERIA MANCHESTER GB", "mcc": "", "amount_minor": 20078, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS ZOOM BRISTOL GB", "mcc": "", "amount_minor": 21145, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: SSE ENERGY YEREVAN AM 267518", "mcc": "", "amount_minor": 5157, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 08/10 RIVERSIDE BUTCHERS LYON", "mcc": "", "amount_minor": 21298, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT FASTNET BROADBAND AMSTERDAM NLD", "mcc": "", "amount_minor": 8553, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA BT BARCELONA", "mcc": "", "amount_minor": 6992, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE AMAZON #7105 BOSTON WA", "mcc": "", "amount_minor": 8311, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS THE GYM GROUP MANCHESTER GB", "mcc": "", "amount_minor": 737, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG PETS AT HOME BERLIN DE", "mcc": "", "amount_minor": 24074, "direction": "debit", "category_type": "pets", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA CAFE NOIR MADRID", "mcc": "", "amount_minor": 21364, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE SUBWAY #1007 AUSTIN WA", "mcc": "", "amount_minor": 22208, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA VIRGIN MEDIA MADRID", "mcc": "", "amount_minor": 6405, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 24/03 ANNAS HAIR SALON PARIS", "mcc": "", "amount_minor": 17963, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Flixbus", "mcc": "", "amount_minor": 11250, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS PENNY MARKT LONDON GB", "mcc": "", "amount_minor": 13386, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG SEPHORA HAMBURG DE", "mcc": "", "amount_minor": 21456, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG BYRON BURGER MÜNCHEN DE", "mcc": "5814", "amount_minor": 24923, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Nordlicht", "mcc": "", "amount_minor": 8108, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 27/10 SCREWFIX PARIS", "mcc": "", "amount_minor": 12508, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO INTERFLORA 1608 MANCHESTER GB ON 10-11", "mcc": "", "amount_minor": 7979, "direction": "debit", "category_type": "gifts", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO MARIOS KEBAB 2119 LEEDS GB ON 22-10", "mcc": "", "amount_minor": 12371, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: ZORBAS YEREVAN AM 297158", "mcc": "", "amount_minor": 17941, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE SPEEDY FUEL #8410 SEATTLE WA", "mcc": "", "amount_minor": 13242, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "Pot transfer", "mcc": "", "amount_minor": 110820, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "mixed", "lang": "", "description": "Перевод на карту", "mcc": "", "amount_minor": 115714, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO MERCADONA 5453 MANCHESTER GB ON 16-04", "mcc": "", "amount_minor": 11842, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS PRET A MANGER LONDON GB", "mcc": "", "amount_minor": 24142, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG PUREGYM MÜNCHEN DE", "mcc": "", "amount_minor": 7767, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT STAR SUPERMARKET AMSTERDAM NLD", "mcc": "", "amount_minor": 15357, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT COMCAST UTRECHT NLD", "mcc": "", "amount_minor": 5551, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA WAITROSE MADRID", "mcc": "", "amount_minor": 24974, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Zara", "mcc": "", "amount_minor": 19792, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: PENNY MARKT YEREVAN AM 520154", "mcc": "", "amount_minor": 10845, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO NETFLIX.COM 1102 LONDON GB ON 21-06", "mcc": "", "amount_minor": 8714, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA VERIZON BARCELONA", "mcc": "", "amount_minor": 7885, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "Pot transfer", "mcc": "", "amount_minor": 12967, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG SUPERDRY MÜNCHEN DE", "mcc": "5651", "amount_minor": 9523, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO AMAZON PRIME 2142 LONDON GB ON 02-01", "mcc": "", "amount_minor": 7128, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: MAILCHIMP YEREVAN AM 115787", "mcc": "", "amount_minor": 23355, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO ROSE STREET PHARMACY 3618 LONDON GB ON 27-05", "mcc": "", "amount_minor": 19870, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO VESNA 342 LONDON GB ON 12-11", "mcc": "", "amount_minor": 9353, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA SEASIDE HOTEL BARCELONA", "mcc": "", "amount_minor": 2232, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE NAILS BY SARA #3235 BOSTON WA", "mcc": "", "amount_minor": 7751, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: MCDONALDS YEREVAN AM 490465", "mcc": "", "amount_minor": 23221, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT H&M UTRECHT NLD", "mcc": "", "amount_minor": 9622, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 25/02 TEXACO PARIS", "mcc": "", "amount_minor": 1100, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Renfe", "mcc": "", "amount_minor": 15503, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA NAILS BY SARA MADRID", "mcc": "", "amount_minor": 22188, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS SNCF LEEDS GB", "mcc": "", "amount_minor": 11370, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 08/10 TFL TRAVEL CH PARIS", "mcc": "", "amount_minor": 17356, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS KROGER LEEDS GB", "mcc": "", "amount_minor": 5579, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO MOTHERCARE 1178 MANCHESTER GB ON 12-03", "mcc": "", "amount_minor": 17911, "direction": "debit", "category_type": "family", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO ROYAL INDIAN RESTAURANT 261 LEEDS GB ON 08-04", "mcc": "", "amount_minor": 7765, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "OVERBOEKING EIGEN REKENING", "mcc": "", "amount_minor": 147351, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS CURRYS MANCHESTER GB", "mcc": "", "amount_minor": 23554, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA ASDA MADRID", "mcc": "", "amount_minor": 16997, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA AMAZON BARCELONA", "mcc": "", "amount_minor": 15650, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: CORNER BAKERY YEREVAN AM 190873", "mcc": "", "amount_minor": 11326, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE MARIOS KEBAB #2168 SEATTLE WA", "mcc": "", "amount_minor": 5231, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "GEHALT ACME GMBH", "mcc": "", "amount_minor": 208914, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT ARAL UTRECHT NLD", "mcc": "", "amount_minor": 14483, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 22/08 PAWS VETERINARY CLINIC LYON", "mcc": "", "amount_minor": 10157, "direction": "debit", "category_type": "pets", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT BYRON BURGER AMSTERDAM NLD", "mcc": "", "amount_minor": 5139, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "TRASPASO A CUENTA AHORRO", "mcc": "", "amount_minor": 30407, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA DECATHLON BARCELONA", "mcc": "", "amount_minor": 3281, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT KAUFLAND UTRECHT NLD", "mcc": "", "amount_minor": 22656, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO BURGER SHACK 7519 LEEDS GB ON 08-09", "mcc": "", "amount_minor": 12305, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 25/03 REWE PARIS", "mcc": "", "amount_minor": 17853, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS CITY PARKING LEEDS GB", "mcc": "", "amount_minor": 15870, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE THE WORKS #5261 SEATTLE WA", "mcc": "5945", "amount_minor": 19053, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO 1PASSWORD 6501 MANCHESTER GB ON 23-02", "mcc": "", "amount_minor": 8500, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS SHELL BRISTOL GB", "mcc": "", "amount_minor": 9197, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS SSE ENERGY LONDON GB", "mcc": "", "amount_minor": 18384, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE DISNEY PLUS #4611 AUSTIN WA", "mcc": "", "amount_minor": 21481, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO ARGOS 3693 BRISTOL GB ON 26-02", "mcc": "", "amount_minor": 6942, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: ADOBE YEREVAN AM 921863", "mcc": "", "amount_minor": 23473, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 02/05 FNAC PARIS", "mcc": "", "amount_minor": 18370, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Glovo", "mcc": "", "amount_minor": 15953, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE BEST BUY #3804 SEATTLE WA", "mcc": "", "amount_minor": 11136, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO HILTON 562 MANCHESTER GB ON 10-12", "mcc": "", "amount_minor": 20921, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE CARREFOUR #2360 AUSTIN WA", "mcc": "", "amount_minor": 14933, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "INTEREST PAID", "mcc": "", "amount_minor": 297288, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "monzo", "lang": "en", "description": "Tankstelle Meyer", "mcc": "", "amount_minor": 14119, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG BP HAMBURG DE", "mcc": "", "amount_minor": 10821, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 07/10 TSIRANI PARIS", "mcc": "", "amount_minor": 14035, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 05/12 BURGER KING PARIS", "mcc": "", "amount_minor": 3661, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS DOORDASH LEEDS GB", "mcc": "", "amount_minor": 2943, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: PRIMARK YEREVAN AM 734012", "mcc": "", "amount_minor": 2382, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "CREDIT CARD REPAYMENT", "mcc": "", "amount_minor": 254415, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT AUDIBLE AMSTERDAM NLD", "mcc": "", "amount_minor": 14401, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS GREENWAY DENTAL CARE LONDON GB", "mcc": "", "amount_minor": 8181, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG SUBWAY HAMBURG DE", "mcc": "", "amount_minor": 21610, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT BOLT UTRECHT NLD", "mcc": "", "amount_minor": 23262, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE DECATHLON #8916 BOSTON WA", "mcc": "", "amount_minor": 20666, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "City Museum", "mcc": "", "amount_minor": 24063, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO YOUTUBE MUSIC 3112 LONDON GB ON 25-05", "mcc": "", "amount_minor": 21221, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT LEBARA MOBILE AMSTERDAM NLD", "mcc": "", "amount_minor": 5870, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS GRAND THEATRE LONDON GB", "mcc": "", "amount_minor": 7823, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Grand Theatre", "mcc": "", "amount_minor": 5985, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS SCREWFIX MANCHESTER GB", "mcc": "", "amount_minor": 6685, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 24/10 COMCAST LYON", "mcc": "", "amount_minor": 9222, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "INTERNAL TRANSFER TO JOINT", "mcc": "", "amount_minor": 162945, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 19/07 CAFE NOIR PARIS", "mcc": "", "amount_minor": 6132, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "TOP UP REVOLUT", "mcc": "", "amount_minor": 91236, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO PLAYSTATION NETWORK 4340 BRISTOL GB ON 16-03", "mcc": "", "amount_minor": 24505, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG EDEKA MÜNCHEN DE", "mcc": "", "amount_minor": 9984, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Cineworld", "mcc": "", "amount_minor": 18457, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "INTEREST PAID", "mcc": "", "amount_minor": 162457, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS WARHAMMER BRISTOL GB", "mcc": "", "amount_minor": 14945, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT SKY AMSTERDAM NLD", "mcc": "", "amount_minor": 20501, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Iceland", "mcc": "", "amount_minor": 2236, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA ASDA BARCELONA", "mcc": "", "amount_minor": 8122, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO SCHUH 8566 LONDON GB ON 21-12", "mcc": "", "amount_minor": 12606, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO MOONPIG 490 LONDON GB ON 07-01", "mcc": "", "amount_minor": 4281, "direction": "debit", "category_type": "gifts", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "ÜBERWEISUNG AN TAGESGELDKONTO", "mcc": "", "amount_minor": 140152, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT LEROY MERLIN UTRECHT NLD", "mcc": "", "amount_minor": 17021, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG NORTHFIELD UNIVERSITY MÜNCHEN DE", "mcc": "", "amount_minor": 9604, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 08/05 FRANCO MANCA LYON", "mcc": "", "amount_minor": 21325, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG Q8 TANKSTATION BERLIN DE", "mcc": "5541", "amount_minor": 8307, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO CORNER BAKERY 2811 LONDON GB ON 18-08", "mcc": "", "amount_minor": 17979, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 06/03 PRET A MANGER LYON", "mcc": "", "amount_minor": 15314, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: SOLSTICE YEREVAN AM 387412", "mcc": "", "amount_minor": 8924, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE HAPPY TOYS #3453 AUSTIN WA", "mcc": "", "amount_minor": 5090, "direction": "debit", "category_type": "family", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT SPEEDY FUEL AMSTERDAM NLD", "mcc": "", "amount_minor": 267, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA GAILS BAKERY BARCELONA", "mcc": "", "amount_minor": 6018, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO BURGER KING 7047 MANCHESTER GB ON 17-01", "mcc": "", "amount_minor": 22049, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: PHARMACIE CENTRALE YEREVAN AM 439401", "mcc": "", "amount_minor": 5627, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA MONOPRIX MADRID", "mcc": "", "amount_minor": 3807, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT MORRISONS UTRECHT NLD", "mcc": "", "amount_minor": 23522, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS FASTNET BROADBAND MANCHESTER GB", "mcc": "", "amount_minor": 13347, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Eurowings", "mcc": "", "amount_minor": 1978, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: DOMINOS PIZZA YEREVAN AM 798289", "mcc": "", "amount_minor": 4185, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "ԱՇԽԱՏԱՎԱՐՁ ACME", "mcc": "", "amount_minor": 39457, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE CITY MUSEUM #6126 SEATTLE WA", "mcc": "", "amount_minor": 16347, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "Փոխանցում քարտից քարտ", "mcc": "", "amount_minor": 269441, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: GOLDEN DRAGON RESTAURANT YEREVAN AM 551357", "mcc": "", "amount_minor": 14042, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Panaderia La Espiga", "mcc": "", "amount_minor": 3665, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA METRO TAXI MADRID", "mcc": "", "amount_minor": 7795, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA SPOTIFY MADRID", "mcc": "", "amount_minor": 13538, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO TANKSTELLE MEYER 8684 LONDON GB ON 26-01", "mcc": "", "amount_minor": 14555, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Natali Pharm", "mcc": "", "amount_minor": 7893, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE HANDY HARDWARE #3690 BOSTON WA", "mcc": "", "amount_minor": 23122, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "VIREMENT INTERNE LIVRET A", "mcc": "", "amount_minor": 149464, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS ASOS LEEDS GB", "mcc": "", "amount_minor": 23022, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE TEXACO #4384 BOSTON WA", "mcc": "", "amount_minor": 14253, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 19/08 THE CROWN PUB LYON", "mcc": "", "amount_minor": 9922, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "City Opticians", "mcc": "", "amount_minor": 14678, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA FLEX FITNESS MADRID", "mcc": "", "amount_minor": 7473, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO SCHUH 7209 LEEDS GB ON 14-11", "mcc": "", "amount_minor": 16958, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA ANNAS HAIR SALON BARCELONA", "mcc": "", "amount_minor": 2886, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS PUREGYM LONDON GB", "mcc": "", "amount_minor": 4912, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO KROGER 1326 LEEDS GB ON 03-12", "mcc": "", "amount_minor": 21219, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG SPECSAVERS HAMBURG DE", "mcc": "", "amount_minor": 21081, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE ZORBAS #7776 BOSTON WA", "mcc": "5812", "amount_minor": 9188, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE ZOOPLUS #499 BOSTON WA", "mcc": "", "amount_minor": 17222, "direction": "debit", "category_type": "pets", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 05/05 PIZZA PILGRIMS LYON", "mcc": "", "amount_minor": 2906, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA FASTNET BROADBAND BARCELONA", "mcc": "", "amount_minor": 12729, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG YANDEX.GO MÜNCHEN DE", "mcc": "", "amount_minor": 7586, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 04/01 BOOTS PARIS", "mcc": "", "amount_minor": 23029, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Citymapper", "mcc": "", "amount_minor": 12589, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS RYANAIR LONDON GB", "mcc": "", "amount_minor": 19148, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG EE BERLIN DE", "mcc": "", "amount_minor": 18643, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE TANKSTELLE MEYER #3755 BOSTON WA", "mcc": "", "amount_minor": 11739, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG THE WORKS BERLIN DE", "mcc": "5945", "amount_minor": 12493, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG PAWS VETERINARY CLINIC BERLIN DE", "mcc": "", "amount_minor": 19399, "direction": "debit", "category_type": "pets", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO CORNER BAKERY 3442 BRISTOL GB ON 01-09", "mcc": "", "amount_minor": 15081, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: BÄCKEREI SCHMIDT YEREVAN AM 651121", "mcc": "", "amount_minor": 1417, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT STEAM AMSTERDAM NLD", "mcc": "", "amount_minor": 2873, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO TRAVELODGE 6552 LEEDS GB ON 23-07", "mcc": "", "amount_minor": 11582, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: BYRON BURGER YEREVAN AM 421742", "mcc": "", "amount_minor": 22060, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE STARBUCKS #2747 BOSTON WA", "mcc": "", "amount_minor": 10425, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG OCTOPUS ENERGY HAMBURG DE", "mcc": "", "amount_minor": 16871, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO DELIVEROO 8265 MANCHESTER GB ON 24-03", "mcc": "", "amount_minor": 4136, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS DUOLINGO LONDON GB", "mcc": "", "amount_minor": 12054, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG PLAYSTATION NETWORK BERLIN DE", "mcc": "", "amount_minor": 20858, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA FNAC MADRID", "mcc": "", "amount_minor": 14848, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Zara", "mcc": "", "amount_minor": 3727, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS FARMACIA SAN JUAN LONDON GB", "mcc": "", "amount_minor": 19128, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA METRO TAXI MADRID", "mcc": "", "amount_minor": 7128, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 27/11 LINGUA SCHOOL PARIS", "mcc": "", "amount_minor": 7099, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO GASOLINERA SOL 7061 LONDON GB ON 11-06", "mcc": "", "amount_minor": 22745, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT DEUTSCHE BAHN UTRECHT NLD", "mcc": "", "amount_minor": 17134, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS BRITISH GAS LEEDS GB", "mcc": "", "amount_minor": 22104, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS SAINSBURYS BRISTOL GB", "mcc": "", "amount_minor": 16206, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE WARHAMMER #8931 BOSTON WA", "mcc": "5945", "amount_minor": 15084, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 27/03 SUSHI ZEN PARIS", "mcc": "", "amount_minor": 24869, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS NORDLICHT MANCHESTER GB", "mcc": "", "amount_minor": 22925, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 25/10 PREMIER INN PARIS", "mcc": "", "amount_minor": 8889, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO FRANPRIX 9476 MANCHESTER GB ON 13-02", "mcc": "", "amount_minor": 21492, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA VESNA MADRID", "mcc": "", "amount_minor": 13195, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "The Crown Pub", "mcc": "", "amount_minor": 11149, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO COURSERA 6442 BRISTOL GB ON 23-07", "mcc": "", "amount_minor": 23850, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS SAFEWAY LONDON GB", "mcc": "", "amount_minor": 819, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: TOTAL ENERGIES YEREVAN AM 311813", "mcc": "", "amount_minor": 4297, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS CVS PHARMACY LONDON GB", "mcc": "", "amount_minor": 15870, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 06/11 BLOOMS FLORIST LYON", "mcc": "", "amount_minor": 17271, "direction": "debit", "category_type": "gifts", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA SAINSBURYS BARCELONA", "mcc": "", "amount_minor": 17935, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG TSIRANI BERLIN DE", "mcc": "5411", "amount_minor": 7278, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "TFR TO SAVINGS", "mcc": "", "amount_minor": 115388, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT FLEX FITNESS AMSTERDAM NLD", "mcc": "", "amount_minor": 5307, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "CASHBACK REWARD", "mcc": "", "amount_minor": 175232, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE UNIQLO #6185 AUSTIN WA", "mcc": "", "amount_minor": 13379, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 14/04 DEUTSCHE BAHN PARIS", "mcc": "", "amount_minor": 15795, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS WAGAMAMA LEEDS GB", "mcc": "", "amount_minor": 10166, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG JOHN LEWIS MÜNCHEN DE", "mcc": "", "amount_minor": 10482, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG ALPHA PHARM BERLIN DE", "mcc": "", "amount_minor": 20491, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE GITHUB #5777 BOSTON WA", "mcc": "", "amount_minor": 5205, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: EDEKA YEREVAN AM 413374", "mcc": "", "amount_minor": 1268, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: WAYFAIR YEREVAN AM 166221", "mcc": "", "amount_minor": 11042, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG EXPEDIA HAMBURG DE", "mcc": "", "amount_minor": 19262, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS NATALI PHARM MANCHESTER GB", "mcc": "", "amount_minor": 3259, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA TOTAL ENERGIES BARCELONA", "mcc": "", "amount_minor": 8344, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: MAILCHIMP YEREVAN AM 205991", "mcc": "", "amount_minor": 2186, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA ROSSMANN BARCELONA", "mcc": "", "amount_minor": 18153, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA PUBLIX MADRID", "mcc": "", "amount_minor": 1020, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS LUSH LONDON GB", "mcc": "", "amount_minor": 16722, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "FASTER PAYMENT FROM S JONES", "mcc": "", "amount_minor": 167932, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS UDEMY LONDON GB", "mcc": "", "amount_minor": 5472, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: WILDBERRIES YEREVAN AM 633370", "mcc": "", "amount_minor": 24937, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT AUDIBLE UTRECHT NLD", "mcc": "", "amount_minor": 12119, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "TRASPASO A CUENTA AHORRO", "mcc": "", "amount_minor": 38304, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 28/07 WAGAMAMA LYON", "mcc": "", "amount_minor": 18474, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 27/12 DOMINOS PIZZA PARIS", "mcc": "", "amount_minor": 2820, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "HMRC TAX REFUND", "mcc": "", "amount_minor": 60162, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: MUJI YEREVAN AM 913072", "mcc": "", "amount_minor": 23640, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO HALCYON 2497 BRISTOL GB ON 18-07", "mcc": "", "amount_minor": 22111, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS HIGHWAY PETROL STATION LEEDS GB", "mcc": "", "amount_minor": 20251, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Thames Water", "mcc": "", "amount_minor": 1577, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT UBER EATS AMSTERDAM NLD", "mcc": "", "amount_minor": 23701, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT DOUGLAS UTRECHT NLD", "mcc": "", "amount_minor": 10227, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA HIGHWAY PETROL STATION BARCELONA", "mcc": "", "amount_minor": 8736, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE FRISEUR KLEIN #4742 SEATTLE WA", "mcc": "", "amount_minor": 483, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA NAILS BY SARA MADRID", "mcc": "", "amount_minor": 16053, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE UBER #9333 BOSTON WA", "mcc": "", "amount_minor": 3447, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE STAR SUPERMARKET #1328 AUSTIN WA", "mcc": "", "amount_minor": 14733, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS EASYJET MANCHESTER GB", "mcc": "", "amount_minor": 12531, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: UBER EATS YEREVAN AM 753039", "mcc": "", "amount_minor": 9570, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS FRESHCO SUPERMARKET LONDON GB", "mcc": "", "amount_minor": 22803, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO АПТЕКА 36 6702 LONDON GB ON 01-12", "mcc": "", "amount_minor": 14917, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT COSTA COFFEE AMSTERDAM NLD", "mcc": "", "amount_minor": 12715, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS PHARMACIE CENTRALE MANCHESTER GB", "mcc": "", "amount_minor": 11544, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 17/10 TOP CUTS BARBER PARIS", "mcc": "", "amount_minor": 21220, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 04/09 PIZZA HUT LYON", "mcc": "", "amount_minor": 24859, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE HAPPY TOYS #3792 SEATTLE WA", "mcc": "", "amount_minor": 2389, "direction": "debit", "category_type": "family", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE THE GYM GROUP #5489 SEATTLE WA", "mcc": "", "amount_minor": 23757, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: TESCO YEREVAN AM 359672", "mcc": "", "amount_minor": 8978, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE ZOOPLUS #3958 SEATTLE WA", "mcc": "", "amount_minor": 5494, "direction": "debit", "category_type": "pets", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Chipotle", "mcc": "", "amount_minor": 481, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Five Guys", "mcc": "", "amount_minor": 21590, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS INTERFLORA BRISTOL GB", "mcc": "", "amount_minor": 20625, "direction": "debit", "category_type": "gifts", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 17/09 ARAL PARIS", "mcc": "", "amount_minor": 7406, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT NORWEGIAN AIR UTRECHT NLD", "mcc": "", "amount_minor": 14262, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE BELLA NAPOLI PIZZERIA #5485 BOSTON WA", "mcc": "", "amount_minor": 296, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT ODEON AMSTERDAM NLD", "mcc": "", "amount_minor": 16227, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS GREENWAY DENTAL CARE BRISTOL GB", "mcc": "", "amount_minor": 14451, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: MARIOS KEBAB YEREVAN AM 780887", "mcc": "", "amount_minor": 5874, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS MERCADONA LEEDS GB", "mcc": "", "amount_minor": 4814, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO JUST EAT 3991 LONDON GB ON 12-05", "mcc": "", "amount_minor": 274, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "ÜBERWEISUNG AN TAGESGELDKONTO", "mcc": "", "amount_minor": 231528, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: SUPERDRY YEREVAN AM 677049", "mcc": "", "amount_minor": 13607, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA NOTION BARCELONA", "mcc": "", "amount_minor": 21725, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG FRANPRIX MÜNCHEN DE", "mcc": "", "amount_minor": 14899, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA FRESHCO SUPERMARKET MADRID", "mcc": "", "amount_minor": 19251, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE ODEON #3625 SEATTLE WA", "mcc": "", "amount_minor": 9634, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 08/11 PANADERIA LA ESPIGA PARIS", "mcc": "", "amount_minor": 15531, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT CURZON AMSTERDAM NLD", "mcc": "", "amount_minor": 3744, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT LYFT AMSTERDAM NLD", "mcc": "", "amount_minor": 16975, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT KFC UTRECHT NLD", "mcc": "", "amount_minor": 7744, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG ZALANDO MÜNCHEN DE", "mcc": "", "amount_minor": 14449, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT HOME DEPOT UTRECHT NLD", "mcc": "", "amount_minor": 23597, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO METRO TAXI 2474 BRISTOL GB ON 17-04", "mcc": "", "amount_minor": 5199, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "City Car Rental", "mcc": "", "amount_minor": 7750, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA MEDIAMARKT BARCELONA", "mcc": "", "amount_minor": 9016, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 12/03 WOLT PARIS", "mcc": "", "amount_minor": 19290, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE THAMES WATER #9803 SEATTLE WA", "mcc": "", "amount_minor": 24324, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "SALARY ACME WIDGETS LTD", "mcc": "", "amount_minor": 3580, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: ROSSMANN YEREVAN AM 614212", "mcc": "", "amount_minor": 2517, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE CURZON #2986 AUSTIN WA", "mcc": "7832", "amount_minor": 24675, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Rose Street Pharmacy", "mcc": "", "amount_minor": 424, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT MOTHERCARE UTRECHT NLD", "mcc": "", "amount_minor": 15959, "direction": "debit", "category_type": "family", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Mcdonalds", "mcc": "", "amount_minor": 24614, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA CITY MUSEUM BARCELONA", "mcc": "", "amount_minor": 18269, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA DELIVEROO BARCELONA", "mcc": "", "amount_minor": 4067, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS GAILS BAKERY LONDON GB", "mcc": "", "amount_minor": 4246, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 03/10 UCOM LYON", "mcc": "", "amount_minor": 16851, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS KFC MANCHESTER GB", "mcc": "", "amount_minor": 767, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA ALBERT HEIJN BARCELONA", "mcc": "", "amount_minor": 13244, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: BURGER SHACK YEREVAN AM 629327", "mcc": "", "amount_minor": 14534, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Annas Hair Salon", "mcc": "", "amount_minor": 6458, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO BEST BUY 1253 BRISTOL GB ON 01-07", "mcc": "", "amount_minor": 9433, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Blooms Florist", "mcc": "", "amount_minor": 16438, "direction": "debit", "category_type": "gifts", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT LUSH AMSTERDAM NLD", "mcc": "", "amount_minor": 7424, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 25/12 NORTHFIELD UNIVERSITY LYON", "mcc": "", "amount_minor": 19741, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE STRIKE BOWLING #4996 BOSTON WA", "mcc": "", "amount_minor": 21723, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE SPARKLE CAR WASH #526 BOSTON WA", "mcc": "", "amount_minor": 24352, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA DOORDASH BARCELONA", "mcc": "", "amount_minor": 7621, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG WARHAMMER HAMBURG DE", "mcc": "5945", "amount_minor": 22118, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS CAFE NOIR BRISTOL GB", "mcc": "", "amount_minor": 7487, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO GITHUB 7940 MANCHESTER GB ON 09-04", "mcc": "", "amount_minor": 12924, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG SPARKLE CAR WASH MÜNCHEN DE", "mcc": "", "amount_minor": 9752, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG TFL TRAVEL CH MÜNCHEN DE", "mcc": "", "amount_minor": 7524, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG PANADERIA LA ESPIGA HAMBURG DE", "mcc": "", "amount_minor": 20135, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: ROSE STREET PHARMACY YEREVAN AM 753099", "mcc": "", "amount_minor": 8138, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO GAILS BAKERY 1812 MANCHESTER GB ON 08-04", "mcc": "", "amount_minor": 14368, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Gasolinera Sol", "mcc": "", "amount_minor": 24679, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "CREDIT CARD REPAYMENT", "mcc": "", "amount_minor": 163744, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "mixed", "lang": "", "description": "TOP UP REVOLUT", "mcc": "", "amount_minor": 214656, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "mixed", "lang": "", "description": "NOMINA ACME SL", "mcc": "", "amount_minor": 137701, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE SUPERDRY #5472 AUSTIN WA", "mcc": "5651", "amount_minor": 2197, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS BÄCKEREI SCHMIDT LONDON GB", "mcc": "", "amount_minor": 23448, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 03/02 GASOLINERA SOL LYON", "mcc": "", "amount_minor": 6824, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG DOUGLAS HAMBURG DE", "mcc": "", "amount_minor": 22015, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT BENEFIT COSMETICS AMSTERDAM NLD", "mcc": "", "amount_minor": 23482, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Dia Supermercado", "mcc": "", "amount_minor": 13153, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: HOME DEPOT YEREVAN AM 256050", "mcc": "", "amount_minor": 5318, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 25/01 UBER PARIS", "mcc": "", "amount_minor": 12783, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: ZOOM YEREVAN AM 273568", "mcc": "", "amount_minor": 14995, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE CITY CAR RENTAL #2345 SEATTLE WA", "mcc": "", "amount_minor": 3205, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO THE CROWN PUB 8212 LONDON GB ON 02-10", "mcc": "", "amount_minor": 12357, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE BRITISH AIRWAYS #7090 AUSTIN WA", "mcc": "", "amount_minor": 981, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: АПТЕКА 36 YEREVAN AM 518846", "mcc": "", "amount_minor": 24998, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: BURGER SHACK YEREVAN AM 709788", "mcc": "", "amount_minor": 4567, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: COSTA COFFEE YEREVAN AM 422366", "mcc": "", "amount_minor": 13074, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO TICKETMASTER 7137 LEEDS GB ON 06-06", "mcc": "", "amount_minor": 13693, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 28/11 SKY PARIS", "mcc": "", "amount_minor": 22588, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO CHEWY 7180 LONDON GB ON 28-01", "mcc": "", "amount_minor": 21788, "direction": "debit", "category_type": "pets", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS AIRBNB LEEDS GB", "mcc": "", "amount_minor": 7354, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO EBAY 9118 BRISTOL GB ON 03-07", "mcc": "", "amount_minor": 18476, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE SMYTHS TOYS #5822 SEATTLE WA", "mcc": "", "amount_minor": 4380, "direction": "debit", "category_type": "family", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 10/01 NORDLICHT PARIS", "mcc": "", "amount_minor": 6687, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG CITY OPTICIANS MÜNCHEN DE", "mcc": "", "amount_minor": 5000, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO BACKPACKERS HOSTEL 7548 LEEDS GB ON 22-05", "mcc": "", "amount_minor": 7330, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Spotify", "mcc": "", "amount_minor": 4499, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "VIREMENT INTERNE LIVRET A", "mcc": "", "amount_minor": 223432, "direction": "credit", "category_type": null, "kind": "transfer"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 16/05 SOLSTICE PARIS", "mcc": "", "amount_minor": 22945, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: NORWEGIAN AIR YEREVAN AM 823944", "mcc": "", "amount_minor": 20387, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT SPARKLE CAR WASH UTRECHT NLD", "mcc": "", "amount_minor": 23776, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "SALARY ACME WIDGETS LTD", "mcc": "", "amount_minor": 222809, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "monzo", "lang": "en", "description": "Mailchimp", "mcc": "", "amount_minor": 18178, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS KAUFLAND BRISTOL GB", "mcc": "", "amount_minor": 12458, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE OCADO #6224 AUSTIN WA", "mcc": "", "amount_minor": 23544, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO Q8 TANKSTATION 300 BRISTOL GB ON 07-09", "mcc": "", "amount_minor": 12990, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA LEBARA MOBILE MADRID", "mcc": "", "amount_minor": 4556, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS PUBLIX BRISTOL GB", "mcc": "", "amount_minor": 7857, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE PIZZA HUT #9382 AUSTIN WA", "mcc": "", "amount_minor": 15736, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: CITY OPTICIANS YEREVAN AM 417673", "mcc": "", "amount_minor": 23312, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT LIDL AMSTERDAM NLD", "mcc": "", "amount_minor": 7886, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE HANDY HARDWARE #2948 AUSTIN WA", "mcc": "", "amount_minor": 9856, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT DIA SUPERMERCADO UTRECHT NLD", "mcc": "", "amount_minor": 11803, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS HILTON MANCHESTER GB", "mcc": "", "amount_minor": 3020, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Safeway", "mcc": "", "amount_minor": 14797, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE MEDIAMARKT #793 SEATTLE WA", "mcc": "", "amount_minor": 5627, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: OCADO YEREVAN AM 755160", "mcc": "", "amount_minor": 12617, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE SOLSTICE #419 AUSTIN WA", "mcc": "7298", "amount_minor": 11639, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT SEASIDE HOTEL AMSTERDAM NLD", "mcc": "", "amount_minor": 17369, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS FIVE GUYS BRISTOL GB", "mcc": "", "amount_minor": 1158, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "CASHBACK REWARD", "mcc": "", "amount_minor": 47821, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS CVS PHARMACY MANCHESTER GB", "mcc": "", "amount_minor": 18531, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA TK MAXX MADRID", "mcc": "", "amount_minor": 15654, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG PAWS VETERINARY CLINIC BERLIN DE", "mcc": "", "amount_minor": 9574, "direction": "debit", "category_type": "pets", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG FRISEUR KLEIN BERLIN DE", "mcc": "", "amount_minor": 4027, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG MOONPIG BERLIN DE", "mcc": "", "amount_minor": 22603, "direction": "debit", "category_type": "gifts", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: WAITROSE YEREVAN AM 103315", "mcc": "", "amount_minor": 19610, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA OCTOPUS ENERGY MADRID", "mcc": "", "amount_minor": 20736, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS CITY PARKING BRISTOL GB", "mcc": "", "amount_minor": 11789, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "FASTER PAYMENT FROM S JONES", "mcc": "", "amount_minor": 217023, "direction": "credit", "category_type": null, "kind": "income"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE VESNA #8192 SEATTLE WA", "mcc": "5691", "amount_minor": 6819, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO WALGREENS 2786 MANCHESTER GB ON 21-10", "mcc": "", "amount_minor": 18911, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS MUJI LEEDS GB", "mcc": "", "amount_minor": 18917, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE STRIKE BOWLING #6190 AUSTIN WA", "mcc": "", "amount_minor": 24803, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 20/10 FARMACIA SAN JUAN PARIS", "mcc": "", "amount_minor": 12544, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT UDEMY UTRECHT NLD", "mcc": "", "amount_minor": 23461, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT UNIQLO AMSTERDAM NLD", "mcc": "", "amount_minor": 17197, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "Перевод на карту", "mcc": "", "amount_minor": 181905, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: ARGOS YEREVAN AM 169651", "mcc": "", "amount_minor": 1232, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: SNCF YEREVAN AM 305230", "mcc": "", "amount_minor": 7182, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 02/06 ZALANDO LYON", "mcc": "", "amount_minor": 6524, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS THE WORKS BRISTOL GB", "mcc": "", "amount_minor": 7029, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 09/08 MUJI LYON", "mcc": "", "amount_minor": 2117, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "Փոխանցում քարտից քարտ", "mcc": "", "amount_minor": 119269, "direction": "debit", "category_type": null, "kind": "transfer"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT LEROY MERLIN AMSTERDAM NLD", "mcc": "", "amount_minor": 4274, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Carrefour", "mcc": "", "amount_minor": 10744, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG ROYAL INDIAN RESTAURANT MÜNCHEN DE", "mcc": "", "amount_minor": 14406, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT LLOYDS PHARMACY AMSTERDAM NLD", "mcc": "", "amount_minor": 19129, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT BOOKING.COM UTRECHT NLD", "mcc": "", "amount_minor": 14168, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS BRITISH AIRWAYS LEEDS GB", "mcc": "", "amount_minor": 1425, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 24/01 BOULANGERIE DUPONT PARIS", "mcc": "", "amount_minor": 7509, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE HANDY HARDWARE #116 BOSTON WA", "mcc": "", "amount_minor": 3345, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG RYANAIR BERLIN DE", "mcc": "", "amount_minor": 23811, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT АПТЕКА 36 UTRECHT NLD", "mcc": "", "amount_minor": 2961, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS 1PASSWORD LEEDS GB", "mcc": "", "amount_minor": 7672, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 24/04 BENEFIT COSMETICS LYON", "mcc": "", "amount_minor": 18574, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS CO-OP MANCHESTER GB", "mcc": "", "amount_minor": 7481, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Speedy Fuel", "mcc": "", "amount_minor": 15985, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Tk Maxx", "mcc": "", "amount_minor": 20297, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT WAYFAIR UTRECHT NLD", "mcc": "", "amount_minor": 8495, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Odeon Luxe Cinema", "mcc": "", "amount_minor": 10098, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO BENEFIT COSMETICS 2665 BRISTOL GB ON 08-03", "mcc": "", "amount_minor": 4552, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE NORTHFIELD UNIVERSITY #1482 AUSTIN WA", "mcc": "", "amount_minor": 16320, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT LIEFERANDO UTRECHT NLD", "mcc": "", "amount_minor": 4383, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Lingua School", "mcc": "", "amount_minor": 2038, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 02/04 AIRBNB PARIS", "mcc": "", "amount_minor": 6223, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE GREGGS #5657 BOSTON WA", "mcc": "", "amount_minor": 4925, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS LIEFERANDO LONDON GB", "mcc": "", "amount_minor": 19089, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 10/02 ALBERT HEIJN LYON", "mcc": "", "amount_minor": 20502, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS REWE LEEDS GB", "mcc": "", "amount_minor": 9324, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG SSE ENERGY MÜNCHEN DE", "mcc": "4900", "amount_minor": 5937, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 06/09 CO-OP LYON", "mcc": "", "amount_minor": 2937, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA PIZZA PILGRIMS BARCELONA", "mcc": "", "amount_minor": 16291, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG AMAZON PRIME MÜNCHEN DE", "mcc": "", "amount_minor": 14305, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: IKEA YEREVAN AM 606547", "mcc": "", "amount_minor": 21924, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT FRANCO MANCA UTRECHT NLD", "mcc": "", "amount_minor": 5083, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: PENNY MARKT YEREVAN AM 504707", "mcc": "", "amount_minor": 2180, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG ALDI MÜNCHEN DE", "mcc": "", "amount_minor": 2919, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA TRAINLINE BARCELONA", "mcc": "", "amount_minor": 20056, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Top Cuts Barber", "mcc": "", "amount_minor": 9717, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO OAK FURNITURE 1350 BRISTOL GB ON 02-02", "mcc": "", "amount_minor": 13779, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Boots", "mcc": "", "amount_minor": 13070, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: TRAVELODGE YEREVAN AM 459002", "mcc": "", "amount_minor": 3443, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: HIGHWAY PETROL STATION YEREVAN AM 437059", "mcc": "", "amount_minor": 21948, "direction": "debit", "category_type": "transport", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA IKEA BARCELONA", "mcc": "", "amount_minor": 6687, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS APOTHEKE AM MARKT LEEDS GB", "mcc": "", "amount_minor": 14921, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 23/04 NOTION PARIS", "mcc": "", "amount_minor": 17511, "direction": "debit", "category_type": "work", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Coursera", "mcc": "", "amount_minor": 23859, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO EXPEDIA 3878 BRISTOL GB ON 21-10", "mcc": "", "amount_minor": 22346, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS BT BRISTOL GB", "mcc": "", "amount_minor": 9705, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE OAK FURNITURE #5716 AUSTIN WA", "mcc": "", "amount_minor": 23798, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Monoprix", "mcc": "", "amount_minor": 22518, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG FLEX FITNESS HAMBURG DE", "mcc": "", "amount_minor": 22707, "direction": "debit", "category_type": "selfcare", "kind": "expense"}
+{"bank": "uk_contactless", "lang": "en", "description": "CONTACTLESS BOOKING.COM LONDON GB", "mcc": "", "amount_minor": 21458, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "de_giro", "lang": "de", "description": "KARTENZAHLUNG H&M HAMBURG DE", "mcc": "", "amount_minor": 15879, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT SUSHI ZEN AMSTERDAM NLD", "mcc": "", "amount_minor": 19923, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: SPECSAVERS YEREVAN AM 548421", "mcc": "", "amount_minor": 20530, "direction": "debit", "category_type": "health", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: FRESHCO SUPERMARKET YEREVAN AM 555784", "mcc": "", "amount_minor": 830, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "nl_pin", "lang": "nl", "description": "BETAALAUTOMAAT ODEON LUXE CINEMA AMSTERDAM NLD", "mcc": "", "amount_minor": 9748, "direction": "debit", "category_type": "leisure", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: SUSHI ZEN YEREVAN AM 275860", "mcc": "", "amount_minor": 18468, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "es_tarjeta", "lang": "es", "description": "COMPRA TARJETA NANDOS BARCELONA", "mcc": "", "amount_minor": 24021, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "fr_cb", "lang": "fr", "description": "PAIEMENT CB 13/07 PREMIER INN PARIS", "mcc": "", "amount_minor": 13779, "direction": "debit", "category_type": "travel", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: B&Q YEREVAN AM 996826", "mcc": "", "amount_minor": 18548, "direction": "debit", "category_type": "housing", "kind": "expense"}
+{"bank": "us_pos", "lang": "en", "description": "POS PURCHASE DUOLINGO #1361 BOSTON WA", "mcc": "", "amount_minor": 5413, "direction": "debit", "category_type": "education", "kind": "expense"}
+{"bank": "monzo", "lang": "en", "description": "Whole Foods Market", "mcc": "", "amount_minor": 12554, "direction": "debit", "category_type": "food", "kind": "expense"}
+{"bank": "ameria", "lang": "hy", "description": "Ք: EE YEREVAN AM 463141", "mcc": "", "amount_minor": 13642, "direction": "debit", "category_type": "utilities", "kind": "expense"}
+{"bank": "uk_card", "lang": "en", "description": "CARD PAYMENT TO WILDBERRIES 3163 LEEDS GB ON 04-03", "mcc": "", "amount_minor": 16252, "direction": "debit", "category_type": "shopping", "kind": "expense"}
+{"bank": "mixed", "lang": "", "description": "OVERBOEKING EIGEN REKENING", "mcc": "", "amount_minor": 165633, "direction": "credit", "category_type": null, "kind": "transfer"}

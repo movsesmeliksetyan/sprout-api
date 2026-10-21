@@ -180,8 +180,10 @@ func (g *Groq) Complete(ctx context.Context, call Call) (Completion, error) {
 }
 
 // groqStatusError turns an error answer into a *StatusError. An answer the
-// API itself found not to match the schema is invalid output, which is not
-// retried.
+// API itself could not make match the schema (json_validate_failed) is
+// ErrGenerationFailed: it happens now and then on prompts that succeed when
+// asked again, so it is retried, and is invalid output once attempts run
+// out.
 func groqStatusError(resp *http.Response) error {
 	raw, _ := io.ReadAll(io.LimitReader(resp.Body, maxGroqErrorBody))
 	var body groqError
@@ -192,7 +194,7 @@ func groqStatusError(resp *http.Response) error {
 	}
 	err := fmt.Errorf("groq %s: %s", body.Error.Code, message)
 	if body.Error.Code == "json_validate_failed" {
-		return fmt.Errorf("%w: %w", ErrInvalidOutput, err)
+		return fmt.Errorf("%w: %w", ErrGenerationFailed, err)
 	}
 	return &StatusError{StatusCode: resp.StatusCode, RetryAfter: retryAfterSeconds(resp.Header), Err: err}
 }

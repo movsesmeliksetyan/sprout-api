@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 35 / 63**
+**Progress: 36 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -82,7 +82,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 - [x] BE-34 · Learning loop — 2026-10-21, cc22d27
   - Migration `00014_merchant_votes.sql`. The nightly river job is registered by BE-37, which brings river; BE-34 ships `PromoteDictionary`, the function it runs. Demotion needs at least 3 voters. The PRD's BE-34 notes have the details.
 - [x] BE-35 · `POST /categorization/suggest` — 2026-10-21, ca881ee
-- [ ] BE-36 · Evaluation harness
+- [x] BE-36 · Evaluation harness — 2026-10-21, 967dc9b
+  - Deterministic: coverage 89.9 %, precision 99.1 %; with `qwen/qwen3.8-27b`: accuracy 95.9 %. The live runs led to three fixes (Groq generation failures retried, `LLM_CATEGORIZE_BATCH` for the free tier's 1,000 output tokens a minute, a date before a web address in the normaliser, with backfill migration 00015). The PRD's BE-36 notes have the details.
 
 ## Milestone 8 — Statement normalisation (§4)
 

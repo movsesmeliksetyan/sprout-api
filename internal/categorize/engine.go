@@ -97,11 +97,12 @@ type Options struct {
 // Engine categorises transactions through the layers of PRD §5.2, cheapest
 // first; the first answer that reaches Threshold wins.
 type Engine struct {
-	q      db.Querier
-	store  *Store
-	now    func() time.Time
-	llm    llm.Client
-	logger *slog.Logger
+	q        db.Querier
+	store    *Store
+	now      func() time.Time
+	llm      llm.Client
+	llmBatch int
+	logger   *slog.Logger
 }
 
 // EngineOption configures an Engine.
@@ -114,7 +115,7 @@ func WithClock(now func() time.Time) EngineOption {
 
 // NewEngine returns an engine that reads through q.
 func NewEngine(q db.Querier, opts ...EngineOption) *Engine {
-	e := &Engine{q: q, store: NewStore(q), now: time.Now, logger: slog.New(slog.DiscardHandler)}
+	e := &Engine{q: q, store: NewStore(q), now: time.Now, llmBatch: llmBatch, logger: slog.New(slog.DiscardHandler)}
 	for _, opt := range opts {
 		opt(e)
 	}

@@ -122,6 +122,11 @@ func (e *StatusError) Unwrap() error { return e.Err }
 // ErrTruncated is a provider's answer cut off at the token limit.
 var ErrTruncated = fmt.Errorf("%w: the answer was cut off", ErrInvalidOutput)
 
+// ErrGenerationFailed is a provider that could not produce an answer
+// matching the schema this time. It is invalid output if it persists, but
+// unlike an answer that does not fit it is worth another attempt.
+var ErrGenerationFailed = fmt.Errorf("%w: the provider failed to generate it", ErrInvalidOutput)
+
 // Options configure a client. Zero values take the defaults.
 type Options struct {
 	// TextModel answers CompleteJSON and VisionModel VisionJSON.
@@ -267,12 +272,13 @@ func (c *client) attempt(ctx context.Context, call Call) (Completion, error) {
 
 // retryable reports whether a failed attempt is worth another, and after
 // how long. Refusals, answers that do not fit, and requests the provider
-// will not take are final.
+// will not take are final; a provider failing to generate an answer is not.
 func (c *client) retryable(ctx context.Context, err error, attempts int) (time.Duration, bool) {
 	if ctx.Err() != nil || attempts >= c.opts.MaxAttempts {
 		return 0, false
 	}
-	if errors.Is(err, ErrInvalidOutput) || errors.Is(err, ErrRefused) || errors.Is(err, ErrNoReply) {
+	final := errors.Is(err, ErrInvalidOutput) || errors.Is(err, ErrRefused) || errors.Is(err, ErrNoReply)
+	if final && !errors.Is(err, ErrGenerationFailed) {
 		return 0, false
 	}
 	var asked time.Duration

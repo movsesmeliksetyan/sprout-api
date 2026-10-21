@@ -131,6 +131,8 @@ func TestCompleteJSON_RetriesWhatIsWorthRetrying(t *testing.T) {
 		{"a bad key is final", []llm.Reply{status(401), ok}, llm.ErrUnavailable, 1},
 		{"a refusal is final", []llm.Reply{{Err: llm.ErrRefused}, ok}, llm.ErrRefused, 1},
 		{"a cut-off answer is final", []llm.Reply{{Err: llm.ErrTruncated}, ok}, llm.ErrInvalidOutput, 1},
+		{"a failed generation, then answered", []llm.Reply{{Err: llm.ErrGenerationFailed}, ok}, nil, 2},
+		{"a failed generation every time", []llm.Reply{{Err: llm.ErrGenerationFailed}}, llm.ErrInvalidOutput, 3},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

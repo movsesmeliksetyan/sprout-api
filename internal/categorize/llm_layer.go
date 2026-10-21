@@ -12,8 +12,13 @@ import (
 )
 
 const (
-	// llmBatch is how many merchants one call asks about.
+	// llmBatch is how many merchants one call asks about unless
+	// WithLLMBatch says fewer.
 	llmBatch = 50
+	// llmTokensPerMerchant bounds the answer: one merchant's takes about 50.
+	// Groq counts the bound itself against a tier's output tokens a minute,
+	// so it is kept tight: 15 merchants fit the free tier's 1,000.
+	llmTokensPerMerchant = 64
 	// unknownMerchantTTL is how long a merchant the model could not place
 	// is not asked about again.
 	unknownMerchantTTL = 30 * 24 * time.Hour
@@ -69,6 +74,12 @@ type llmAnswerItem struct {
 	CategoryType *string `json:"category_type"`
 	DisplayName  string  `json:"display_name"`
 	Confidence   float64 `json:"confidence"`
+}
+
+// WithLLMBatch sets how many merchants one call asks about, from 1 to
+// llmBatch.
+func WithLLMBatch(n int) EngineOption {
+	return func(e *Engine) { e.llmBatch = min(max(n, 1), llmBatch) }
 }
 
 // WithLLM gives the engine layer 5: merchants no other layer placed are
@@ -129,8 +140,8 @@ func (e *Engine) llmLayer(ctx context.Context, c *classification, types resolver
 
 	now := e.now()
 	placed := make(map[string]llmPlacement)
-	for start := 0; start < len(order); start += llmBatch {
-		keys := order[start:min(start+llmBatch, len(order))]
+	for start := 0; start < len(order); start += e.llmBatch {
+		keys := order[start:min(start+e.llmBatch, len(order))]
 		answers, err := e.askLLM(ctx, keys, byKey, typeList)
 		if err != nil {
 			e.logger.WarnContext(ctx, "categorize: llm batch failed", "merchants", len(keys), "error", err)
@@ -215,7 +226,7 @@ func (e *Engine) askLLM(ctx context.Context, keys []string, byKey map[string]*ll
 		Purpose:   "categorize",
 		System:    llmSystem,
 		Prompt:    string(prompt),
-		MaxTokens: 120 * len(keys),
+		MaxTokens: llmTokensPerMerchant * len(keys),
 		Effort:    llm.EffortNone,
 	}, llmSchema)
 	if err != nil {

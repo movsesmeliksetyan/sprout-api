@@ -11,7 +11,7 @@ GOLANGCI_LINT := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v
 # Paths written by `make generate`.
 GENERATED := internal/db internal/httpx/api_gen.go
 
-.PHONY: help build run worker test lint lint-spec generate generate-check check migrate-up migrate-down seed-rules seed perf-notes eval
+.PHONY: help build run worker test lint lint-spec generate generate-check check migrate-up migrate-down seed-rules seed perf-notes eval eval-llm
 
 help: ## List the available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -64,5 +64,9 @@ seed: ## Fill a development user's ledger with 50,000 generated transactions
 perf-notes: ## Measure the read endpoints on the seeded ledger and rewrite docs/perf-notes.md (needs Docker)
 	PERF_NOTES=$(CURDIR)/docs/perf-notes.md go test -count=1 -run '^TestAggregationPerformance$$' ./cmd/sprout
 
-eval: ## Run the deterministic categorisation evaluation (built in BE-36)
-	go test -run '^TestEval' ./internal/categorize/...
+eval: ## Run the deterministic categorisation evaluation (part of make test; needs Docker)
+	go test -count=1 -v -run '^TestEval(Deterministic|LabelledSet)$$' ./internal/categorize
+
+eval-llm: ## Evaluate the full pipeline with the real model and rewrite docs/categorization-eval.md (needs .env and Docker)
+	set -a; . ./.env; set +a; LLM_CATEGORIZE_BATCH=$${LLM_CATEGORIZE_BATCH:-15} EVAL_REPORT=$(CURDIR)/docs/categorization-eval.md \
+		go test -tags=live -count=1 -v -timeout 20m -run '^TestEvalLLM$$' ./internal/categorize

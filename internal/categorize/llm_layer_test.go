@@ -239,6 +239,22 @@ func TestLLMLayer_PartialBatchFailure(t *testing.T) {
 	assert.False(t, found, "a failed batch saves nothing")
 }
 
+func TestLLMLayer_SmallerBatches(t *testing.T) {
+	t.Parallel()
+	l := newLLMLedger(t)
+	l.category(t, "Food", "food")
+	l.engine = categorize.NewEngine(l.q, categorize.WithClock(func() time.Time { return now }),
+		categorize.WithLLM(llm.New(l.model, llm.Options{TextModel: "test-model", MaxAttempts: 1}), testutil.Logger(t)),
+		categorize.WithLLMBatch(15))
+	var in []categorize.Input
+	for i := range 40 {
+		in = append(in, debit(fmt.Sprintf("zqshop%c%c", 'a'+i/26, 'a'+i%26), ""))
+	}
+	l.classifyLLM(t, in...)
+	require.Len(t, l.model.batches, 3)
+	assert.Equal(t, []int{15, 15, 10}, []int{len(l.model.batches[0]), len(l.model.batches[1]), len(l.model.batches[2])})
+}
+
 func TestLLMLayer_OnlyWhenAllowed(t *testing.T) {
 	t.Parallel()
 	l := newLLMLedger(t)
