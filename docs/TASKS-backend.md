@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 48 / 63**
+**Progress: 49 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -106,7 +106,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
   - The stages run in `imports.Processor`, which the job calls, not in `process_import.go`. Migration 00019 adds `import_rows.note` for refunds. The `import_ready` notification is a hook with nothing wired until BE-56. Contract §2.10 now spells out the row PATCH rules. The PRD's BE-47 notes have the details.
 - [x] BE-48 · Commit, discard, retention — 2026-10-21, 0b08dc2
   - Migration 00020 adds `uploads.purge_after`/`purged_at` for retention; a committed row's transaction takes the row's id. Contract §2.10 spells out the commit's `422` and `409`. The PRD's BE-48 notes have the details.
-- [ ] BE-49 · Statement corpus and end-to-end tests
+- [x] BE-49 · Statement corpus and end-to-end tests — 2026-10-21, e84d233
+  - Expected files sit next to the existing fixtures rather than in one corpus directory, so the extraction goldens and the corpus share files. It found two reader bugs, both fixed: delimiter detection on decimal-comma debit/credit files, and the PDF row check on short statements. The PRD's BE-49 notes have the details.
 
 ## Milestone 9 — Receipt scanning
 
