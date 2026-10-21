@@ -1,0 +1,12 @@
+{
+  "bank": "OFX 2 credit card",
+  "country": "US",
+  "status": "ready",
+  "mapping_source": "native",
+  "rows": 4,
+  "error_rows": 0,
+  "expense_minor": 9612,
+  "income_minor": 51299,
+  "first_date": "2025-07-11",
+  "last_date": "2025-07-14"
+}

@@ -1,0 +1,12 @@
+{
+  "bank": "OFX 1 bank statement",
+  "country": "GB",
+  "status": "ready",
+  "mapping_source": "native",
+  "rows": 4,
+  "error_rows": 0,
+  "expense_minor": 7729,
+  "income_minor": 250000,
+  "first_date": "2025-07-10",
+  "last_date": "2025-07-14"
+}

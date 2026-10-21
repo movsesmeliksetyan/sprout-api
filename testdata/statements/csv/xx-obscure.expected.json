@@ -1,0 +1,12 @@
+{
+  "bank": "Fixed codes, no known headers",
+  "country": "XX",
+  "status": "needs_mapping",
+  "mapping_source": "",
+  "rows": 0,
+  "error_rows": 0,
+  "expense_minor": 0,
+  "income_minor": 0,
+  "first_date": "",
+  "last_date": ""
+}

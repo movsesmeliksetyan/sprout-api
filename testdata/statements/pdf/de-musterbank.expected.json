@@ -1,0 +1,50 @@
+{
+  "bank": "Text PDF, Kontoauszug",
+  "country": "DE",
+  "llm": {
+    "statement_page_table": [
+      {
+        "headers": [
+          "Buchungstag",
+          "Valuta",
+          "Verwendungszweck",
+          "Betrag"
+        ],
+        "rows": [
+          [
+            "01.07.2025",
+            "01.07.2025",
+            "REWE MARKT GMBH KARTENZAHLUNG",
+            "-38,12"
+          ],
+          [
+            "03.07.2025",
+            "03.07.2025",
+            "GEHALT MUSTERFIRMA GMBH",
+            "3.250,00"
+          ],
+          [
+            "08.07.2025",
+            "08.07.2025",
+            "DEUTSCHE BAHN TICKET",
+            "-29,90"
+          ],
+          [
+            "14.07.2025",
+            "14.07.2025",
+            "DM DROGERIE MARKT",
+            "-11,45"
+          ]
+        ]
+      }
+    ]
+  },
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 4,
+  "error_rows": 0,
+  "expense_minor": 7947,
+  "income_minor": 325000,
+  "first_date": "2025-07-01",
+  "last_date": "2025-07-14"
+}

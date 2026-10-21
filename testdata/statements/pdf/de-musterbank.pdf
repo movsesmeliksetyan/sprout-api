@@ -1,0 +1,38 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Length 540 >>
+stream
+BT /F1 10 Tf 40 800 Td (Musterbank AG   Kontoauszug 07/2025) Tj ET
+BT /F1 10 Tf 40 786 Td (IBAN DE** **** **** **** **** **) Tj ET
+BT /F1 10 Tf 40 772 Td (Buchungstag Valuta Verwendungszweck Betrag) Tj ET
+BT /F1 10 Tf 40 758 Td (01.07.2025 01.07.2025 REWE MARKT GMBH KARTENZAHLUNG -38,12) Tj ET
+BT /F1 10 Tf 40 744 Td (03.07.2025 03.07.2025 GEHALT MUSTERFIRMA GMBH 3.250,00) Tj ET
+BT /F1 10 Tf 40 730 Td (08.07.2025 08.07.2025 DEUTSCHE BAHN TICKET -29,90) Tj ET
+BT /F1 10 Tf 40 716 Td (14.07.2025 14.07.2025 DM DROGERIE MARKT -11,45) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000212 00000 n 
+0000000802 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+928
+%%EOF

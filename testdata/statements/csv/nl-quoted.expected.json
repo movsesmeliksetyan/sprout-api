@@ -1,0 +1,12 @@
+{
+  "bank": "Dutch, Af/Bij",
+  "country": "NL",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 3,
+  "error_rows": 0,
+  "expense_minor": 1794,
+  "income_minor": 250000,
+  "first_date": "2025-07-12",
+  "last_date": "2025-07-14"
+}

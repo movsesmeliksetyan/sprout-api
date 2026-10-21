@@ -1,0 +1,12 @@
+{
+  "bank": "French, with footer",
+  "country": "FR",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 3,
+  "error_rows": 0,
+  "expense_minor": 6350,
+  "income_minor": 280000,
+  "first_date": "2025-07-12",
+  "last_date": "2025-07-14"
+}

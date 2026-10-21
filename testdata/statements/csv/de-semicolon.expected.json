@@ -1,0 +1,12 @@
+{
+  "bank": "German Girokonto, semicolons",
+  "country": "DE",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 3,
+  "error_rows": 0,
+  "expense_minor": 7279,
+  "income_minor": 250000,
+  "first_date": "2025-07-12",
+  "last_date": "2025-07-14"
+}

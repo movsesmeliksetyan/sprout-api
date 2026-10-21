@@ -1,0 +1,12 @@
+{
+  "bank": "Ameriabank-style card export",
+  "country": "AM",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 3,
+  "error_rows": 0,
+  "expense_minor": 650000,
+  "income_minor": 1500000,
+  "first_date": "2025-07-12",
+  "last_date": "2025-07-14"
+}
