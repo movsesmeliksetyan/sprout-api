@@ -52,7 +52,7 @@ func TestRun(t *testing.T) {
 		wantStdout []string
 		wantStderr []string
 	}{
-		{name: "help flag lists subcommands", args: []string{"--help"}, wantCode: exitOK, wantStdout: []string{"api", "worker", "migrate"}},
+		{name: "help flag lists subcommands", args: []string{"--help"}, wantCode: exitOK, wantStdout: []string{"api", "worker", "migrate", "seed-rules"}},
 		{name: "short help flag", args: []string{"-h"}, wantCode: exitOK, wantStdout: []string{"Usage:"}},
 		{name: "help command", args: []string{"help"}, wantCode: exitOK, wantStdout: []string{"Usage:"}},
 		{name: "no arguments", args: nil, wantCode: exitUsage, wantStderr: []string{"Usage:"}},
@@ -76,6 +76,11 @@ func TestRun(t *testing.T) {
 		{name: "migrate without a command", args: []string{"migrate"}, wantCode: exitUsage, wantStderr: []string{"sprout migrate: usage: sprout migrate up|down|status"}},
 		{name: "migrate with an unknown command", args: []string{"migrate", "redo"}, wantCode: exitUsage, wantStderr: []string{"usage: sprout migrate up|down|status"}},
 		{name: "migrate with extra arguments", args: []string{"migrate", "up", "now"}, wantCode: exitUsage, wantStderr: []string{"usage: sprout migrate up|down|status"}},
+		{name: "seed-rules with arguments", args: []string{"seed-rules", "now"}, wantCode: exitUsage, wantStderr: []string{"sprout seed-rules: usage: sprout seed-rules"}},
+		{
+			name: "seed-rules needs only DATABASE_URL", args: []string{"seed-rules"}, wantCode: exitError,
+			wantStderr: []string{"sprout seed-rules: invalid configuration:", "DATABASE_URL: required"},
+		},
 		{
 			name: "migrate needs only DATABASE_URL", args: []string{"migrate", "up"}, wantCode: exitError,
 			wantStderr: []string{"sprout migrate: invalid configuration:", "DATABASE_URL: required"},

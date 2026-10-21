@@ -1,0 +1,192 @@
+# Words that give away a description's category type (PRD §5.2, layer 4),
+# loaded by `sprout seed-rules`. Columns: pattern, category_type, priority.
+# A pattern is one or more words in merchant-key form (lower case, letters,
+# digits, &) that must appear in order as whole words; a word ending in *
+# matches every word that starts with it. Higher priority is tried first:
+# 30 for words that are hardly ever wrong, 20 for the usual, 10 for words
+# that only suggest a type.
+pattern,category_type,priority
+
+# Fuel and car
+petrol*,transport,30
+fuel,transport,30
+filling station,transport,30
+service station,transport,30
+gas station,transport,30
+tankstelle,transport,30
+carburant*,transport,30
+gasolinera,transport,30
+benzin*,transport,20
+бензин,transport,30
+азс,transport,30
+parking,transport,20
+parkhaus,transport,20
+car wash,transport,30
+garage,transport,10
+tyre*,transport,20
+tire*,transport,20
+mot test,transport,30
+taxi,transport,30
+такси,transport,30
+տաքսի,transport,30
+cab,transport,10
+metro,transport,10
+railway*,transport,20
+bus,transport,10
+
+# Food
+supermarket*,food,30
+supermarché,food,30
+supermercado,food,30
+supermercato,food,30
+supermarkt,food,30
+супермаркет,food,30
+սուպերմարկետ,food,30
+grocer*,food,30
+épicerie,food,20
+lebensmittel,food,20
+продукты,food,20
+bakery,food,30
+boulangerie,food,30
+bäckerei,food,30
+panaderia,food,30
+пекарня,food,30
+butcher*,food,30
+boucherie,food,30
+metzgerei,food,30
+restaurant*,food,30
+ristorante,food,30
+trattoria,food,30
+brasserie,food,20
+ресторан,food,30
+ռեստորան,food,30
+cafe,food,20
+café,food,20
+caffe,food,20
+coffee,food,20
+кафе,food,20
+սրճարան,food,20
+pizz*,food,20
+burger*,food,20
+sushi,food,20
+kebab,food,20
+shawarma,food,20
+bistro,food,20
+diner,food,20
+pub,food,20
+bar,food,10
+takeaway,food,20
+deli,food,10
+food,food,10
+
+# Health
+pharmac*,health,30
+farmacia,health,30
+apotheke,health,30
+apotheek,health,30
+аптека,health,30
+դեղատուն,health,30
+pharm,health,20
+chemist,health,20
+dental,health,30
+dentist*,health,30
+clinic*,health,20
+klinik,health,20
+клиника,health,20
+hospital*,health,30
+optician*,health,30
+medical,health,20
+doctor*,health,20
+
+# Self-care
+gym,selfcare,20
+fitness,selfcare,20
+hair*,selfcare,20
+barber*,selfcare,30
+salon,selfcare,20
+beauty,selfcare,20
+spa,selfcare,10
+nails,selfcare,20
+coiffure,selfcare,30
+friseur,selfcare,30
+парикмахерская,selfcare,30
+
+# Leisure
+cinema*,leisure,30
+kino,leisure,20
+кинотеатр,leisure,30
+theatre,leisure,20
+theater,leisure,20
+museum,leisure,20
+concert*,leisure,20
+tickets,leisure,10
+bowling,leisure,20
+streaming,leisure,10
+
+# Utilities
+electricity,utilities,30
+electric,utilities,10
+energy,utilities,10
+gas bill,utilities,30
+water,utilities,10
+broadband,utilities,30
+internet,utilities,20
+mobile,utilities,10
+telecom*,utilities,20
+strom,utilities,20
+électricité,utilities,30
+электроэнергия,utilities,30
+
+# Housing
+rent,housing,20
+miete,housing,20
+loyer,housing,20
+alquiler,housing,20
+аренда,housing,20
+mortgage,housing,30
+council tax,housing,30
+letting*,housing,20
+furniture,housing,20
+diy,housing,20
+hardware,housing,20
+
+# Travel
+hotel*,travel,30
+hostel,travel,30
+airline*,travel,30
+airways,travel,30
+airport,travel,20
+flight*,travel,20
+отель,travel,30
+հյուրանոց,travel,30
+
+# Shopping
+clothing,shopping,20
+fashion,shopping,10
+shoes,shopping,20
+electronics,shopping,20
+department store,shopping,20
+outlet,shopping,10
+
+# Education
+school,education,20
+university,education,20
+college,education,10
+tuition,education,30
+academy,education,10
+
+# Pets
+vet,pets,20
+veterinar*,pets,30
+pet,pets,10
+
+# Gifts
+florist*,gifts,30
+flowers,gifts,20
+fleuriste,gifts,30
+цветы,gifts,20
+
+# Family
+toys,family,20
+nursery,family,10
+childcare,family,30

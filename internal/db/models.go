@@ -67,6 +67,42 @@ type IdempotencyKey struct {
 	CreatedAt           time.Time
 }
 
+type KeywordRule struct {
+	Pattern      string
+	CategoryType string
+	Priority     int32
+}
+
+type MccMap struct {
+	Mcc          string
+	CategoryType string
+}
+
+type MerchantDictionary struct {
+	ID           uuid.UUID
+	MerchantKey  string
+	CategoryType *string
+	DisplayName  string
+	Source       string
+	Votes        int32
+	Confidence   *float64
+	Model        *string
+	ExpiresAt    *time.Time
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+type MerchantRule struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	MerchantKey string
+	CategoryID  uuid.UUID
+	Hits        int32
+	LastUsedAt  time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
 type Transaction struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID

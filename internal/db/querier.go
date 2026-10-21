@@ -61,6 +61,10 @@ type Querier interface {
 	DeleteContribution(ctx context.Context, arg DeleteContributionParams) (GoalContribution, error)
 	DeleteExpiredIdempotencyKeys(ctx context.Context) (int64, error)
 	DeleteGoal(ctx context.Context, arg DeleteGoalParams) (int64, error)
+	DeleteKeywordRulesExcept(ctx context.Context, patterns []string) (int64, error)
+	DeleteMCCMapExcept(ctx context.Context, mccs []string) (int64, error)
+	// Removes the seed merchants the seed file no longer has.
+	DeleteSeedDictionaryExcept(ctx context.Context, merchantKeys []string) (int64, error)
 	DeleteTransaction(ctx context.Context, arg DeleteTransactionParams) (int64, error)
 	GetCategory(ctx context.Context, arg GetCategoryParams) (Category, error)
 	GetGoal(ctx context.Context, arg GetGoalParams) (GetGoalRow, error)
@@ -83,9 +87,17 @@ type Querier interface {
 	// The whole-day totals of the given days under the same filters as
 	// ListTransactions: income minus expense, and how many transactions.
 	ListDayTotals(ctx context.Context, arg ListDayTotalsParams) ([]ListDayTotalsRow, error)
+	// The dictionary rows for any of the keys, leaving out llm rows that have
+	// expired.
+	ListDictionaryEntries(ctx context.Context, arg ListDictionaryEntriesParams) ([]ListDictionaryEntriesRow, error)
 	// The user's active and completed goals in display order, each with what is
 	// saved in it: top-ups minus withdrawals.
 	ListGoals(ctx context.Context, userID uuid.UUID) ([]ListGoalsRow, error)
+	// Every keyword rule, in the order they are tried.
+	ListKeywordRules(ctx context.Context) ([]KeywordRule, error)
+	ListMCCTypes(ctx context.Context, mccs []string) ([]MccMap, error)
+	// The user's rules for any of the keys whose category is still active.
+	ListMerchantRules(ctx context.Context, arg ListMerchantRulesParams) ([]ListMerchantRulesRow, error)
 	// The newest contributions of one of the user's goals.
 	ListRecentContributions(ctx context.Context, arg ListRecentContributionsParams) ([]GoalContribution, error)
 	// A page of the user's transactions, newest first. A null filter is not
@@ -100,11 +112,26 @@ type Querier interface {
 	ReleaseIdempotencyKey(ctx context.Context, arg ReleaseIdempotencyKeyParams) (int64, error)
 	// Puts the user's categories in the order of ids.
 	ReorderCategories(ctx context.Context, arg ReorderCategoriesParams) error
+	// Stores what the model said about merchants. An llm row replaces an llm
+	// row only, never a seed or learned one. An empty category_type is a
+	// merchant the model did not know; an expires_at of the zero time (year 1)
+	// is a row that does not expire.
+	SaveLLMDictionaryEntries(ctx context.Context, arg SaveLLMDictionaryEntriesParams) error
 	// Everything the user has put into goals and not taken back: top-ups minus
 	// withdrawals.
 	SavedInGoals(ctx context.Context, userID uuid.UUID) (int64, error)
 	// Does nothing when the user already has an active category of this name.
 	SeedCategory(ctx context.Context, arg SeedCategoryParams) error
+	// Writes the seed merchants. A seed row replaces a seed or llm row, never a
+	// learned one, and an unchanged row is left alone. Returns a row for every
+	// merchant added or changed.
+	SeedDictionary(ctx context.Context, arg SeedDictionaryParams) ([]bool, error)
+	// Writes the seed patterns, leaving unchanged ones alone. Returns a row for
+	// every pattern added or changed.
+	SeedKeywordRules(ctx context.Context, arg SeedKeywordRulesParams) ([]bool, error)
+	// Writes the seed codes, leaving unchanged ones alone. Returns a row for
+	// every code added or changed.
+	SeedMCCMap(ctx context.Context, arg SeedMCCMapParams) ([]bool, error)
 	// The user's expenses on the calendar days from_date to to_date, both
 	// included.
 	SpentBetween(ctx context.Context, arg SpentBetweenParams) (int64, error)
@@ -128,6 +155,9 @@ type Querier interface {
 	UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) (Transaction, error)
 	// A null argument leaves its column as it is.
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	// Points the user's rule for a merchant at one of their active categories,
+	// counting the use. Writes nothing when the category is not theirs.
+	UpsertMerchantRule(ctx context.Context, arg UpsertMerchantRuleParams) (int64, error)
 	UserHasTransactions(ctx context.Context, userID uuid.UUID) (bool, error)
 }
 

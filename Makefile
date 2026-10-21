@@ -11,7 +11,7 @@ GOLANGCI_LINT := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v
 # Paths written by `make generate`.
 GENERATED := internal/db internal/httpx/api_gen.go
 
-.PHONY: help build run worker test lint lint-spec generate generate-check check migrate-up migrate-down seed perf-notes eval
+.PHONY: help build run worker test lint lint-spec generate generate-check check migrate-up migrate-down seed-rules seed perf-notes eval
 
 help: ## List the available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -54,6 +54,9 @@ migrate-up: ## Apply all pending migrations
 
 migrate-down: ## Roll back the latest migration
 	go run ./cmd/sprout migrate down
+
+seed-rules: ## Load the categorisation seeds (merchants, MCC codes, keywords); safe to run again
+	go run ./cmd/sprout seed-rules
 
 seed: ## Fill a development user's ledger with 50,000 generated transactions
 	go run ./cmd/sprout seed
