@@ -1,0 +1,40 @@
+[
+  {
+    "scenario": "the design",
+    "cards": [
+      {
+        "kind": "peak_weekday",
+        "tone": "neutral",
+        "icon": "chart",
+        "title": "Your biggest day was Saturday",
+        "body": "You spent $500 on Saturdays this month, 27% of the total.",
+        "category_id": null,
+        "goal_id": null,
+        "score": 50
+      }
+    ]
+  },
+  {
+    "scenario": "an even month",
+    "cards": null
+  },
+  {
+    "scenario": "a week",
+    "cards": [
+      {
+        "kind": "peak_weekday",
+        "tone": "neutral",
+        "icon": "chart",
+        "title": "Your biggest day was Saturday",
+        "body": "You spent $500 on Saturday this week, 27% of the total.",
+        "category_id": null,
+        "goal_id": null,
+        "score": 50
+      }
+    ]
+  },
+  {
+    "scenario": "a single day",
+    "cards": null
+  }
+]

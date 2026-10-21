@@ -1,0 +1,55 @@
+[
+  {
+    "scenario": "the design: too small a change",
+    "cards": null
+  },
+  {
+    "scenario": "down",
+    "cards": [
+      {
+        "kind": "total_spend_down",
+        "tone": "positive",
+        "icon": "sparkle",
+        "title": "You spent 10% less this month",
+        "body": "$1,842.50 in all, against $2,052.50 last month.",
+        "category_id": null,
+        "goal_id": null,
+        "score": 65
+      }
+    ]
+  },
+  {
+    "scenario": "up",
+    "cards": [
+      {
+        "kind": "total_spend_up",
+        "tone": "neutral",
+        "icon": "chart",
+        "title": "You spent 32% more this month",
+        "body": "$1,842.50 in all, against $1,400 last month.",
+        "category_id": null,
+        "goal_id": null,
+        "score": 62
+      }
+    ]
+  },
+  {
+    "scenario": "down in a past year",
+    "cards": [
+      {
+        "kind": "total_spend_down",
+        "tone": "positive",
+        "icon": "sparkle",
+        "title": "You spent 10% less last year",
+        "body": "$1,842.50 in all, against $2,052.50 the year before.",
+        "category_id": null,
+        "goal_id": null,
+        "score": 65
+      }
+    ]
+  },
+  {
+    "scenario": "nothing before",
+    "cards": null
+  }
+]

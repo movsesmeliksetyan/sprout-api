@@ -629,6 +629,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 - Files: `internal/insights/engine.go`, `internal/insights/rules_*.go`, `internal/insights/copy.go`
 - Done when: fixture reproducing the design yields the three cards ("You spent 8% less on Food…", "Self-care is over budget", "Your biggest day was Saturday"); golden tests per rule.
 - Needs: BE-23, BE-27
+- Notes: the engine is pure: `insights.Snapshot` is built by the caller (BE-54's service reads it from the summaries, the ledger and the goals). Rules: category spend down (≥5 % less, once a current period is half over) or up (≥20 % more), either only when the change is ≥2 % of the period's spending; over budget (naming the expense that is more than half the category's spend); near budget (≥85 %, current period only); peak weekday (≥20 % of a month's or year's spend); total spend down/up on the same thresholds; goal almost there (≥80 % saved) and on track (positive pace with an ETA). Selection also keeps one card per goal. Golden files are `testdata/insights/<rule>.golden.json` (`go test ./internal/insights -update`). Copy says "one $90 expense at Serenity Spa" where the design says "one $90 spa visit": the server knows the merchant, not what was bought.
 
 **BE-54 · Insight generation and `GET /insights`**
 - Do: Compute on read with a short cache: stored rows refreshed when the user's ledger changed since last computation (track `users.ledger_version`, bumped on writes). Nightly periodic job pre-computes the current month for active users.

@@ -1,0 +1,27 @@
+[
+  {
+    "scenario": "goals",
+    "cards": [
+      {
+        "kind": "goal_on_track",
+        "tone": "positive",
+        "icon": "target",
+        "title": "House deposit is on track",
+        "body": "At $500 a month you'll reach $20,000 by November 2027.",
+        "category_id": null,
+        "goal_id": "01900000-0000-7000-8000-000000000101",
+        "score": 45
+      },
+      {
+        "kind": "goal_almost_there",
+        "tone": "positive",
+        "icon": "target",
+        "title": "Almost there with new bike",
+        "body": "Just $100 to go: you've saved 92% of $1,200.",
+        "category_id": null,
+        "goal_id": "01900000-0000-7000-8000-000000000102",
+        "score": 75
+      }
+    ]
+  }
+]
