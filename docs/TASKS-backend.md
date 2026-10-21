@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 36 / 63**
+**Progress: 37 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -87,7 +87,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 ## Milestone 8 — Statement normalisation (§4)
 
-- [ ] BE-37 · Imports schema, endpoints, job plumbing
+- [x] BE-37 · Imports schema, endpoints, job plumbing — 2026-10-21, 334a6e0
+  - Migrations `00016` (river's tables, a Go migration in `internal/jobs/schema`) and `00017_imports.sql`. The idempotency purge moved from `sprout api` into the worker as an hourly job, and the BE-34 promotion runs nightly there. The PRD's BE-37 notes have the details.
 - [ ] BE-38 · Container detection
 - [ ] BE-39 · CSV extractor
 - [ ] BE-40 · OFX/QFX and XLSX extractors

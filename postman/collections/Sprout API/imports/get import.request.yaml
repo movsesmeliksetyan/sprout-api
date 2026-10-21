@@ -1,0 +1,8 @@
+$kind: http-request
+name: 'Get import'
+method: GET
+url: '{{baseUrl}}/v1/imports/{{importId}}'
+order: 2000
+pathVariables:
+  - key: importId
+    value: '{{importId}}'

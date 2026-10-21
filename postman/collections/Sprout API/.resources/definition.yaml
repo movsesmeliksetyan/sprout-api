@@ -37,6 +37,7 @@ description: |-
     {{contributionId}}    – by "Top up goal" and "Withdraw from goal", and by
                             "List contributions" when it is still empty;
                             cleared by "Delete contribution"
+    {{importId}}          – by "Create import"; cleared by "Delete import"
 auth:
   type: bearer
   credentials:
@@ -57,3 +58,4 @@ variables:
   transactionId: ""
   goalId: ""
   contributionId: ""
+  importId: ""

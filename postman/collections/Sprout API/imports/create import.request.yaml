@@ -1,0 +1,24 @@
+$kind: http-request
+name: 'Create import'
+method: POST
+url: '{{baseUrl}}/v1/imports'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "upload_id": "{{uploadId}}",
+      "period": "month"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 202 && json.id) {
+          pm.collectionVariables.set("importId", json.id);
+          console.log("✅ importId saved: " + json.id + "; poll it with Get import");
+      }

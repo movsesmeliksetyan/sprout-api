@@ -69,9 +69,8 @@ func TestRun(t *testing.T) {
 			},
 		},
 		{
-			name: "worker loads config then stops at the stub", args: []string{"worker"}, env: devEnv(t), wantCode: exitError,
-			wantStdout: []string{`"msg":"config loaded"`},
-			wantStderr: []string{"sprout worker: not implemented yet"},
+			name: "worker rejects an empty environment", args: []string{"worker"}, wantCode: exitError,
+			wantStderr: []string{"sprout worker: invalid configuration:", "ENV: required", "DATABASE_URL: required"},
 		},
 		{name: "migrate without a command", args: []string{"migrate"}, wantCode: exitUsage, wantStderr: []string{"sprout migrate: usage: sprout migrate up|down|status"}},
 		{name: "migrate with an unknown command", args: []string{"migrate", "redo"}, wantCode: exitUsage, wantStderr: []string{"usage: sprout migrate up|down|status"}},

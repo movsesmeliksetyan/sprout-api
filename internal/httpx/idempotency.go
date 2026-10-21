@@ -275,34 +275,11 @@ func (r *responseRecorder) succeeded() bool {
 
 // PurgeIdempotencyKeys deletes the keys that have expired and reports how
 // many there were. Expired keys are never replayed, so this only reclaims
-// space.
+// space. The worker runs it hourly.
 func PurgeIdempotencyKeys(ctx context.Context, database db.DBTX) (int64, error) {
 	n, err := db.New(database).DeleteExpiredIdempotencyKeys(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("idempotency: purge: %w", err)
 	}
 	return n, nil
-}
-
-// PurgeIdempotencyKeysEvery purges once and then at every interval, until
-// ctx is cancelled. A failed purge is logged and tried again next time.
-func PurgeIdempotencyKeysEvery(ctx context.Context, database db.DBTX, logger *slog.Logger, interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-	for {
-		switch removed, err := PurgeIdempotencyKeys(ctx, database); {
-		case ctx.Err() != nil:
-			return
-		case err != nil:
-			logger.WarnContext(ctx, "idempotency keys not purged", slog.String("error", err.Error()))
-		case removed > 0:
-			logger.InfoContext(ctx, "idempotency keys purged", slog.Int64("removed", removed))
-		}
-
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-		}
-	}
 }
