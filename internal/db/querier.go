@@ -90,6 +90,8 @@ type Querier interface {
 	// The dictionary rows for any of the keys, leaving out llm rows that have
 	// expired.
 	ListDictionaryEntries(ctx context.Context, arg ListDictionaryEntriesParams) ([]ListDictionaryEntriesRow, error)
+	// Which of the keys the user has spent money with before.
+	ListExpenseMerchantKeys(ctx context.Context, arg ListExpenseMerchantKeysParams) ([]string, error)
 	// The user's active and completed goals in display order, each with what is
 	// saved in it: top-ups minus withdrawals.
 	ListGoals(ctx context.Context, userID uuid.UUID) ([]ListGoalsRow, error)

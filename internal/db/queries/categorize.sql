@@ -115,3 +115,8 @@ SELECT c.id, c.category_type::text AS category_type,
 FROM categories c
 WHERE c.user_id = @user_id AND c.archived_at IS NULL AND c.category_type IS NOT NULL
 ORDER BY c.sort_order, c.id;
+
+-- name: ListExpenseMerchantKeys :many
+-- Which of the keys the user has spent money with before.
+SELECT DISTINCT merchant_key FROM transactions
+WHERE user_id = @user_id AND kind = 'expense' AND merchant_key = ANY(@merchant_keys::text[]);
