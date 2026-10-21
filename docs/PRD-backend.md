@@ -45,7 +45,7 @@ Bank/open-banking sync · multi-currency ledgers and FX · shared/household acco
 | Tests | `testing` + `testify`, `testcontainers-go` for Postgres/MinIO, golden files for parsers |
 | Local dev | `docker compose` (postgres, minio), `make` targets |
 
-One binary, three subcommands: `sprout api`, `sprout worker`, `sprout migrate`.
+One binary, four subcommands: `sprout api`, `sprout worker`, `sprout migrate`, `sprout seed-rules` (BE-30).
 
 ### 2.1 Layout
 
@@ -98,8 +98,8 @@ All tables: `id UUID PRIMARY KEY` (v7), `created_at`, `updated_at` unless noted.
 | `merchant_rules` | `user_id`, `merchant_key`, `category_id`, `hits`, `last_used_at` | Unique `(user_id, merchant_key)` |
 | `merchant_dictionary` | `merchant_key UNIQUE`, `category_type NULL`, `display_name`, `source` (`seed`/`learned`/`llm`), `votes`, `confidence`, `model`, `expires_at NULL` | Global, no user data inside. `llm` rows are what the model said about a merchant, kept so it is never asked twice (§5.2); `category_type NULL` with `expires_at` is "the model did not know" |
 | `category_types` | static reference | Canonical types (food, transport, housing, utilities, leisure, selfcare, health, shopping, …) that map to a user's categories by default-icon and name |
-| `mcc_map` | `mcc`, `category_type` | Static seed |
-| `keyword_rules` | `pattern`, `category_type`, `priority` | Static seed |
+| `mcc_map` | `mcc` (primary key), `category_type` | Static seed; no `id` or timestamps |
+| `keyword_rules` | `pattern` (primary key), `category_type`, `priority` | Static seed; no `id` or timestamps |
 | `receipts` | `user_id`, `upload_id`, `status`, `merchant`, `purchased_at`, `total_minor`, `currency`, `payment_method`, `category_id`, `category_confidence`, `line_items JSONB`, `raw_extraction JSONB`, `transaction_id`, `failure JSONB` | |
 | `insights` | `user_id`, `period`, `period_start`, `kind`, `tone`, `icon`, `title`, `body`, `category_id`, `goal_id`, `score` | Unique `(user_id, period, period_start, kind, category_id, goal_id)` |
 | `devices` | `user_id`, `device_id`, `apns_token`, `environment`, `app_version`, `locale`, `last_seen_at`, `invalidated_at` | Unique `(user_id, device_id)` |
@@ -459,7 +459,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-30 · Rule stores and seeds**
 - Do: Migrations + queries for `merchant_rules`, `merchant_dictionary` (with the `llm` source and its columns, §3), `mcc_map`, `keyword_rules`. Seed files: ≥ 300 common merchants across UK/EU/US, the standard MCC ranges → category types, ≥ 60 keyword patterns (multi-language). Loader command `sprout seed-rules` (idempotent upsert).
-- Files: `migrations/00009_categorize.sql`, `internal/categorize/store.go`, `internal/categorize/data/dictionary.csv`, `mcc.csv`, `keywords.csv`
+- Files: `migrations/00013_categorize.sql`, `internal/db/queries/categorize.sql`, `internal/categorize/store.go`, `internal/categorize/seed.go`, `internal/categorize/data/dictionary.csv`, `mcc.csv`, `keywords.csv`
+- Notes: the migration is `00013` (00009–00012 were taken). `categorize.Store` takes a `db.Querier`, and every lookup is one query for a whole batch: `UserRules(user, keys)` (rules whose category is archived are left out), `Dictionary(keys, now)`, `MCCTypes(mccs)` and `Keywords()` (all of them, highest priority first; a few hundred rows). `Dictionary` answers each key with its own row or else the row for its longest prefix of whole words (`tesco petrol station` → `tesco`, `uber eats` beats `uber`): the store lists a key's word prefixes and looks them all up with `merchant_key = ANY(…)`, which uses the unique index; an `llm` row past its `expires_at` answers nothing. Writes: `SaveUserRule` (upsert, `hits + 1`; a category that is not one of the user's active ones is `ErrCategoryNotFound`) and `SaveLLMEntries` (one query; an `llm` row replaces only an `llm` row, never `seed` or `learned`). `confidence` is `DOUBLE PRECISION`, set on `llm` rows only, which also carry `model`; `category_type` may be null only with an `expires_at`; both are checked by the table. Seed files: `dictionary.csv` (483 merchants across the UK, EU, US and Armenia: `merchant_key,display_name,category_type`, the key being what `Normalize` makes of the display name, checked on load), `mcc.csv` (ranges `from,to,category_type,description`, expanded to one row a code; no overlaps), `keywords.csv` (159 patterns in English, French, German, Spanish, Italian, Dutch, Russian and Armenian). A pattern is whole words in key form that must appear in order; a word ending in `*` matches any word it starts (`pharmac*`). Priority is 30 (hardly ever wrong), 20 (usual) or 10 (only suggestive); BE-31 turns it into the layer's 0.70–0.80 confidence. `sprout seed-rules` (`make seed-rules`, needs only `DATABASE_URL`) runs `categorize.SeedRules` in one transaction and makes the tables match the files: unchanged rows are left alone, so a second run prints `0 added, 0 updated, 0 removed`; codes and patterns no longer in the files are deleted, and so are seed merchants (only `source: seed` rows); a seed merchant replaces an `llm` row for its key and never a `learned` one.
 - Done when: seeds load twice without duplicates; lookups are batch (one query per layer for N inputs).
 - Needs: BE-14
 

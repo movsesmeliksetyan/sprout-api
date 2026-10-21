@@ -19,6 +19,7 @@ cd sprout-api
 cp .env.example .env
 docker compose up -d --wait
 make migrate-up
+make seed-rules
 make run
 ```
 
@@ -47,16 +48,17 @@ Run `make` to list every target.
 | `make generate-check` | Fail if the committed generated code is out of date |
 | `make check` | Everything a change must pass before it is committed: `generate-check`, `lint` and `test` (needs Docker). There is no CI on pull requests; run this locally |
 | `make migrate-up` / `make migrate-down` | Apply all pending migrations / roll back the latest one |
+| `make seed-rules` | Load the categorisation seeds built into the binary: merchants, MCC codes and keywords (`sprout seed-rules`; safe to run again) |
 | `make eval` | Run the deterministic categorisation evaluation |
 
 The API is described by [api/openapi.yaml](api/openapi.yaml), served at `/v1/openapi.yaml` outside production, with a Swagger UI page for browsing and trying it at `/v1/docs`. Every `/v1` operation exists and answers `501` until its task in the PRD implements it.
 
-`sprout migrate up|down|status` needs only `DATABASE_URL`. The `worker` subcommand is a stub for now and exits with "not implemented yet"; it and the evaluation set are filled in by later tasks in the PRD.
+`sprout migrate up|down|status` and `sprout seed-rules` need only `DATABASE_URL`; run `seed-rules` after migrating, and again whenever the seed files change. The `worker` subcommand is a stub for now and exits with "not implemented yet"; it and the evaluation set are filled in by later tasks in the PRD.
 
 ## Layout
 
 ```
-cmd/sprout/     entry point: api, worker, migrate
+cmd/sprout/     entry point: api, worker, migrate, seed-rules
 api/            OpenAPI spec
 migrations/     goose SQL migrations
 internal/       application packages, one per concern (see PRD §2.1)

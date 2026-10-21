@@ -18,6 +18,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/auth"
 	"github.com/movsesmeliksetyan/sprout-api/internal/backfill"
 	"github.com/movsesmeliksetyan/sprout-api/internal/categories"
+	"github.com/movsesmeliksetyan/sprout-api/internal/categorize"
 	"github.com/movsesmeliksetyan/sprout-api/internal/config"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/goals"
@@ -67,6 +68,7 @@ var commands = []command{
 	{name: "api", summary: "Serve the HTTP API", run: runAPI},
 	{name: "worker", summary: "Run background and periodic jobs", run: configuredStub},
 	{name: "migrate", summary: "Apply or inspect database migrations (up, down, status)", run: runMigrate},
+	{name: "seed-rules", summary: "Load the categorisation seeds: merchants, MCC codes, keywords", run: runSeedRules},
 	{name: "seed", summary: "Fill a user's ledger with generated transactions", hidden: true, run: runSeed},
 }
 
@@ -120,7 +122,7 @@ func usage(w io.Writer) {
 		if cmd.hidden {
 			continue
 		}
-		fmt.Fprintf(w, "  %-8s %s\n", cmd.name, cmd.summary)
+		fmt.Fprintf(w, "  %-10s %s\n", cmd.name, cmd.summary)
 	}
 }
 
@@ -238,4 +240,39 @@ func runMigrate(c cli, args []string) error {
 		return err
 	}
 	return db.Migrate(c.ctx, databaseURL.Reveal(), args[0], c.stdout, backfill.Migrations()...)
+}
+
+// runSeedRules makes the global categorisation tables match the seed files
+// built into the binary. Running it again changes nothing. It needs only
+// DATABASE_URL, not the full configuration.
+func runSeedRules(c cli, args []string) error {
+	if len(args) != 0 {
+		return &usageError{usage: "sprout seed-rules"}
+	}
+	databaseURL, err := config.LoadDatabaseURL(c.lookup)
+	if err != nil {
+		return err
+	}
+	pool, err := db.Open(c.ctx, databaseURL.Reveal())
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+
+	result, err := categorize.SeedRules(c.ctx, pool)
+	if err != nil {
+		return err
+	}
+	for _, table := range []struct {
+		name   string
+		counts categorize.SeedCounts
+	}{
+		{"merchant_dictionary", result.Dictionary},
+		{"mcc_map", result.MCC},
+		{"keyword_rules", result.Keywords},
+	} {
+		fmt.Fprintf(c.stdout, "%s: %d added, %d updated, %d removed\n",
+			table.name, table.counts.Added, table.counts.Updated, table.counts.Removed)
+	}
+	return nil
 }

@@ -120,7 +120,8 @@ func TestSeed_IsNotInTheUsage(t *testing.T) {
 
 	usage(&stdout)
 
-	assert.NotContains(t, stdout.String(), "seed")
+	assert.NotRegexp(t, `(?m)^  seed `, stdout.String())
+	assert.Contains(t, stdout.String(), "seed-rules", "loading the rules is a production command")
 }
 
 func TestSeedMerchant(t *testing.T) {

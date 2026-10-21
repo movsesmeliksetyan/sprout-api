@@ -1,0 +1,526 @@
+# The seed merchants of the global dictionary (PRD §5.2, layer 2), loaded
+# by `sprout seed-rules`. Columns: merchant_key, display_name, category_type.
+# The key is what categorize.Normalize makes of the display name, which a
+# test checks; the type is a key of category_types. Business names only.
+merchant_key,display_name,category_type
+
+# UK groceries
+tesco,Tesco,food
+sainsburys,Sainsbury's,food
+asda,Asda,food
+morrisons,Morrisons,food
+waitrose,Waitrose,food
+marks and spencer,M&S,food
+lidl,Lidl,food
+aldi,Aldi,food
+coop,Co-op,food
+iceland,Iceland,food
+ocado,Ocado,food
+spar,Spar,food
+budgens,Budgens,food
+londis,Londis,food
+farmfoods,Farmfoods,food
+booths,Booths,food
+whole foods market,Whole Foods Market,food
+
+# EU groceries
+carrefour,Carrefour,food
+auchan,Auchan,food
+leclerc,Leclerc,food
+intermarche,Intermarche,food
+monoprix,Monoprix,food
+franprix,Franprix,food
+rewe,Rewe,food
+edeka,Edeka,food
+kaufland,Kaufland,food
+netto,Netto,food
+albert heijn,Albert Heijn,food
+jumbo,Jumbo,food
+delhaize,Delhaize,food
+colruyt,Colruyt,food
+mercadona,Mercadona,food
+eroski,Eroski,food
+esselunga,Esselunga,food
+conad,Conad,food
+pingo doce,Pingo Doce,food
+continente,Continente,food
+billa,Billa,food
+hofer,Hofer,food
+migros,Migros,food
+biedronka,Biedronka,food
+zabka,Zabka,food
+ica,ICA,food
+rimi,Rimi,food
+maxima,Maxima,food
+picnic,Picnic,food
+
+# US groceries
+walmart,Walmart,shopping
+target,Target,shopping
+kroger,Kroger,food
+safeway,Safeway,food
+publix,Publix,food
+trader joes,Trader Joe's,food
+costco,Costco,food
+sams club,Sam's Club,food
+albertsons,Albertsons,food
+heb,H-E-B,food
+wegmans,Wegmans,food
+food lion,Food Lion,food
+giant eagle,Giant Eagle,food
+meijer,Meijer,food
+sprouts farmers market,Sprouts Farmers Market,food
+stop & shop,Stop & Shop,food
+instacart,Instacart,food
+
+# Armenia groceries
+sas supermarket,SAS Supermarket,food
+yerevan city,Yerevan City,food
+star supermarket,Star Supermarket,food
+nor zovq,Nor Zovq,food
+parma,Parma,food
+
+# Restaurants, cafes, takeaway
+mcdonalds,McDonald's,food
+burger king,Burger King,food
+kfc,KFC,food
+subway,Subway,food
+dominos,Domino's,food
+pizza hut,Pizza Hut,food
+papa johns,Papa John's,food
+nandos,Nando's,food
+wagamama,Wagamama,food
+pizza express,Pizza Express,food
+greggs,Greggs,food
+pret a manger,Pret A Manger,food
+itsu,Itsu,food
+wasabi,Wasabi,food
+five guys,Five Guys,food
+shake shack,Shake Shack,food
+taco bell,Taco Bell,food
+chipotle,Chipotle,food
+wendys,Wendy's,food
+dunkin,Dunkin',food
+starbucks,Starbucks,food
+costa coffee,Costa Coffee,food
+caffe nero,Caffe Nero,food
+tim hortons,Tim Hortons,food
+le pain quotidien,Le Pain Quotidien,food
+vapiano,Vapiano,food
+wetherspoon,Wetherspoon,food
+toby carvery,Toby Carvery,food
+harvester,Harvester,food
+frankie & bennys,Frankie & Benny's,food
+zizzi,Zizzi,food
+ask italian,Ask Italian,food
+bella italia,Bella Italia,food
+côte,Côte,food
+dishoom,Dishoom,food
+honest burgers,Honest Burgers,food
+tortilla,Tortilla,food
+chickfila,Chick-fil-A,food
+panera bread,Panera Bread,food
+popeyes,Popeyes,food
+arbys,Arby's,food
+jollibee,Jollibee,food
+tashir pizza,Tashir Pizza,food
+karas,Karas,food
+tun lahmajo,Tun Lahmajo,food
+jingyal hats,Jingyal Hats,food
+sweet coast,Sweet Coast,food
+
+# Food delivery
+deliveroo,Deliveroo,food
+just eat,Just Eat,food
+uber eats,Uber Eats,food
+doordash,DoorDash,food
+grubhub,Grubhub,food
+lieferando,Lieferando,food
+thuisbezorgd,Thuisbezorgd,food
+wolt,Wolt,food
+glovo,Glovo,food
+bolt food,Bolt Food,food
+foodpanda,Foodpanda,food
+menu am,Menu.am,food
+yandex eda,Yandex Eda,food
+too good to go,Too Good To Go,food
+hellofresh,HelloFresh,food
+gousto,Gousto,food
+
+# Fuel and car
+shell,Shell,transport
+bp,BP,transport
+esso,Esso,transport
+texaco,Texaco,transport
+exxon,Exxon,transport
+mobil,Mobil,transport
+chevron,Chevron,transport
+total energies,Total Energies,transport
+repsol,Repsol,transport
+aral,Aral,transport
+eni,Eni,transport
+circle k,Circle K,transport
+valero,Valero,transport
+sunoco,Sunoco,transport
+speedway,Speedway,transport
+gazprom armenia,Gazprom Armenia,transport
+halfords,Halfords,transport
+kwik fit,Kwik Fit,transport
+autozone,AutoZone,transport
+rac,RAC,transport
+adac,ADAC,transport
+justpark,JustPark,transport
+ringgo,RingGo,transport
+ncp,NCP,transport
+paybyphone,PayByPhone,transport
+easypark,EasyPark,transport
+tesla,Tesla,transport
+ionity,Ionity,transport
+
+# Rides and public transport
+uber,Uber,transport
+bolt,Bolt,transport
+lyft,Lyft,transport
+freenow,FreeNow,transport
+addison lee,Addison Lee,transport
+gett,Gett,transport
+yandex go,Yandex Go,transport
+gg taxi,GG Taxi,transport
+voi,Voi,transport
+transport for london,TfL,transport
+national rail,National Rail,transport
+trainline,Trainline,transport
+lner,LNER,transport
+avanti west coast,Avanti West Coast,transport
+gwr,GWR,transport
+northern rail,Northern Rail,transport
+scotrail,ScotRail,transport
+southern railway,Southern Railway,transport
+stagecoach,Stagecoach,transport
+arriva,Arriva,transport
+first bus,First Bus,transport
+national express,National Express,transport
+deutsche bahn,Deutsche Bahn,transport
+bvg,BVG,transport
+mvg,MVG,transport
+sncf,SNCF,transport
+ratp,RATP,transport
+renfe,Renfe,transport
+trenitalia,Trenitalia,transport
+ns,NS,transport
+gvb,GVB,transport
+sbb,SBB,transport
+öbb,ÖBB,transport
+flixbus,FlixBus,transport
+blablacar,BlaBlaCar,transport
+mta,MTA,transport
+bart,BART,transport
+amtrak,Amtrak,transport
+
+# Travel
+ryanair,Ryanair,travel
+easyjet,easyJet,travel
+british airways,British Airways,travel
+virgin atlantic,Virgin Atlantic,travel
+jet2,Jet2,travel
+wizz air,Wizz Air,travel
+lufthansa,Lufthansa,travel
+air france,Air France,travel
+klm,KLM,travel
+iberia,Iberia,travel
+vueling,Vueling,travel
+aegean airlines,Aegean Airlines,travel
+turkish airlines,Turkish Airlines,travel
+emirates,Emirates,travel
+qatar airways,Qatar Airways,travel
+delta air lines,Delta Air Lines,travel
+united airlines,United Airlines,travel
+american airlines,American Airlines,travel
+southwest airlines,Southwest Airlines,travel
+jetblue,JetBlue,travel
+eurostar,Eurostar,travel
+airbnb,Airbnb,travel
+booking com,Booking.com,travel
+hotels com,Hotels.com,travel
+expedia,Expedia,travel
+agoda,Agoda,travel
+trivago,Trivago,travel
+skyscanner,Skyscanner,travel
+premier inn,Premier Inn,travel
+travelodge,Travelodge,travel
+hilton,Hilton,travel
+marriott,Marriott,travel
+hyatt,Hyatt,travel
+holiday inn,Holiday Inn,travel
+ibis,Ibis,travel
+novotel,Novotel,travel
+hertz,Hertz,travel
+avis,Avis,travel
+europcar,Europcar,travel
+sixt,Sixt,travel
+enterprise rentacar,Enterprise Rent-A-Car,travel
+
+# Utilities, telecom
+british gas,British Gas,utilities
+octopus energy,Octopus Energy,utilities
+edf energy,EDF Energy,utilities
+eon,E.ON,utilities
+ovo energy,Ovo Energy,utilities
+scottish power,Scottish Power,utilities
+thames water,Thames Water,utilities
+severn trent,Severn Trent,utilities
+anglian water,Anglian Water,utilities
+united utilities,United Utilities,utilities
+vattenfall,Vattenfall,utilities
+engie,Engie,utilities
+iberdrola,Iberdrola,utilities
+enel,Enel,utilities
+con edison,Con Edison,utilities
+pg&e,PG&E,utilities
+duke energy,Duke Energy,utilities
+ee,EE,utilities
+vodafone,Vodafone,utilities
+o2,O2,utilities
+giffgaff,Giffgaff,utilities
+virgin media,Virgin Media,utilities
+sky,Sky,utilities
+bt,BT,utilities
+talktalk,TalkTalk,utilities
+plusnet,Plusnet,utilities
+orange,Orange,utilities
+deutsche telekom,Deutsche Telekom,utilities
+tmobile,T-Mobile,utilities
+verizon,Verizon,utilities
+at&t,AT&T,utilities
+comcast,Comcast,utilities
+xfinity,Xfinity,utilities
+viva mts,Viva-MTS,utilities
+team telecom armenia,Team Telecom Armenia,utilities
+ucom,Ucom,utilities
+electric networks of armenia,Electric Networks of Armenia,utilities
+veolia jur,Veolia Jur,utilities
+tv licensing,TV Licensing,utilities
+
+# Housing, home and DIY
+ikea,IKEA,housing
+b&q,B&Q,housing
+homebase,Homebase,housing
+wickes,Wickes,housing
+screwfix,Screwfix,housing
+toolstation,Toolstation,housing
+dunelm,Dunelm,housing
+the range,The Range,housing
+home depot,Home Depot,housing
+lowes,Lowe's,housing
+wayfair,Wayfair,housing
+bauhaus,Bauhaus,housing
+obi,OBI,housing
+hornbach,Hornbach,housing
+leroy merlin,Leroy Merlin,housing
+castorama,Castorama,housing
+habitat,Habitat,housing
+rightmove,Rightmove,housing
+zoopla,Zoopla,housing
+openrent,OpenRent,housing
+
+# Shopping: marketplaces, clothes, electronics, department stores
+amazon,Amazon,shopping
+ebay,eBay,shopping
+etsy,Etsy,shopping
+aliexpress,AliExpress,shopping
+temu,Temu,shopping
+shein,Shein,shopping
+zalando,Zalando,shopping
+asos,ASOS,shopping
+vinted,Vinted,shopping
+wildberries,Wildberries,shopping
+ozon,Ozon,shopping
+buy am,Buy.am,shopping
+argos,Argos,shopping
+currys,Currys,shopping
+john lewis,John Lewis,shopping
+selfridges,Selfridges,shopping
+harrods,Harrods,shopping
+debenhams,Debenhams,shopping
+next,Next,shopping
+primark,Primark,shopping
+h&m,H&M,shopping
+zara,Zara,shopping
+uniqlo,Uniqlo,shopping
+mango,Mango,shopping
+gap,Gap,shopping
+bershka,Bershka,shopping
+pull & bear,Pull & Bear,shopping
+massimo dutti,Massimo Dutti,shopping
+stradivarius,Stradivarius,shopping
+tk maxx,TK Maxx,shopping
+tj maxx,TJ Maxx,shopping
+sports direct,Sports Direct,shopping
+jd sports,JD Sports,shopping
+decathlon,Decathlon,shopping
+nike,Nike,shopping
+adidas,Adidas,shopping
+foot locker,Foot Locker,shopping
+new look,New Look,shopping
+river island,River Island,shopping
+matalan,Matalan,shopping
+c&a,C&A,shopping
+galeries lafayette,Galeries Lafayette,shopping
+el corte ingles,El Corte Ingles,shopping
+mediamarkt,MediaMarkt,shopping
+fnac,Fnac,shopping
+darty,Darty,shopping
+best buy,Best Buy,shopping
+samsung,Samsung,shopping
+macys,Macy's,shopping
+nordstrom,Nordstrom,shopping
+kohls,Kohl's,shopping
+wilko,Wilko,shopping
+poundland,Poundland,shopping
+b&m,B&M,shopping
+home bargains,Home Bargains,shopping
+flying tiger,Flying Tiger,shopping
+pepco,Pepco,shopping
+whsmith,WHSmith,shopping
+waterstones,Waterstones,shopping
+hobbycraft,Hobbycraft,shopping
+
+# Health and pharmacy
+boots,Boots,health
+superdrug,Superdrug,selfcare
+lloyds pharmacy,Lloyds Pharmacy,health
+well pharmacy,Well Pharmacy,health
+cvs pharmacy,CVS Pharmacy,health
+walgreens,Walgreens,health
+rite aid,Rite Aid,health
+dm,dm-drogerie markt,selfcare
+rossmann,Rossmann,selfcare
+müller,Müller,selfcare
+kruidvat,Kruidvat,selfcare
+natali pharm,Natali Pharm,health
+alpha pharm,Alpha Pharm,health
+specsavers,Specsavers,health
+vision express,Vision Express,health
+bupa,Bupa,health
+docmorris,DocMorris,health
+shop apotheke,Shop Apotheke,health
+
+# Self-care, beauty, fitness
+sephora,Sephora,selfcare
+douglas,Douglas,selfcare
+the body shop,The Body Shop,selfcare
+lush,Lush,selfcare
+rituals,Rituals,selfcare
+loccitane,L'Occitane,selfcare
+ulta beauty,Ulta Beauty,selfcare
+treatwell,Treatwell,selfcare
+fresha,Fresha,selfcare
+puregym,PureGym,selfcare
+the gym group,The Gym Group,selfcare
+david lloyd,David Lloyd,selfcare
+virgin active,Virgin Active,selfcare
+nuffield health,Nuffield Health,selfcare
+anytime fitness,Anytime Fitness,selfcare
+planet fitness,Planet Fitness,selfcare
+mcfit,McFit,selfcare
+basicfit,Basic-Fit,selfcare
+classpass,ClassPass,selfcare
+headspace,Headspace,selfcare
+
+# Leisure: streaming, games, entertainment
+netflix,Netflix,leisure
+spotify,Spotify,leisure
+disney plus,Disney Plus,leisure
+amazon prime,Amazon Prime,leisure
+youtube premium,YouTube Premium,leisure
+apple,Apple,leisure
+deezer,Deezer,leisure
+tidal,Tidal,leisure
+audible,Audible,leisure
+kindle,Kindle,leisure
+now tv,Now TV,leisure
+dazn,DAZN,leisure
+hbo max,HBO Max,leisure
+hulu,Hulu,leisure
+paramount plus,Paramount Plus,leisure
+crunchyroll,Crunchyroll,leisure
+twitch,Twitch,leisure
+steam,Steam,leisure
+playstation network,PlayStation Network,leisure
+xbox,Xbox,leisure
+nintendo,Nintendo,leisure
+epic games,Epic Games,leisure
+ticketmaster,Ticketmaster,leisure
+eventbrite,Eventbrite,leisure
+stubhub,StubHub,leisure
+see tickets,See Tickets,leisure
+odeon,Odeon,leisure
+vue cinemas,Vue Cinemas,leisure
+cineworld,Cineworld,leisure
+everyman cinema,Everyman Cinema,leisure
+picturehouse,Picturehouse,leisure
+amc theatres,AMC Theatres,leisure
+regal cinemas,Regal Cinemas,leisure
+pathe,Pathe,leisure
+kinopark,Kinopark,leisure
+bowlplex,Bowlplex,leisure
+national trust,National Trust,leisure
+english heritage,English Heritage,leisure
+merlin entertainments,Merlin Entertainments,leisure
+patreon,Patreon,leisure
+
+# Education and work
+coursera,Coursera,education
+udemy,Udemy,education
+duolingo,Duolingo,education
+skillshare,Skillshare,education
+babbel,Babbel,education
+khan academy,Khan Academy,education
+masterclass,MasterClass,education
+open university,Open University,education
+anthropic,Anthropic,work
+openai,OpenAI,work
+github,GitHub,work
+atlassian,Atlassian,work
+slack,Slack,work
+zoom,Zoom,work
+notion,Notion,work
+figma,Figma,work
+adobe,Adobe,work
+canva,Canva,work
+dropbox,Dropbox,work
+microsoft,Microsoft,work
+jetbrains,JetBrains,work
+digitalocean,DigitalOcean,work
+heroku,Heroku,work
+wework,WeWork,work
+regus,Regus,work
+linkedin,LinkedIn,work
+
+# Pets
+pets at home,Pets at Home,pets
+petco,Petco,pets
+petsmart,PetSmart,pets
+chewy,Chewy,pets
+zooplus,Zooplus,pets
+fressnapf,Fressnapf,pets
+butternut box,Butternut Box,pets
+
+# Gifts and flowers
+moonpig,Moonpig,gifts
+funky pigeon,Funky Pigeon,gifts
+card factory,Card Factory,gifts
+interflora,Interflora,gifts
+bloom & wild,Bloom & Wild,gifts
+serenata flowers,Serenata Flowers,gifts
+prezzybox,Prezzybox,gifts
+not on the high street,Not On The High Street,gifts
+
+# Family and kids
+smyths toys,Smyths Toys,family
+mothercare,Mothercare,family
+hamleys,Hamleys,family
+the entertainer,The Entertainer,family
+jojo maman bebe,JoJo Maman Bebe,family
+mamas & papas,Mamas & Papas,family
+kiddicare,Kiddicare,family

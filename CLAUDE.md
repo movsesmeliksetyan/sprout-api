@@ -23,7 +23,7 @@ Do not restate these documents elsewhere; read the relevant section before start
 
 Go (current stable) · `net/http` + `chi` · `oapi-codegen` strict server from `api/openapi.yaml` · PostgreSQL 16+ with `pgx/v5`, `sqlc`, `goose` · `river` for jobs · Auth0 RS256 JWTs via JWKS · S3-compatible storage (MinIO locally) · `log/slog` JSON, OpenTelemetry, Prometheus · `testify`, `testcontainers-go`, golden files.
 
-One binary, three subcommands: `sprout api`, `sprout worker`, `sprout migrate`.
+One binary, four subcommands: `sprout api`, `sprout worker`, `sprout migrate`, `sprout seed-rules`.
 
 ## Commands
 
@@ -32,6 +32,7 @@ One binary, three subcommands: `sprout api`, `sprout worker`, `sprout migrate`.
 ```
 docker compose up -d --wait   # postgres + minio
 make migrate-up          # goose migrations
+make seed-rules          # categorisation seeds (merchants, MCC codes, keywords); idempotent
 make run                 # API
 make worker              # river worker
 make generate            # sqlc + oapi-codegen (pinned, via go run); must produce no diff on a second run

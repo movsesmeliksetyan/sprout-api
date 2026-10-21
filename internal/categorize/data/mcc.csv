@@ -1,0 +1,202 @@
+# Merchant category codes → category type (PRD §5.2, layer 3), loaded by
+# `sprout seed-rules`. Columns: first code, last code, category_type, what
+# the range is. Each range is every code from first to last; ranges must
+# not overlap. Codes not listed have no type. A code's meaning follows the
+# ISO 18245 list the card schemes publish.
+from,to,category_type,description
+3000,3350,travel,Airlines
+3351,3500,travel,Car rental agencies
+3501,3999,travel,Hotels and resorts
+4011,4011,transport,Railroads
+4111,4111,transport,Local and commuter passenger transport
+4112,4112,transport,Passenger railways
+4119,4119,health,Ambulance services
+4121,4121,transport,Taxis and limousines
+4131,4131,transport,Bus lines
+4411,4411,travel,Cruise lines
+4457,4457,leisure,Boat rentals and leases
+4468,4468,leisure,Marinas
+4511,4511,travel,Airlines and air carriers
+4582,4582,travel,Airports and terminals
+4722,4722,travel,Travel agencies and tour operators
+4784,4784,transport,Tolls and bridge fees
+4789,4789,transport,Transportation services
+4812,4812,utilities,Telecommunication equipment and phone sales
+4814,4814,utilities,Telecommunication services
+4816,4816,utilities,Computer network and internet services
+4899,4899,utilities,Cable and satellite television
+4900,4900,utilities,Electric gas and water utilities
+5021,5021,housing,Office and commercial furniture
+5039,5039,housing,Construction materials
+5044,5045,work,Office and computer equipment
+5065,5065,shopping,Electrical parts and equipment
+5094,5094,shopping,Jewellery and watches
+5111,5111,work,Stationery and office supplies
+5122,5122,health,Drugs and druggists' sundries
+5137,5137,shopping,Uniforms and commercial clothing
+5139,5139,shopping,Commercial footwear
+5192,5192,leisure,Books periodicals and newspapers
+5193,5193,gifts,Florists' supplies and nursery stock
+5200,5200,housing,Home supply warehouse stores
+5211,5211,housing,Lumber and building materials
+5231,5231,housing,Glass paint and wallpaper
+5251,5251,housing,Hardware stores
+5261,5261,housing,Nurseries and lawn and garden supply
+5271,5271,housing,Mobile home dealers
+5300,5300,shopping,Wholesale clubs
+5309,5309,shopping,Duty-free stores
+5310,5310,shopping,Discount stores
+5311,5311,shopping,Department stores
+5331,5331,shopping,Variety stores
+5399,5399,shopping,General merchandise
+5411,5411,food,Grocery stores and supermarkets
+5422,5422,food,Freezer and meat lockers
+5441,5441,food,Candy nut and confectionery stores
+5451,5451,food,Dairy products stores
+5462,5462,food,Bakeries
+5499,5499,food,Convenience stores and speciality food
+5511,5511,transport,Car and truck dealers new and used
+5521,5521,transport,Car and truck dealers used only
+5531,5533,transport,Auto stores and auto parts
+5541,5542,transport,Service stations and automated fuel dispensers
+5551,5551,leisure,Boat dealers
+5561,5561,transport,Camper and trailer dealers
+5571,5571,transport,Motorcycle dealers
+5592,5592,transport,Motor home dealers
+5598,5599,transport,Snowmobile and other vehicle dealers
+5611,5611,shopping,Men's clothing and accessories
+5621,5621,shopping,Women's ready-to-wear stores
+5631,5631,shopping,Women's accessories
+5641,5641,family,Children's and infants' wear
+5651,5651,shopping,Family clothing stores
+5655,5655,shopping,Sports and riding apparel
+5661,5661,shopping,Shoe stores
+5681,5681,shopping,Furriers
+5691,5691,shopping,Clothing stores
+5697,5699,shopping,Tailors and accessory shops
+5712,5712,housing,Furniture and home furnishings
+5713,5713,housing,Floor covering stores
+5714,5714,housing,Drapery and upholstery stores
+5718,5719,housing,Fireplaces and home furnishing speciality
+5722,5722,housing,Household appliance stores
+5732,5732,shopping,Electronics stores
+5733,5733,leisure,Music stores and instruments
+5734,5734,shopping,Computer software stores
+5735,5735,leisure,Record stores
+5811,5811,food,Caterers
+5812,5812,food,Restaurants
+5813,5813,food,Bars pubs and nightclubs
+5814,5814,food,Fast food restaurants
+5815,5818,leisure,Digital goods media games and apps
+5912,5912,health,Pharmacies and drug stores
+5921,5921,food,Liquor stores
+5931,5931,shopping,Second-hand stores
+5932,5932,shopping,Antique shops
+5940,5940,shopping,Bicycle shops
+5941,5941,shopping,Sporting goods stores
+5942,5942,leisure,Book stores
+5943,5943,shopping,Stationery stores
+5944,5944,shopping,Jewellery and watch stores
+5945,5945,family,Toy and game shops
+5946,5946,shopping,Camera and photo stores
+5947,5947,gifts,Gift card and souvenir shops
+5948,5948,shopping,Luggage and leather goods
+5949,5949,shopping,Sewing and fabric stores
+5950,5950,housing,Glassware and crystal stores
+5970,5970,leisure,Artists' and craft supplies
+5971,5971,shopping,Art dealers and galleries
+5972,5972,shopping,Stamp and coin stores
+5973,5973,shopping,Religious goods stores
+5975,5976,health,Hearing aids and orthopaedic goods
+5977,5977,selfcare,Cosmetic stores
+5978,5978,work,Typewriter stores
+5983,5983,utilities,Fuel dealers for heating
+5992,5992,gifts,Florists
+5993,5993,shopping,Cigar stores
+5994,5994,leisure,Newsagents
+5995,5995,pets,Pet shops and pet food
+5996,5996,housing,Swimming pools sales and service
+5997,5997,selfcare,Electric razor stores
+5998,5998,housing,Tent and awning shops
+6513,6513,housing,Real estate agents and rentals
+7011,7011,travel,Hotels and lodging
+7012,7012,travel,Timeshares
+7032,7032,leisure,Sporting and recreational camps
+7033,7033,travel,Campgrounds and trailer parks
+7210,7211,housing,Laundry services
+7216,7216,housing,Dry cleaners
+7217,7217,housing,Carpet and upholstery cleaning
+7221,7221,leisure,Photographic studios
+7230,7230,selfcare,Hairdressers barbers and beauty salons
+7251,7251,shopping,Shoe repair and hat cleaning
+7273,7273,leisure,Dating services
+7295,7295,family,Babysitting services
+7297,7297,selfcare,Massage parlours
+7298,7298,selfcare,Health and beauty spas
+7299,7299,selfcare,Personal services
+7333,7333,work,Commercial photography and graphic design
+7338,7339,work,Quick copy and secretarial services
+7342,7342,housing,Pest control
+7349,7349,housing,Cleaning and maintenance
+7372,7372,work,Computer programming and data processing
+7375,7375,work,Information retrieval services
+7379,7379,work,Computer maintenance and repair
+7392,7392,work,Consulting and public relations
+7512,7512,travel,Car rental
+7513,7513,transport,Truck and utility trailer rental
+7519,7519,travel,Motor home and recreational vehicle rental
+7523,7523,transport,Parking lots and garages
+7531,7531,transport,Auto body repair shops
+7534,7534,transport,Tyre retreading and repair
+7535,7535,transport,Auto paint shops
+7538,7538,transport,Auto service shops
+7542,7542,transport,Car washes
+7549,7549,transport,Towing services
+7622,7622,shopping,Electronics repair
+7623,7623,housing,Air conditioning and refrigeration repair
+7629,7629,housing,Electrical and small appliance repair
+7631,7631,shopping,Watch clock and jewellery repair
+7641,7641,housing,Furniture repair
+7692,7692,housing,Welding repair
+7699,7699,housing,Repair shops and related services
+7829,7829,leisure,Film and video production and distribution
+7832,7832,leisure,Cinemas
+7841,7841,leisure,Video rental and streaming
+7911,7911,leisure,Dance halls studios and schools
+7922,7922,leisure,Theatrical producers and ticket agencies
+7929,7929,leisure,Bands orchestras and entertainers
+7932,7932,leisure,Billiard and pool establishments
+7933,7933,leisure,Bowling alleys
+7941,7941,leisure,Sports clubs and promoters
+7991,7991,leisure,Tourist attractions and exhibits
+7992,7992,leisure,Golf courses
+7993,7993,leisure,Video game supplies
+7994,7994,leisure,Video game arcades
+7995,7995,leisure,Betting and gambling
+7996,7996,leisure,Amusement parks and circuses
+7997,7997,selfcare,Gyms and membership clubs
+7998,7998,leisure,Aquariums and zoos
+7999,7999,leisure,Recreation services
+8011,8011,health,Doctors
+8021,8021,health,Dentists and orthodontists
+8031,8031,health,Osteopaths
+8041,8041,health,Chiropractors
+8042,8042,health,Optometrists
+8043,8043,health,Opticians and eyeglasses
+8049,8049,health,Podiatrists
+8050,8050,health,Nursing and personal care facilities
+8062,8062,health,Hospitals
+8071,8071,health,Medical and dental laboratories
+8099,8099,health,Medical services
+8111,8111,work,Legal services and attorneys
+8211,8211,education,Elementary and secondary schools
+8220,8220,education,Colleges and universities
+8241,8241,education,Correspondence schools
+8244,8244,education,Business and secretarial schools
+8249,8249,education,Trade and vocational schools
+8299,8299,education,Schools and educational services
+8351,8351,family,Child care services
+8675,8675,transport,Automobile associations
+8911,8911,work,Architectural and engineering services
+8931,8931,work,Accounting and bookkeeping
+9402,9402,work,Postal services
