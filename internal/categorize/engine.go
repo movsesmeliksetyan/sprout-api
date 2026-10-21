@@ -2,6 +2,7 @@ package categorize
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 	"time"
 	"unicode"
@@ -9,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
+	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
 )
 
 // Source is the layer that categorised a transaction (contract §1.3,
@@ -87,17 +89,19 @@ type Result struct {
 
 // Options choose the layers a classification may use.
 type Options struct {
-	// AllowLLM lets unresolved transactions go to the language model. It has
-	// no effect until the LLM layer exists (BE-32).
+	// AllowLLM lets the merchants no other layer placed go to the language
+	// model, when the engine has one (WithLLM).
 	AllowLLM bool
 }
 
 // Engine categorises transactions through the layers of PRD §5.2, cheapest
 // first; the first answer that reaches Threshold wins.
 type Engine struct {
-	q     db.Querier
-	store *Store
-	now   func() time.Time
+	q      db.Querier
+	store  *Store
+	now    func() time.Time
+	llm    llm.Client
+	logger *slog.Logger
 }
 
 // EngineOption configures an Engine.
@@ -110,7 +114,7 @@ func WithClock(now func() time.Time) EngineOption {
 
 // NewEngine returns an engine that reads through q.
 func NewEngine(q db.Querier, opts ...EngineOption) *Engine {
-	e := &Engine{q: q, store: NewStore(q), now: time.Now}
+	e := &Engine{q: q, store: NewStore(q), now: time.Now, logger: slog.New(slog.DiscardHandler)}
 	for _, opt := range opts {
 		opt(e)
 	}
@@ -120,14 +124,10 @@ func NewEngine(q db.Querier, opts ...EngineOption) *Engine {
 // Classify categorises a batch for a user, one result per input in the
 // same order. Each layer makes at most one query whatever the batch size,
 // and a layer is skipped once nothing is left for it.
-func (e *Engine) Classify(ctx context.Context, userID uuid.UUID, in []Input, _ Options) ([]Result, error) {
-	c := classification{results: make([]Result, len(in))}
+func (e *Engine) Classify(ctx context.Context, userID uuid.UUID, in []Input, opts Options) ([]Result, error) {
+	c := classification{results: make([]Result, len(in)), answered: map[string]bool{}}
 	for i, input := range in {
-		name := input.Merchant
-		if strings.TrimSpace(name) == "" {
-			name = input.RawDescription
-		}
-		merchant := Normalize(name)
+		merchant := Normalize(merchantSource(input))
 		c.results[i] = Result{Source: SourceNone, MerchantKey: merchant.Key, DisplayMerchant: merchant.Display}
 		if input.Direction != DirectionCredit {
 			c.pending = append(c.pending, i)
@@ -153,7 +153,19 @@ func (e *Engine) Classify(ctx context.Context, userID uuid.UUID, in []Input, _ O
 	if err := c.keywords(ctx, e.store, types, in); err != nil {
 		return nil, err
 	}
+	if opts.AllowLLM && e.llm != nil && len(c.pending) > 0 {
+		e.llmLayer(ctx, &c, types, in)
+	}
 	return c.results, nil
+}
+
+// merchantSource is the text an input's merchant is read from: Merchant
+// when there is one, else the description.
+func merchantSource(in Input) string {
+	if strings.TrimSpace(in.Merchant) != "" {
+		return in.Merchant
+	}
+	return in.RawDescription
 }
 
 // classification is a batch on its way through the layers.
@@ -161,6 +173,9 @@ type classification struct {
 	results []Result
 	// pending are the indexes of the inputs no layer has placed yet.
 	pending []int
+	// answered are the merchant keys the model has already given an answer
+	// for that has not expired, placed or not: they are not asked again.
+	answered map[string]bool
 }
 
 // place gives the input at i its category, if the answer reaches the
@@ -229,6 +244,9 @@ func (c *classification) dictionary(ctx context.Context, store *Store, types res
 	}
 	c.keep(func(i int) bool {
 		entry, ok := entries[c.results[i].MerchantKey]
+		if ok && entry.Source == DictionaryLLM && entry.Key == c.results[i].MerchantKey {
+			c.answered[entry.Key] = true
+		}
 		if !ok || entry.CategoryType == nil {
 			return false
 		}

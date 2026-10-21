@@ -23,6 +23,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/goals"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
+	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
 	"github.com/movsesmeliksetyan/sprout-api/internal/summary"
@@ -188,6 +189,11 @@ func runAPI(c cli, _ []string) error {
 	)
 	categoryService := categories.NewService(pool, categories.WithUsageCheck(transactions.CategoryInUse))
 	transactionService := transactions.NewService(pool)
+	llmClient, err := llm.NewFromConfig(cfg.LLM, llm.Options{Logger: logger})
+	if err != nil {
+		return err
+	}
+	engine := categorize.NewEngine(db.New(pool), categorize.WithLLM(llmClient, logger))
 	opts := []httpx.Option{
 		httpx.WithReadinessCheck("postgres", db.Ready(pool)),
 		httpx.WithReadinessCheck("storage", store.Ready),
@@ -198,7 +204,7 @@ func runAPI(c cli, _ []string) error {
 		),
 		httpx.WithAPI(newAPI(userService, uploadService, categoryService, transactionService,
 			summary.NewService(pool, transactionService),
-			goals.NewService(pool, goals.WithImages(uploadService, store, logger)))),
+			goals.NewService(pool, goals.WithImages(uploadService, store, logger)), engine)),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))
