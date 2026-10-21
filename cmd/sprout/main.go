@@ -188,7 +188,7 @@ func runAPI(c cli, _ []string) error {
 		users.WithTransactionCheck(transactions.HasAny),
 	)
 	categoryService := categories.NewService(pool, categories.WithUsageCheck(transactions.CategoryInUse))
-	transactionService := transactions.NewService(pool)
+	transactionService := transactions.NewService(pool, transactions.WithMerchantRuleHook(categorize.Learn))
 	llmClient, err := llm.NewFromConfig(cfg.LLM, llm.Options{Logger: logger})
 	if err != nil {
 		return err
