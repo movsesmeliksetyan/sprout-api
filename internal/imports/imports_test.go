@@ -8,6 +8,7 @@ import (
 	"os"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -87,7 +88,8 @@ func newFixture(t *testing.T) fixture {
 		httpx.WithAPI(api{Handler: imports.NewHandler(imports.NewService(pool, uploadService, inserter))}),
 	).Handler()
 	m := &model{}
-	processor := imports.NewProcessor(pool, store, llm.New(m, llm.Options{TextModel: "test", MaxAttempts: 1}))
+	processor := imports.NewProcessor(pool, store, llm.New(m, llm.Options{TextModel: "test", MaxAttempts: 1}),
+		imports.WithClock(func() time.Time { return now }))
 	return fixture{pool: pool, store: store, uploads: uploadService, server: server, model: m, processor: processor}
 }
 
@@ -97,10 +99,21 @@ func (f fixture) file(t *testing.T, user testutil.TestUser, name, content string
 	return testutil.Upload(t, f.uploads, user.ID, uploads.PurposeStatement, "text/csv", name, []byte(content))
 }
 
-// imported creates an import of content and processes it, returning it.
+// now is the processor's clock: Wednesday 16 July 2025, in the week of
+// Monday 14 to Sunday 20.
+var now = time.Date(2025, time.July, 16, 12, 0, 0, 0, time.UTC)
+
+// imported creates an import of content keeping every period and processes
+// it, returning it.
 func (f fixture) imported(t *testing.T, user testutil.TestUser, content string) httpx.Import {
 	t.Helper()
-	rec := f.do(t, user, http.MethodPost, "/imports", map[string]any{"upload_id": f.file(t, user, "statement.csv", content), "period": "all"})
+	return f.importedFor(t, user, content, "all")
+}
+
+// importedFor is imported keeping only the given period.
+func (f fixture) importedFor(t *testing.T, user testutil.TestUser, content, period string) httpx.Import {
+	t.Helper()
+	rec := f.do(t, user, http.MethodPost, "/imports", map[string]any{"upload_id": f.file(t, user, "statement.csv", content), "period": period})
 	require.Equal(t, http.StatusAccepted, rec.Code, "body: %s", rec.Body.String())
 	return f.process(t, user, testutil.DecodeJSON[httpx.Import](t, rec).ID)
 }

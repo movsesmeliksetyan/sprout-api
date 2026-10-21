@@ -25,13 +25,27 @@ type Processor struct {
 	db    Database
 	store storage.Store
 	llm   llm.Client
+	now   func() time.Time
+}
+
+// ProcessorOption configures a Processor.
+type ProcessorOption func(*Processor)
+
+// WithClock sets where the processor reads the time, which places an
+// import's period window. It defaults to time.Now.
+func WithClock(now func() time.Time) ProcessorOption {
+	return func(p *Processor) { p.now = now }
 }
 
 // NewProcessor returns a processor reading files from store and asking
 // client, which may be nil, about the files the deterministic stages
 // cannot read.
-func NewProcessor(database Database, store storage.Store, client llm.Client) *Processor {
-	return &Processor{db: database, store: store, llm: client}
+func NewProcessor(database Database, store storage.Store, client llm.Client, opts ...ProcessorOption) *Processor {
+	p := &Processor{db: database, store: store, llm: client, now: time.Now}
+	for _, opt := range opts {
+		opt(p)
+	}
+	return p
 }
 
 // outcome is what the pipeline made of a file.
@@ -44,6 +58,7 @@ type outcome struct {
 	fingerprint string
 	bankHint    *string
 	rows        []statements.Row
+	outOfPeriod int
 	failure     *Failure
 }
 
@@ -90,6 +105,13 @@ func (p *Processor) Process(ctx context.Context, importID uuid.UUID) error {
 		result, err = p.read(ctx, data, loc, hints)
 		if err != nil {
 			return err
+		}
+		if result.status == StatusReady {
+			window, err := statements.NewWindow(source.Period, loc, p.now())
+			if err != nil {
+				return fmt.Errorf("imports: period: %w", err)
+			}
+			result = validate(result, window, loc)
 		}
 	}
 	return p.save(ctx, importID, source, loc, result)
@@ -148,6 +170,16 @@ func (p *Processor) read(ctx context.Context, data []byte, loc *time.Location, h
 	return result, nil
 }
 
+// validate checks the rows read and keeps those in the import's window.
+func validate(result outcome, window statements.Window, loc *time.Location) outcome {
+	validated, err := statements.Validate(result.rows, window, loc)
+	if err != nil {
+		return withFormat(fileFailure(err), result.format)
+	}
+	result.rows, result.outOfPeriod = validated.Rows, validated.OutOfPeriod
+	return result
+}
+
 // save replaces the import's rows with the outcome's and records what was
 // found, in one transaction.
 func (p *Processor) save(ctx context.Context, importID uuid.UUID, source db.GetImportSourceRow, loc *time.Location, result outcome) error {
@@ -163,6 +195,7 @@ func (p *Processor) save(ctx context.Context, importID uuid.UUID, source db.GetI
 		if err != nil {
 			return err
 		}
+		summary.OutOfPeriodCount = result.outOfPeriod
 		if len(rows) > 0 {
 			if _, err := q.InsertImportRows(ctx, rows); err != nil {
 				return fmt.Errorf("imports: rows: %w", err)
@@ -277,6 +310,8 @@ func fileFailure(err error) outcome {
 		return failed(FailureUnsupportedFormat, "This file is not a statement Sprout can read: use CSV, OFX, XLSX or PDF.")
 	case errors.Is(err, statements.ErrTooManyRows):
 		return failed(FailureTooManyRows, "The statement is too long. Export a shorter period.")
+	case errors.Is(err, statements.ErrLowParseRate):
+		return failed(FailureUnreadable, "Most of this statement's rows could not be read.")
 	}
 	return failed(FailureUnreadable, "This statement could not be read.")
 }
