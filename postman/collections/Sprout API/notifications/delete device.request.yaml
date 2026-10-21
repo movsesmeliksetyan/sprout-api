@@ -1,0 +1,16 @@
+$kind: http-request
+name: 'Delete device'
+method: DELETE
+url: '{{baseUrl}}/v1/devices/{{deviceId}}'
+order: 2000
+pathVariables:
+  - key: deviceId
+    value: '{{deviceId}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      if (pm.response.code === 204) {
+          pm.collectionVariables.set("deviceId", "");
+          console.log("✅ device removed; deviceId cleared");
+      }

@@ -905,7 +905,9 @@ paths:
       operationId: registerDevice
       tags: [notifications]
       summary: Register or refresh a push device
-      description: "`device_id` is a client-generated UUID kept in the Keychain."
+      description: >-
+        `device_id` is a client-generated UUID kept in the Keychain. The token is hex
+        (64–200 characters); a token registered under another device or user moves here.
       requestBody:
         description: A device's push registration.
         required: true
@@ -922,7 +924,7 @@ paths:
       operationId: deleteDevice
       tags: [notifications]
       summary: Remove a push device
-      description: Called on logout.
+      description: Called on logout. A device that is not registered, or is someone else's, is 404.
       responses:
         "204":
           description: The device is removed.

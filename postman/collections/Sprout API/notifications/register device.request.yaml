@@ -1,0 +1,27 @@
+$kind: http-request
+name: 'Register device'
+method: PUT
+url: '{{baseUrl}}/v1/devices/{{deviceId}}'
+order: 1000
+pathVariables:
+  - key: deviceId
+    value: '{{deviceId}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "apns_token": "0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0",
+      "environment": "sandbox",
+      "app_version": "1.0.0",
+      "locale": "en_GB"
+    }
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      if (!pm.collectionVariables.get("deviceId")) {
+          pm.collectionVariables.set("deviceId", pm.variables.replaceIn("{{$guid}}"));
+      }

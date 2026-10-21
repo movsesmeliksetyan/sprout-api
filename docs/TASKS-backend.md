@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 54 / 63**
+**Progress: 55 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -127,7 +127,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 ## Milestone 11 — Notifications
 
-- [ ] BE-55 · Device registration
+- [x] BE-55 · Device registration — 2026-10-21, 78fbd0e
+  - Notes: migration `00023_notifications.sql` (00015 was taken) creates `devices` and the `notifications` inbox table BE-56 fills. An APNs token is unique across devices: registering it releases it from any other device, of this user or another, in the same transaction, then upserts on (`user_id`, `device_id`), refreshing `last_seen_at` and clearing `invalidated_at`. The token is lower-cased hex of 64–200 characters; `app_version` ≤ 32 and `locale` ≤ 35 characters, otherwise `422`. `DELETE` of a device that is missing or someone else's is `404` (contract §2.12 says so now). The service is `notify.Service`, which BE-56 extends. Postman gains the notifications folder with Register device and Delete device, and the `deviceId` variable.
 - [ ] BE-56 · APNs sender and inbox
 - [ ] BE-57 · Budget alerts
 - [ ] BE-58 · Weekly recap

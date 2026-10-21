@@ -73,6 +73,7 @@ type Querier interface {
 	DeleteCategory(ctx context.Context, arg DeleteCategoryParams) (int64, error)
 	// Removes a contribution of one of the user's goals and returns it.
 	DeleteContribution(ctx context.Context, arg DeleteContributionParams) (GoalContribution, error)
+	DeleteDevice(ctx context.Context, arg DeleteDeviceParams) (int64, error)
 	DeleteExpiredIdempotencyKeys(ctx context.Context) (int64, error)
 	DeleteExpiredLLMEntries(ctx context.Context, now time.Time) (int64, error)
 	DeleteGoal(ctx context.Context, arg DeleteGoalParams) (int64, error)
@@ -155,6 +156,7 @@ type Querier interface {
 	// The whole-day totals of the given days under the same filters as
 	// ListTransactions: income minus expense, and how many transactions.
 	ListDayTotals(ctx context.Context, arg ListDayTotalsParams) ([]ListDayTotalsRow, error)
+	ListDevices(ctx context.Context, userID uuid.UUID) ([]Device, error)
 	// The dictionary rows for any of the keys, leaving out llm rows that have
 	// expired.
 	ListDictionaryEntries(ctx context.Context, arg ListDictionaryEntriesParams) ([]ListDictionaryEntriesRow, error)
@@ -209,6 +211,9 @@ type Querier interface {
 	// Records the user's votes: each merchant's category, by its type. A
 	// category without a type, or not the user's, casts no vote.
 	RecordMerchantVotes(ctx context.Context, arg RecordMerchantVotesParams) (int64, error)
+	// Frees a token held by any other device, of this user or another, so it
+	// can move to the one registering it.
+	ReleaseAPNsToken(ctx context.Context, arg ReleaseAPNsTokenParams) error
 	// Gives the key up so that a retry runs again.
 	ReleaseIdempotencyKey(ctx context.Context, arg ReleaseIdempotencyKeyParams) (int64, error)
 	// Puts the user's categories in the order of ids.
@@ -268,6 +273,7 @@ type Querier interface {
 	UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) (Transaction, error)
 	// A null argument leaves its column as it is.
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpsertDevice(ctx context.Context, arg UpsertDeviceParams) (Device, error)
 	// Points the user's rule for a merchant at one of their active categories,
 	// counting the use. Writes nothing when the category is not theirs.
 	UpsertMerchantRule(ctx context.Context, arg UpsertMerchantRuleParams) (int64, error)

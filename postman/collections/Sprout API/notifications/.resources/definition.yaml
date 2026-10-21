@@ -1,0 +1,4 @@
+$kind: collection
+name: notifications
+description: 'Push devices and the notification inbox.'
+order: 13000
