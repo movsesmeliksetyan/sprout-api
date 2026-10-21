@@ -1,0 +1,24 @@
+{
+  "headers": [
+    "Datum",
+    "Text",
+    "Betrag Soll",
+    "Betrag Haben"
+  ],
+  "rows": [
+    [
+      "2025-07-14",
+      "KARTENZAHLUNG REWE",
+      "42.8",
+      ""
+    ],
+    [
+      "2025-07-12",
+      "GEHALT ACME GMBH",
+      "",
+      "2500"
+    ]
+  ],
+  "preamble": [],
+  "footer": []
+}

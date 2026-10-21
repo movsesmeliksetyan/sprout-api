@@ -1,0 +1,32 @@
+{
+  "headers": [
+    "Date",
+    "Description",
+    "Amount",
+    "Balance"
+  ],
+  "rows": [
+    [
+      "2025-07-14",
+      "TESCO STORES 3297",
+      "-42.8",
+      "1203.11"
+    ],
+    [
+      "2025-07-13",
+      "PRET A MANGER",
+      "-4.5",
+      "1245.91"
+    ],
+    [
+      "2025-07-12",
+      "SALARY ACME",
+      "2500",
+      "1250.41"
+    ]
+  ],
+  "preamble": [
+    "Statement for account ****1234"
+  ],
+  "footer": []
+}
