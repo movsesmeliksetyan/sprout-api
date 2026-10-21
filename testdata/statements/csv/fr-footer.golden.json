@@ -1,0 +1,43 @@
+{
+  "headers": [
+    "Date",
+    "Libellé",
+    "Débit",
+    "Crédit"
+  ],
+  "rows": [
+    [
+      "14/07/2025",
+      "PAIEMENT CB CARREFOUR MARKET",
+      "23,50",
+      ""
+    ],
+    [
+      "13/07/2025",
+      "PRLV SEPA EDF",
+      "40,00",
+      ""
+    ],
+    [
+      "12/07/2025",
+      "VIR SEPA SALAIRE",
+      "",
+      "2 800,00"
+    ]
+  ],
+  "preamble": [],
+  "footer": [
+    [
+      "Solde au 31/07/2025",
+      "",
+      "",
+      "1 234,56"
+    ],
+    [
+      "Total des opérations",
+      "",
+      "63,50",
+      "2 800,00"
+    ]
+  ]
+}

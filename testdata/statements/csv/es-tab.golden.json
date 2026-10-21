@@ -1,0 +1,24 @@
+{
+  "headers": [
+    "Fecha",
+    "Concepto",
+    "Importe",
+    "Saldo"
+  ],
+  "rows": [
+    [
+      "14/07/2025",
+      "COMPRA TARJETA MERCADONA MADRID",
+      "-18,90",
+      "980,10"
+    ],
+    [
+      "13/07/2025",
+      "COMPRA TARJETA RENFE",
+      "-25,00",
+      "999,00"
+    ]
+  ],
+  "preamble": [],
+  "footer": []
+}

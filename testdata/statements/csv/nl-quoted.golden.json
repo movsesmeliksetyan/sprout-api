@@ -1,0 +1,38 @@
+{
+  "headers": [
+    "Datum",
+    "Naam / Omschrijving",
+    "Rekening",
+    "Af Bij",
+    "Bedrag (EUR)",
+    "Mededelingen"
+  ],
+  "rows": [
+    [
+      "20250714",
+      "Albert Heijn 1234",
+      "NL00INGB0000000000",
+      "Af",
+      "12,34",
+      "Betaalautomaat"
+    ],
+    [
+      "20250713",
+      "NS Reizigers",
+      "NL00INGB0000000000",
+      "Af",
+      "5,60",
+      "Betaalautomaat"
+    ],
+    [
+      "20250712",
+      "Salaris ACME",
+      "NL00INGB0000000000",
+      "Bij",
+      "2500,00",
+      "Salaris juli"
+    ]
+  ],
+  "preamble": [],
+  "footer": []
+}
