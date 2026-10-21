@@ -1,0 +1,259 @@
+# Column labels that say what a statement column holds (PRD §4.3 stage 3b),
+# by role. Labels are compared lower case, without accents, with
+# punctuation as spaces; a label matches when it equals an entry, and
+# partly when it contains one as whole words. Languages: English, German,
+# Spanish, French, Italian, Dutch, Portuguese, Polish, Russian, Armenian.
+# "ignore" holds labels that look like a role but are not the one to read
+# (a value date next to the booking date, a time).
+
+date:
+  - date
+  - transaction date
+  - posting date
+  - posted date
+  - booking date
+  - trans date
+  - completed date
+  - datum
+  - buchungstag
+  - buchungsdatum
+  - fecha
+  - fecha operacion
+  - fecha de operacion
+  - date operation
+  - date de l operation
+  - date comptable
+  - data
+  - data operazione
+  - data contabile
+  - transactiedatum
+  - boekdatum
+  - data lancamento
+  - data da operacao
+  - data transakcji
+  - data operacji
+  - дата
+  - дата операции
+  - дата транзакции
+  - ամսաթիվ
+  - գործարքի ամսաթիվ
+
+description:
+  - description
+  - details
+  - transaction details
+  - narrative
+  - memo
+  - reference details
+  - payee
+  - name
+  - merchant
+  - transaction description
+  - particulars
+  - verwendungszweck
+  - buchungstext
+  - beschreibung
+  - text
+  - empfanger
+  - auftraggeber empfanger
+  - beguenstigter zahlungspflichtiger
+  - concepto
+  - descripcion
+  - movimiento
+  - libelle
+  - libelle operation
+  - description operation
+  - descrizione
+  - causale
+  - descrizione operazione
+  - omschrijving
+  - naam omschrijving
+  - mededelingen
+  - descricao
+  - historico
+  - opis
+  - tytul
+  - opis operacji
+  - описание
+  - назначение платежа
+  - детали
+  - նկարագրություն
+  - նպատակ
+  - մանրամասներ
+
+amount:
+  - amount
+  - value
+  - transaction amount
+  - amount gbp
+  - amount eur
+  - amount usd
+  - betrag
+  - betrag eur
+  - umsatz
+  - importe
+  - cantidad
+  - montant
+  - montant eur
+  - importo
+  - bedrag
+  - bedrag eur
+  - valor
+  - montante
+  - kwota
+  - сумма
+  - сумма операции
+  - գումար
+  - գործարքի գումար
+
+debit:
+  - debit
+  - debits
+  - debit amount
+  - paid out
+  - money out
+  - withdrawal
+  - withdrawals
+  - out
+  - outgoing
+  - charge
+  - soll
+  - belastung
+  - ausgang
+  - cargo
+  - cargos
+  - debe
+  - debito
+  - addebiti
+  - uscite
+  - af
+  - afschrijving
+  - saida
+  - obciazenia
+  - wyplywy
+  - расход
+  - списание
+  - дебет
+  - ելք
+  - դեբետ
+
+credit:
+  - credit
+  - credits
+  - credit amount
+  - paid in
+  - money in
+  - deposit
+  - deposits
+  - in
+  - incoming
+  - haben
+  - gutschrift
+  - eingang
+  - abono
+  - abonos
+  - haber
+  - credito
+  - accrediti
+  - entrate
+  - bij
+  - bijschrijving
+  - entrada
+  - uznania
+  - wplywy
+  - приход
+  - зачисление
+  - кредит
+  - մուտք
+  - կրեդիտ
+
+balance:
+  - balance
+  - running balance
+  - balance after
+  - saldo
+  - kontostand
+  - solde
+  - saldo contabile
+  - saldo disponibile
+  - остаток
+  - баланс
+  - մնացորդ
+
+currency:
+  - currency
+  - ccy
+  - wahrung
+  - wahrungscode
+  - moneda
+  - devise
+  - divisa
+  - valuta code
+  - munt
+  - moeda
+  - waluta
+  - валюта
+  - արժույթ
+
+reference:
+  - reference
+  - ref
+  - transaction id
+  - transaction reference
+  - id
+  - fitid
+  - referenz
+  - referencia
+  - reference operation
+  - riferimento
+  - referentie
+  - transactiereferentie
+  - numer referencyjny
+  - номер документа
+  - референс
+  - համար
+
+mcc:
+  - mcc
+  - merchant category code
+  - category code
+  - sic
+
+ignore:
+  - value date
+  - valuta
+  - valutadatum
+  - wertstellung
+  - fecha valor
+  - date de valeur
+  - data valuta
+  - rentedatum
+  - data waluty
+  - дата валютирования
+  - time
+  - uhrzeit
+  - hora
+  - heure
+  - local amount
+  - local currency
+  - category split
+  - category
+  - type
+  - transaction type
+  - details type
+  - emoji
+  - receipt
+  - address
+  - notes and tags
+  - check or slip
+  - rekening
+  - tegenrekening
+  - mutatiesoort
+  - code
+
+# Values that mark a row as money out or in, in a column of its own beside
+# an unsigned amount (ING's "Af Bij", a bank's "DEBIT"/"CREDIT"). A column
+# whose values are all markers is read as the direction, not as text.
+direction_markers:
+  debit: [af, debit, dr, d, s, soll, out, withdrawal, cargo, charge, debet, расход, списание, ելք, "-"]
+  credit: [bij, credit, cr, c, h, haben, in, deposit, abono, kredit, приход, зачисление, մուտք, "+"]

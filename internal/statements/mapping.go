@@ -42,6 +42,9 @@ type MappingColumns struct {
 	Currency    *int  `json:"currency"`
 	Reference   *int  `json:"reference"`
 	MCC         *int  `json:"mcc"`
+	// Direction is a column of debit/credit markers beside an unsigned
+	// amount; a marker there wins over the amount's sign.
+	Direction *int `json:"direction,omitempty"`
 }
 
 // minParseRate is the share of sample rows, in percent, a valid spec must
@@ -92,6 +95,7 @@ func (s MappingSpec) Validate(width int) error {
 	use("currency", s.Columns.Currency)
 	use("reference", s.Columns.Reference)
 	use("mcc", s.Columns.MCC)
+	use("direction", s.Columns.Direction)
 	if !ValidDateFormat(s.DateFormat) {
 		problems = append(problems, fmt.Sprintf("date format %q is not valid", s.DateFormat))
 	}

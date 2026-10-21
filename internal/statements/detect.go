@@ -308,23 +308,29 @@ func looksNumeric(cell string) bool {
 	return digits > 0 && other <= 3
 }
 
-// looksDate reports whether a cell is a date: two or three groups of
-// digits joined by one of ./- or spaces, around at most one word of up to
-// nine letters (a month name: "14 Jul 2025", "14. März 2025"), or eight
-// digits that read as YYYYMMDD.
+// looksDate reports whether a cell is a date: digits of a day and month
+// (one or two) and a year (two or four) joined by one of ./- or spaces,
+// around at most one word of up to nine letters (a month name: "14 Jul
+// 2025", "14. März 2025"); a day and month alone with a month name or a
+// slash ("14 Jul", "14/07"); or eight digits that read as YYYYMMDD. An
+// amount such as -42.80 or 1203.11 is not a date.
 func looksDate(cell string) bool {
+	cell = withoutTime(strings.TrimSpace(cell))
 	if len(cell) == 8 && allDigits(cell) {
 		month, day := (cell[4]-'0')*10+(cell[5]-'0'), (cell[6]-'0')*10+(cell[7]-'0')
 		return (cell[:2] == "19" || cell[:2] == "20") && month >= 1 && month <= 12 && day >= 1 && day <= 31
 	}
-	groups, separators, words, letters := 0, 0, 0, 0
+	var groups []int
+	words, letters := 0, 0
+	slash := false
 	inDigits, inWord := false, false
-	for _, r := range cell {
+	for i, r := range cell {
 		switch {
 		case unicode.IsDigit(r):
 			if !inDigits {
-				groups++
+				groups = append(groups, 0)
 			}
+			groups[len(groups)-1]++
 			inDigits, inWord = true, false
 			continue
 		case unicode.IsLetter(r):
@@ -334,14 +340,43 @@ func looksDate(cell string) bool {
 			letters++
 			inDigits, inWord = false, true
 			continue
-		case strings.ContainsRune("./- ", r):
-			separators++
-		default:
+		case i == 0:
+			return false // a sign or a bracket: an amount
+		case r == '/':
+			slash = true
+		case !strings.ContainsRune(".- ", r):
 			return false
 		}
 		inDigits, inWord = false, false
 	}
-	return groups >= 2 && groups <= 3 && separators >= 1 && words <= 1 && letters <= 9
+	if words > 1 || letters > 9 {
+		return false
+	}
+	day := func(n int) bool { return n == 1 || n == 2 }
+	year := func(n int) bool { return n == 2 || n == 4 }
+	switch {
+	case len(groups) == 3 && words == 0:
+		return day(groups[0]) && day(groups[1]) && year(groups[2]) || groups[0] == 4 && day(groups[1]) && day(groups[2])
+	case len(groups) == 2 && words == 1:
+		return day(groups[0]) && year(groups[1]) // 14 Jul 2025, Jul 14 2025
+	case len(groups) == 2 && slash:
+		return day(groups[0]) && day(groups[1]) // 14/07
+	}
+	return false
+}
+
+// withoutTime drops a time after a date: "14/07/2025 08:12" and
+// "2025-07-14T08:12:00" are dates.
+func withoutTime(cell string) string {
+	colon := strings.IndexByte(cell, ':')
+	if colon < 0 {
+		return cell
+	}
+	cut := strings.LastIndexAny(cell[:colon], " T")
+	if cut <= 0 {
+		return cell
+	}
+	return strings.TrimSpace(cell[:cut])
 }
 
 func allDigits(s string) bool {

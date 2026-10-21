@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 42 / 63**
+**Progress: 43 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -94,7 +94,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 - [x] BE-40 · OFX/QFX and XLSX extractors — 2026-10-21, f344305
 - [x] BE-41 · PDF extractor — 2026-10-21, 4efda93
 - [x] BE-42 · Mapping spec and deterministic transform — 2026-10-21, 36086ac
-- [ ] BE-43 · Mapping resolution: templates and heuristics
+- [x] BE-43 · Mapping resolution: templates and heuristics — 2026-10-21, 773c5f3
+  - Adds an internal `direction` column role (debit/credit markers beside an unsigned amount, e.g. ING), not in the contract's user mapping. The PRD's BE-43 notes have the details.
 - [ ] BE-44 · Mapping resolution: LLM inference and user mapping
 - [ ] BE-45 · Validation, reconciliation, period filter
 - [ ] BE-46 · De-duplication

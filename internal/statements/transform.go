@@ -55,6 +55,11 @@ func transformRow(index int, cells []string, spec MappingSpec, loc *time.Locatio
 	row.PostedAt = posted
 
 	amount, direction, err := rowAmount(cell, spec)
+	if err == nil && spec.Columns.Direction != nil {
+		if marked, ok := directionMarker(cell(spec.Columns.Direction)); ok {
+			direction = marked
+		}
+	}
 	if err != nil {
 		row.Error = err.Error()
 		return row
