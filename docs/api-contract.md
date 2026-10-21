@@ -422,7 +422,9 @@ Poll every 1 s (server target: < 8 s). `failure.code` ∈ `not_a_receipt`, `unre
 ### 2.12 Devices & notifications
 
 `PUT /devices/{device_id}` — `{ "apns_token": "…", "environment": "sandbox" | "production", "app_version": "1.0.0", "locale": "en_GB" }` → `204`. `device_id` is a client-generated UUID kept in the Keychain.
-`DELETE /devices/{device_id}` → `204` (on logout).
+`DELETE /devices/{device_id}` → `204` (on logout); a device that is not registered, or is someone else's, is `404`.
+
+`apns_token` is the device token in hex (64–200 characters, case ignored); `app_version` is at most 32 characters and `locale` at most 35, otherwise `422`. Registering again updates the device and revives a token APNs had rejected; a token registered under another device or user moves to the one registering it.
 
 `GET /notifications?cursor=` →
 

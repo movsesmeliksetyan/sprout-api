@@ -29,6 +29,20 @@ type CategoryType struct {
 	Name string
 }
 
+type Device struct {
+	ID            uuid.UUID
+	UserID        uuid.UUID
+	DeviceID      uuid.UUID
+	ApnsToken     string
+	Environment   string
+	AppVersion    *string
+	Locale        *string
+	LastSeenAt    time.Time
+	InvalidatedAt *time.Time
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
 type Goal struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
@@ -199,6 +213,19 @@ type MerchantVote struct {
 	VotedAt      time.Time
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+}
+
+type Notification struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Kind      string
+	Title     string
+	Body      string
+	DeepLink  string
+	DedupKey  string
+	ReadAt    *time.Time
+	SentAt    *time.Time
+	CreatedAt time.Time
 }
 
 type Receipt struct {

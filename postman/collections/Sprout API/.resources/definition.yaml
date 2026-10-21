@@ -41,6 +41,9 @@ description: |-
     {{importRowId}}       – by "List import rows": the first row, an
                             uncategorised expense when there is one
     {{receiptId}}         – by "Create receipt"; cleared by "Delete receipt"
+    {{deviceId}}          – by "Register device" when it is still empty: a
+                            new UUID standing for this phone; cleared by
+                            "Delete device"
 auth:
   type: bearer
   credentials:
@@ -64,3 +67,4 @@ variables:
   importId: ""
   importRowId: ""
   receiptId: ""
+  deviceId: ""

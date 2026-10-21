@@ -28,6 +28,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/jobs/schema"
 	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
+	"github.com/movsesmeliksetyan/sprout-api/internal/notify"
 	"github.com/movsesmeliksetyan/sprout-api/internal/receipts"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
 	"github.com/movsesmeliksetyan/sprout-api/internal/summary"
@@ -192,7 +193,8 @@ func runAPI(c cli, _ []string) error {
 			goalService, engine,
 			imports.NewService(pool, uploadService, inserter),
 			receipts.NewService(pool, uploadService, store, inserter, transactionService),
-			insights.NewService(pool, goalService))),
+			insights.NewService(pool, goalService),
+			notify.NewService(pool))),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))
