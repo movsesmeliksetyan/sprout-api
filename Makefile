@@ -11,7 +11,7 @@ GOLANGCI_LINT := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v
 # Paths written by `make generate`.
 GENERATED := internal/db internal/httpx/api_gen.go
 
-.PHONY: help build run worker test lint lint-spec generate generate-check check migrate-up migrate-down seed-rules seed perf-notes eval eval-llm
+.PHONY: help build run worker test lint lint-spec generate generate-check check migrate-up migrate-down seed-rules seed perf-notes eval eval-llm eval-receipts
 
 help: ## List the available targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -70,3 +70,6 @@ eval: ## Run the deterministic categorisation evaluation (part of make test; nee
 eval-llm: ## Evaluate the full pipeline with the real model and rewrite docs/categorization-eval.md (needs .env and Docker)
 	set -a; . ./.env; set +a; LLM_CATEGORIZE_BATCH=$${LLM_CATEGORIZE_BATCH:-15} EVAL_REPORT=$(CURDIR)/docs/categorization-eval.md \
 		go test -tags=live -count=1 -v -timeout 20m -run '^TestEvalLLM$$' ./internal/categorize
+
+eval-receipts: ## Read testdata/receipts with the real vision model and check the expected totals (needs .env)
+	set -a; . ./.env; set +a; go test -tags=live -count=1 -v -run '^TestExtractLive$$' ./internal/receipts

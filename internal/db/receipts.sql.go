@@ -75,6 +75,53 @@ func (q *Queries) FailReceipt(ctx context.Context, arg FailReceiptParams) error 
 	return err
 }
 
+const finishReceipt = `-- name: FinishReceipt :exec
+UPDATE receipts
+SET status              = 'ready',
+    merchant            = $1,
+    purchased_at        = $2,
+    total_minor         = $3,
+    currency            = $4,
+    payment_method      = $5,
+    category_id         = $6,
+    category_confidence = $7,
+    line_items          = $8,
+    raw_extraction      = $9,
+    failure             = NULL
+WHERE id = $10 AND status = 'processing'
+`
+
+type FinishReceiptParams struct {
+	Merchant           *string
+	PurchasedAt        *time.Time
+	TotalMinor         *int64
+	Currency           *string
+	PaymentMethod      *string
+	CategoryID         *uuid.UUID
+	CategoryConfidence *float64
+	LineItems          []byte
+	RawExtraction      []byte
+	ID                 uuid.UUID
+}
+
+// Records what extraction read, unless the receipt was confirmed or
+// deleted meanwhile.
+func (q *Queries) FinishReceipt(ctx context.Context, arg FinishReceiptParams) error {
+	_, err := q.db.Exec(ctx, finishReceipt,
+		arg.Merchant,
+		arg.PurchasedAt,
+		arg.TotalMinor,
+		arg.Currency,
+		arg.PaymentMethod,
+		arg.CategoryID,
+		arg.CategoryConfidence,
+		arg.LineItems,
+		arg.RawExtraction,
+		arg.ID,
+	)
+	return err
+}
+
 const getReceipt = `-- name: GetReceipt :one
 SELECT r.id, r.user_id, r.upload_id, r.status, r.merchant, r.purchased_at, r.total_minor, r.currency, r.payment_method, r.category_id, r.category_confidence, r.line_items, r.raw_extraction, r.transaction_id, r.failure, r.confirmed_at, r.created_at, r.updated_at, u.object_key AS image_key, u.purged_at AS image_purged_at
 FROM receipts r

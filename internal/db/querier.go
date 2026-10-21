@@ -90,6 +90,9 @@ type Querier interface {
 	// Records what processing found, unless the import was committed or
 	// discarded meanwhile.
 	FinishImport(ctx context.Context, arg FinishImportParams) error
+	// Records what extraction read, unless the receipt was confirmed or
+	// deleted meanwhile.
+	FinishReceipt(ctx context.Context, arg FinishReceiptParams) error
 	GetCategory(ctx context.Context, arg GetCategoryParams) (Category, error)
 	GetGoal(ctx context.Context, arg GetGoalParams) (GetGoalRow, error)
 	GetIdempotencyKey(ctx context.Context, arg GetIdempotencyKeyParams) (IdempotencyKey, error)

@@ -64,7 +64,7 @@ type Deps struct {
 func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, error) {
 	workers := river.NewWorkers()
 	river.AddWorker(workers, &processImport{pool: pool, logger: logger, processor: imports.NewProcessor(pool, deps.Store, deps.LLM, imports.WithEngine(deps.Engine))})
-	river.AddWorker(workers, &processReceipt{pool: pool, logger: logger, processor: receipts.NewProcessor(pool)})
+	river.AddWorker(workers, &processReceipt{pool: pool, logger: logger, processor: receipts.NewProcessor(pool, deps.Store, deps.LLM, deps.Engine)})
 	river.AddWorker(workers, &promoteDictionary{pool: pool, logger: logger})
 	river.AddWorker(workers, &purgeIdempotencyKeys{pool: pool, logger: logger})
 	river.AddWorker(workers, &purgeStatementFiles{pool: pool, store: deps.Store, logger: logger})

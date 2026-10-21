@@ -33,6 +33,15 @@ func Supported(code string) bool {
 	return ok
 }
 
+// Decimals is how many digits the minor unit of a currency has: 2 for a
+// code not in the table.
+func Decimals(code string) int {
+	if c, ok := currencies[strings.ToUpper(code)]; ok {
+		return c.decimals
+	}
+	return 2
+}
+
 // Format renders an amount of minor units for display: "$1,842.50", "$210".
 // Whole amounts drop the decimals; a negative amount leads with a minus sign.
 // A currency without a known symbol is written as its code: "CHF 12.50".
