@@ -46,6 +46,15 @@ func transformRow(index int, cells []string, spec MappingSpec, loc *time.Locatio
 		return strings.TrimSpace(cells[*column])
 	}
 
+	// First, so that a row that cannot be read still shows what it was.
+	var parts []string
+	for _, column := range spec.Columns.Description {
+		if text := cell(&column); text != "" {
+			parts = append(parts, text)
+		}
+	}
+	row.RawDescription = strings.Join(strings.Fields(strings.Join(parts, " ")), " ")
+
 	date := spec.Columns.Date
 	posted, err := ParseDate(cell(&date), spec.DateFormat, loc)
 	if err != nil {
@@ -65,14 +74,6 @@ func transformRow(index int, cells []string, spec MappingSpec, loc *time.Locatio
 		return row
 	}
 	row.AmountMinor, row.Direction = amount, direction
-
-	var parts []string
-	for _, column := range spec.Columns.Description {
-		if text := cell(&column); text != "" {
-			parts = append(parts, text)
-		}
-	}
-	row.RawDescription = strings.Join(strings.Fields(strings.Join(parts, " ")), " ")
 
 	if balance := cell(spec.Columns.Balance); balance != "" {
 		if minor, sign, err := ParseAmount(balance, spec.DecimalSeparator, spec.ThousandsSeparator); err == nil {

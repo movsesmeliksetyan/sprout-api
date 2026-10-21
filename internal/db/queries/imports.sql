@@ -40,10 +40,10 @@ WHERE i.id = @id;
 -- name: InsertImportRows :copyfrom
 INSERT INTO import_rows (id, import_id, user_id, row_index, raw, status, included, kind, amount_minor, occurred_at,
                          local_date, merchant, merchant_key, raw_description, mcc, external_ref, category_id,
-                         category_confidence, category_source, dedup_hash, duplicate_of, error)
+                         category_confidence, category_source, dedup_hash, duplicate_of, error, note)
 VALUES (@id, @import_id, @user_id, @row_index, @raw, @status, @included, @kind, @amount_minor, @occurred_at,
         @local_date, @merchant, @merchant_key, @raw_description, @mcc, @external_ref, @category_id,
-        @category_confidence, @category_source, @dedup_hash, @duplicate_of, @error);
+        @category_confidence, @category_source, @dedup_hash, @duplicate_of, @error, @note);
 
 -- name: FinishImport :exec
 -- Records what processing found, unless the import was committed or
@@ -71,3 +71,52 @@ FROM transactions
 WHERE user_id = @user_id
   AND (dedup_hash = ANY (@hashes::bytea[]) OR external_ref = ANY (@external_refs::text[]))
 ORDER BY created_at, id;
+
+-- name: ListImportRows :many
+-- A page of an import's rows for review: the included expenses still
+-- without a category first, then newest first, rows without a date last.
+-- The cursor is the last row of the previous page.
+SELECT r.*,
+       (CASE WHEN r.included AND r.kind = 'expense' AND r.category_id IS NULL THEN 0 ELSE 1 END)::int AS sort_rank,
+       coalesce(r.local_date, '0001-01-01'::date)::date AS sort_date
+FROM import_rows r
+WHERE r.import_id = @import_id
+  AND r.user_id = @user_id
+  AND (sqlc.narg(cursor_id)::uuid IS NULL
+       OR (CASE WHEN r.included AND r.kind = 'expense' AND r.category_id IS NULL THEN 0 ELSE 1 END) > @cursor_rank::int
+       OR ((CASE WHEN r.included AND r.kind = 'expense' AND r.category_id IS NULL THEN 0 ELSE 1 END) = @cursor_rank::int
+           AND (coalesce(r.local_date, '0001-01-01'::date), r.id) < (sqlc.narg(cursor_date)::date, sqlc.narg(cursor_id)::uuid)))
+ORDER BY sort_rank, sort_date DESC, r.id DESC
+LIMIT @row_limit;
+
+-- name: GetImportRowForUpdate :one
+SELECT * FROM import_rows WHERE id = @id AND import_id = @import_id AND user_id = @user_id FOR UPDATE;
+
+-- name: UpdateImportRow :one
+UPDATE import_rows
+SET included            = @included,
+    kind                = @kind,
+    merchant            = @merchant,
+    merchant_key        = @merchant_key,
+    note                = @note,
+    category_id         = @category_id,
+    category_confidence = @category_confidence,
+    category_source     = @category_source,
+    dedup_hash          = @dedup_hash
+WHERE id = @id
+RETURNING *;
+
+-- name: ImportRowCounts :one
+-- An import's summary as its rows stand; totals are of the included rows.
+SELECT count(*)::int                                                                  AS row_count,
+       count(*) FILTER (WHERE included)::int                                          AS included_count,
+       coalesce(sum(amount_minor) FILTER (WHERE included AND kind = 'expense'), 0)::bigint AS total_expense_minor,
+       coalesce(sum(amount_minor) FILTER (WHERE included AND kind = 'income'), 0)::bigint  AS total_income_minor,
+       count(*) FILTER (WHERE status = 'duplicate')::int                              AS duplicate_count,
+       count(*) FILTER (WHERE included AND kind = 'expense' AND category_id IS NULL)::int AS uncategorized_count,
+       count(*) FILTER (WHERE status = 'error')::int                                  AS error_count
+FROM import_rows
+WHERE import_id = @import_id;
+
+-- name: SetImportSummary :exec
+UPDATE imports SET summary = @summary WHERE id = @id;

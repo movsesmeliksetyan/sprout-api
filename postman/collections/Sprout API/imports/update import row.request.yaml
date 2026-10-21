@@ -1,0 +1,20 @@
+$kind: http-request
+name: 'Update import row'
+method: PATCH
+url: '{{baseUrl}}/v1/imports/{{importId}}/rows/{{importRowId}}'
+order: 5000
+pathVariables:
+  - key: importId
+    value: '{{importId}}'
+  - key: importRowId
+    value: '{{importRowId}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "category_id": "{{categoryId}}",
+      "included": true
+    }

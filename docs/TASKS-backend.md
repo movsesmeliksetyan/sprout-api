@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 46 / 63**
+**Progress: 47 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -102,7 +102,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
   - The 5,000-row cap counts the rows the period keeps; under 50 % readable fails as `unreadable`. The PRD's BE-45 notes have the details.
 - [x] BE-46 · De-duplication — 2026-10-21, b5d9b54
   - Migration 00018 adds `transactions.external_ref`, which commit fills, so bank references are matched against the ledger; `import_rows.dedup_hash` becomes `BYTEA`. The PRD's BE-46 notes have the details.
-- [ ] BE-47 · Review API and pipeline assembly
+- [x] BE-47 · Review API and pipeline assembly — 2026-10-21, 483ab33
+  - The stages run in `imports.Processor`, which the job calls, not in `process_import.go`. Migration 00019 adds `import_rows.note` for refunds. The `import_ready` notification is a hook with nothing wired until BE-56. Contract §2.10 now spells out the row PATCH rules. The PRD's BE-47 notes have the details.
 - [ ] BE-48 · Commit, discard, retention
 - [ ] BE-49 · Statement corpus and end-to-end tests
 

@@ -388,6 +388,10 @@ When `status = needs_mapping`:
 
 `PATCH /imports/{id}/rows/{row_id}` — any of `category_id`, `included`, `kind`, `merchant` → `200` row. Changing `category_id` teaches the categoriser (user rule).
 
+- Only while the import is `ready` (`409` otherwise). The import's `summary` is recounted.
+- `422` on the field: an `error` row cannot be included or given a `kind` or `merchant`; a `transfer` cannot be included (change its `kind` first); `category_id` is only for an `expense` and must be one of the user's active categories; `merchant` is at most 80 characters (empty clears it).
+- A chosen category has `category_source: user_rule` and `category_confidence: 1.0`. A row that stops being an expense loses its category; one that becomes a `transfer` is left out unless `included` is sent too, which is `422`.
+
 `POST /imports/{id}/commit` → `200` `{ "created_count": 7, "skipped_count": 0 }`. Idempotent. Included expense rows must have a category (`422` listing offending row ids otherwise). After commit the import is read-only.
 
 `DELETE /imports/{id}` → `204` (discard; not allowed after commit).

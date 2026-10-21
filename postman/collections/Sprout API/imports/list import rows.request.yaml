@@ -1,0 +1,26 @@
+$kind: http-request
+name: 'List import rows'
+method: GET
+url: '{{baseUrl}}/v1/imports/{{importId}}/rows'
+order: 4000
+pathVariables:
+  - key: importId
+    value: '{{importId}}'
+queryParams:
+  - key: limit
+    value: '50'
+    description: 'Page size (1-200)'
+    disabled: true
+  - key: cursor
+    value: ''
+    description: 'next_cursor from previous page'
+    disabled: true
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (pm.response.code === 200 && json.items.length > 0) {
+          pm.collectionVariables.set("importRowId", json.items[0].id);
+          console.log("✅ importRowId saved: " + json.items[0].id + " (uncategorised rows come first)");
+      }

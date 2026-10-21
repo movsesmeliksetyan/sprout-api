@@ -112,6 +112,7 @@ type ImportRow struct {
 	Error              *string
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
+	Note               *string
 }
 
 type KeywordRule struct {

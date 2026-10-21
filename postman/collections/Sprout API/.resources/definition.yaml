@@ -38,6 +38,8 @@ description: |-
                             "List contributions" when it is still empty;
                             cleared by "Delete contribution"
     {{importId}}          – by "Create import"; cleared by "Delete import"
+    {{importRowId}}       – by "List import rows": the first row, an
+                            uncategorised expense when there is one
 auth:
   type: bearer
   credentials:
@@ -59,3 +61,4 @@ variables:
   goalId: ""
   contributionId: ""
   importId: ""
+  importRowId: ""
