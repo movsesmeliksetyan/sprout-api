@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 27 / 63**
+**Progress: 28 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -22,6 +22,7 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 - [x] BE-05 · Postgres, migrations, sqlc — 2026-10-07, b87d1b3
 - [x] BE-06 · OpenAPI spec and code generation — 2026-10-07, 5a7ada9
 - [x] BE-07 · Test harness and CI — 2026-10-07, 700d81b
+  - 2026-10-21: the GitHub workflow runs only by hand (`workflow_dispatch`); `make check` runs the same three jobs locally and is required before every commit, push and PR.
   - `NewTestUser`, `AuthedRequest` and the category and transaction fixture builders were deferred to BE-10, BE-09, BE-15 and BE-17, where what they depend on is built. The PRD records this under each task.
 - [x] BE-08 · `money` and `period` packages — 2026-10-07, 44d20b1
 
@@ -66,7 +67,7 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 ## Milestone 7 — Categorisation engine (§5)
 
-- [ ] BE-28 · LLM client abstraction
+- [x] BE-28 · LLM client abstraction — 2026-10-16, 7ce1ea3
 - [ ] BE-29 · Merchant normaliser
 - [ ] BE-30 · Rule stores and seeds
 - [ ] BE-31 · Engine pipeline (deterministic layers)

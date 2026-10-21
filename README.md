@@ -44,7 +44,8 @@ Run `make` to list every target.
 | `make test` | Run all tests with the race detector (needs Docker: database tests start their own Postgres) |
 | `make lint` | Run golangci-lint and lint `api/openapi.yaml` (pinned tools; the first run compiles them) |
 | `make generate` | Regenerate the sqlc queries in `internal/db` and the OpenAPI server in `internal/httpx/api_gen.go` (pinned tools; nothing to install) |
-| `make generate-check` | Fail if the committed generated code is out of date (what CI runs) |
+| `make generate-check` | Fail if the committed generated code is out of date |
+| `make check` | Everything a change must pass before it is committed: `generate-check`, `lint` and `test` (needs Docker). There is no CI on pull requests; run this locally |
 | `make migrate-up` / `make migrate-down` | Apply all pending migrations / roll back the latest one |
 | `make eval` | Run the deterministic categorisation evaluation |
 

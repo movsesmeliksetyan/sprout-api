@@ -14,7 +14,7 @@ Do not restate these documents elsewhere; read the relevant section before start
 
 1. Start by reading `docs/TASKS-backend.md` and take the next unticked task. Work tasks in order, respecting each task's "Needs".
 2. Read that task in the PRD, plus any section it references (§4 statements, §5 categorisation) and the contract sections for the endpoints it touches.
-3. A task is done only when every "Done when" check passes **and** `make lint test` is green.
+3. A task is done only when every "Done when" check passes **and** `make check` is green. There is no CI on pushes or pull requests (the GitHub workflow is manual-only), so every check runs locally before a commit, a push or a PR, and the summary says what ran and its result.
 4. Tick it in the tracker with date and commit (`- [x] BE-01 · Repository scaffold — 2026-10-09, a1b2c3d`), and update the progress count. Use `[~]` for in progress, `[!]` plus a one-line reason for blocked.
 5. If a task was finished differently from its spec, add an indented note under it and fix the PRD so the two never disagree.
 6. If the wire format has to change: edit `docs/api-contract.md` first, then `api/openapi.yaml`, then code — and say so in the summary so the change can be passed to the iOS repo.
@@ -35,11 +35,11 @@ make migrate-up          # goose migrations
 make run                 # API
 make worker              # river worker
 make generate            # sqlc + oapi-codegen (pinned, via go run); must produce no diff on a second run
-make generate-check      # what CI runs: fails if committed generated code is stale
-make lint test           # required green before a task is ticked
+make generate-check      # fails if committed generated code is stale
+make check               # generate-check + lint + test: required green before a commit, a push or a PR
 make seed                # 50,000 generated transactions for a development user (never in prod)
 make perf-notes          # re-measure the read endpoints and rewrite docs/perf-notes.md
-make eval                # deterministic categorisation eval (CI-gated)
+make eval                # deterministic categorisation eval (part of make check once it exists)
 make eval-llm            # on demand only; calls the real LLM
 ```
 

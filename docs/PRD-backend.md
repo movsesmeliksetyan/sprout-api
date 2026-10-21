@@ -234,7 +234,7 @@ Runs before categorisation, on normalised rows.
 - full pipeline with LLM: top-1 accuracy ≥ 90 %;
 - kind detection F1 ≥ 0.95.
 
-The deterministic numbers run in CI and fail the build on regression. The LLM number runs on demand (`make eval-llm`).
+The deterministic numbers are part of `make check`, which fails on a regression; there is no CI on pull requests, so it runs locally before every commit. The LLM number runs on demand (`make eval-llm`).
 
 ---
 
@@ -285,7 +285,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-07 · Test harness and CI**
 - Do: `testcontainers` helper that starts Postgres once per package, applies migrations, and gives each test an isolated schema or truncation. Helpers: `NewTestUser`, `AuthedRequest(user)` (bypasses JWT with a test verifier), fixture builders for categories/transactions. GitHub Actions workflow: lint, generate-drift check, tests with race detector (the file and the drift job already exist from BE-06; add the lint and test jobs).
 - Files: `internal/testutil/*`, `.github/workflows/backend.yml`
-- Notes: isolation is a database per test, copied from a template that is migrated once per package, so tests may run in parallel. The helpers that depend on things built later are added by those tasks: the test token verifier and `AuthedRequest` in BE-09, `NewTestUser` in BE-10, the category fixture builder in BE-15 and the transaction fixture builder in BE-17. golangci-lint runs at a pinned version through the Makefile, like the other tools.
+- Notes: isolation is a database per test, copied from a template that is migrated once per package, so tests may run in parallel. The helpers that depend on things built later are added by those tasks: the test token verifier and `AuthedRequest` in BE-09, `NewTestUser` in BE-10, the category fixture builder in BE-15 and the transaction fixture builder in BE-17. golangci-lint runs at a pinned version through the Makefile, like the other tools. Since 2026-10-21 the workflow runs only when started by hand (`workflow_dispatch`); `make check` (`generate-check`, `lint`, `test`) runs the same jobs locally and is what a change must pass before it is committed.
 - Done when: a sample integration test hitting `/healthz` and a DB round-trip runs locally and in CI.
 - Needs: BE-05, BE-06
 
@@ -443,7 +443,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-28 · LLM client abstraction**
 - Do: `llm.Client` interface with `CompleteJSON(ctx, req, schema) ` and `VisionJSON(ctx, req, image, schema)`. Provider implementation (Anthropic), a deterministic `Fake` for tests (canned responses keyed by prompt hash), per-call timeout, bounded retries with backoff on 429/5xx, token + latency + cost logging, a global concurrency limiter, a `redact` helper masking IBANs/account numbers/card PANs/emails. Read the provider's current SDK documentation before implementing.
-- Files: `internal/llm/client.go`, `internal/llm/anthropic.go`, `internal/llm/fake.go`, `internal/llm/redact.go`
+- Files: `internal/llm/client.go`, `internal/llm/schema.go`, `internal/llm/anthropic.go`, `internal/llm/fake.go`, `internal/llm/redact.go`
+- Notes: the interface is `CompleteJSON(ctx, Request, *Schema)` and `VisionJSON(ctx, Request, Image, *Schema)`, returning the JSON, the model that answered and the tokens used. `llm.New(provider, Options)` wraps a one-attempt `Provider` with everything that is not provider-specific, so the fake exercises it too: the per-attempt timeout (default 60 s), up to 3 attempts with doubling, jittered backoff (1 s, at most 15 s, a provider's `Retry-After` kept to within that) on 408/409/429/5xx, timeouts and network errors, and a limit of 4 calls in flight shared by every caller of one client. A refusal, a cut-off answer, any other 4xx and an answer that does not match the schema are final. The answer is checked against the whole schema with `santhosh-tekuri/jsonschema`; the keywords structured output does not take (`minimum`, `maxLength`, `pattern`, …) are left out of the schema sent and checked only on the answer. Errors wrap `ErrInvalidOutput`, `ErrRefused` or `ErrUnavailable`; callers degrade on any of them. Each call logs one line: purpose, schema name, model, attempts, latency, tokens, and the cost at list price for the models in a small price table — never the prompt. The Anthropic provider uses the official Go SDK (`anthropic-sdk-go`) on the beta Messages endpoint with `output_config.format` (JSON schema) and the optional `effort`, leaves thinking at the model's default, turns the SDK's own retries off, and sends `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`) so that a declined request is answered by the API's fallback model. Images must be JPEG, PNG, GIF or WebP; anything else (HEIC) fails before a call. The fake is a `Provider`: replies keyed by the SHA-256 of system prompt, prompt, image and schema name, taken in order with the last repeating; a prompt without a reply fails at once with `ErrNoReply`. `Redact` masks emails, IBANs (mod-97 checked), card numbers (13–19 digits passing Luhn) and other runs of 8+ digits as account numbers, keeping 8-digit dates, amounts and short codes; it is applied by callers to file content, cell by cell, not by the client to whole prompts, which carry ids. The client is not wired into `cmd/sprout` until its first user (BE-32).
 - Done when: fake-backed tests cover schema-invalid output (rejected), timeout, retry; redact tests cover each identifier type; one opt-in live smoke test (`-tags=live`).
 - Needs: BE-02
 
@@ -490,9 +491,9 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 - Needs: BE-31
 
 **BE-36 · Evaluation harness**
-- Do: Build the labelled set (§5.5), `make eval` (deterministic, CI-gated) and `make eval-llm` (on demand) printing coverage, precision, accuracy and a confusion table per category type.
+- Do: Build the labelled set (§5.5), `make eval` (deterministic, part of `make check`) and `make eval-llm` (on demand) printing coverage, precision, accuracy and a confusion table per category type.
 - Files: `internal/categorize/eval_test.go`, `testdata/categorize/labelled.jsonl`, `Makefile`
-- Done when: deterministic thresholds from §5.5 met and enforced in CI; LLM run result recorded in `docs/categorization-eval.md`.
+- Done when: deterministic thresholds from §5.5 met and enforced by `make check`; LLM run result recorded in `docs/categorization-eval.md`.
 - Needs: BE-32, BE-33
 
 ### Milestone 8 — Statement normalisation (§4)
@@ -572,7 +573,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 **BE-49 · Statement corpus and end-to-end tests**
 - Do: Assemble ≥ 20 anonymised statements (≥ 8 countries/banks; CSV, OFX, XLSX, PDF; debit/credit-column and signed-amount styles; `,` and `.` decimals; with and without balance column), each with an expected-output JSON. Runner asserts row count, sum, dates, and reports mapping source per file. Document how to add a new bank fixture.
 - Files: `testdata/statements/*`, `internal/statements/e2e_test.go`, `docs/adding-a-statement-fixture.md`
-- Done when: ≥ 90 % of fixtures reach `ready` with no user mapping; all reach `ready` or `needs_mapping` (none `failed`); CI runs it with the fake LLM.
+- Done when: ≥ 90 % of fixtures reach `ready` with no user mapping; all reach `ready` or `needs_mapping` (none `failed`); `make check` runs it with the fake LLM.
 - Needs: BE-48
 
 ### Milestone 9 — Receipt scanning
@@ -673,7 +674,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 | Milestone | You can… |
 |---|---|
-| 1 | Run the API and worker locally with migrations and CI green |
+| 1 | Run the API and worker locally with migrations and `make check` green |
 | 2 | Log in with a real Auth0 token and read/update your profile |
 | 3–4 | Create categories, budgets and transactions; see balance and Home |
 | 5 | Drive Categories, Category detail and Stats for any period |
