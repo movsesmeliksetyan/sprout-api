@@ -57,6 +57,8 @@ func TestCommitImport(t *testing.T) {
 	assert.Equal(t, 1, f.count(t, `SELECT count(*) FROM merchant_votes WHERE user_id = $1 AND merchant_key = 'zqxw trading'
 		AND category_type = 'shopping'`, user.ID), "the expenses vote")
 	assert.Equal(t, httpx.ImportStatus("committed"), f.get(t, user, got.ID).Status)
+	assert.Equal(t, 1, f.count(t, `SELECT count(*) FROM river_job WHERE kind = 'budget_check'
+		AND args->>'user_id' = $1::text AND args->>'import_id' = $2::text`, user.ID, got.ID), "the budgets are checked once")
 
 	// The summaries count the new transactions at once.
 	ledger := transactions.NewService(f.pool)
@@ -70,6 +72,7 @@ func TestCommitImport(t *testing.T) {
 	require.Equal(t, http.StatusOK, rec.Code)
 	assert.JSONEq(t, `{"created_count": 3, "skipped_count": 1}`, rec.Body.String())
 	assert.Equal(t, 3, f.count(t, `SELECT count(*) FROM transactions WHERE user_id = $1`, user.ID))
+	assert.Equal(t, 1, f.count(t, `SELECT count(*) FROM river_job WHERE kind = 'budget_check'`), "not again")
 
 	// After commit the import is read-only and cannot be discarded.
 	rec = f.do(t, user, http.MethodPatch, "/imports/"+got.ID.String()+"/rows/"+unknown.ID.String(), map[string]any{"included": false})

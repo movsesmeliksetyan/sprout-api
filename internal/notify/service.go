@@ -41,12 +41,13 @@ type Service struct {
 	db     Database
 	jobs   Enqueuer
 	pusher Pusher
+	now    func() time.Time
 }
 
 // NewService returns a service over the database that enqueues pushes
 // through jobs.
 func NewService(database Database, jobs Enqueuer, opts ...Option) *Service {
-	s := &Service{db: database, jobs: jobs}
+	s := &Service{db: database, jobs: jobs, now: time.Now}
 	for _, opt := range opts {
 		opt(s)
 	}
@@ -55,6 +56,11 @@ func NewService(database Database, jobs Enqueuer, opts ...Option) *Service {
 
 // Option configures a Service.
 type Option func(*Service)
+
+// WithClock makes the service read the time from now.
+func WithClock(now func() time.Time) Option {
+	return func(s *Service) { s.now = now }
+}
 
 // WithPusher sets what delivers pushes, for the worker. Without it Deliver
 // fails.

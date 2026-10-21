@@ -76,6 +76,7 @@ func (s *Service) Confirm(ctx context.Context, user db.User, id uuid.UUID, c Con
 	if err != nil {
 		return db.Transaction{}, err
 	}
+	s.ledger.SpendChanged(ctx, user.ID)
 	return created, nil
 }
 
