@@ -517,7 +517,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-38 · Container detection**
 - Do: §4.3 stage 1 — magic-byte sniffing, encoding detection + transcoding, delimiter/quote detection by consistency scoring, header-row location.
-- Files: `internal/statements/detect.go`
+- Files: `internal/statements/detect.go`, `testdata/statements/detect/`
+- Notes: `statements.Detect(data) (Detection, error)` returns the format, the encoding, the text as UTF-8 (CSV and OFX), and for delimited text the delimiter, quote (`"`) and header row. Sniffing: `%PDF-` → pdf; a ZIP with `xl/` entries → xlsx (any other ZIP is unsupported); text containing `OFXHEADER` or `<OFX>` in its first 4 KB → ofx (1.x SGML and 2.x XML); other text → csv. Encoding: a BOM (UTF-8, UTF-16 LE/BE), else UTF-16 when ≥ 90 % of the high or low bytes are zero, else UTF-8 when valid, else Windows-1252; text with over 1 % control characters is not text (`unsupported_format`). Delimiter: of `,` `;` tab `|`, the one under which the most records share one width of at least two cells (lines of one cell, a preamble, do not count), the wider on a tie. Header row: the first record of the table's width (±1) whose cells are ≥ 60 % labels (neither number- nor date-like) followed by a record with a number or a date; else the first record of that width. `HeaderRow` counts records, and blank lines are not records. Blank or whitespace-only files are `empty_file`. Fixtures in `testdata/statements/detect/`.
 - Done when: fixtures for each container, UTF-16 with BOM, Windows-1252 with `£`/`€`, semicolon-delimited, 6-line preamble, and a `.csv` that is really XLSX all detect correctly; garbage → `unsupported_format`.
 - Needs: BE-01
 
