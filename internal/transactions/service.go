@@ -56,11 +56,16 @@ type Database interface {
 // through that transaction, and an error undoes the save.
 type MerchantRuleHook func(ctx context.Context, q db.Querier, userID uuid.UUID, merchantKey string, categoryID uuid.UUID) error
 
+// SpendHook runs after a write that may have added spending to a category
+// has committed: the budget alerts' check. It cannot fail the write.
+type SpendHook func(ctx context.Context, userID uuid.UUID)
+
 // Service holds the business logic for the ledger.
 type Service struct {
 	db             Database
 	now            func() time.Time
 	onMerchantRule MerchantRuleHook
+	onSpend        SpendHook
 }
 
 // Option customises a Service.
@@ -77,12 +82,19 @@ func WithMerchantRuleHook(hook MerchantRuleHook) Option {
 	return func(s *Service) { s.onMerchantRule = hook }
 }
 
+// WithSpendHook sets what happens after an expense is saved. Without it
+// nothing does.
+func WithSpendHook(hook SpendHook) Option {
+	return func(s *Service) { s.onSpend = hook }
+}
+
 // NewService returns a Service working on database.
 func NewService(database Database, opts ...Option) *Service {
 	s := &Service{
 		db:             database,
 		now:            time.Now,
 		onMerchantRule: func(context.Context, db.Querier, uuid.UUID, string, uuid.UUID) error { return nil },
+		onSpend:        func(context.Context, uuid.UUID) {},
 	}
 	for _, opt := range opts {
 		opt(s)
@@ -125,6 +137,9 @@ func (s *Service) Create(ctx context.Context, user db.User, params CreateParams)
 	})
 	if err != nil {
 		return db.Transaction{}, err
+	}
+	if created.Kind == string(KindExpense) {
+		s.SpendChanged(ctx, user.ID)
 	}
 	return created, nil
 }
@@ -233,6 +248,7 @@ func (s *Service) Update(ctx context.Context, user db.User, id uuid.UUID, patch 
 	}
 
 	var updated db.Transaction
+	var wasExpense bool
 	err = db.WithTx(ctx, s.db, func(tx pgx.Tx) error {
 		q := db.New(tx)
 		current, err := q.GetTransactionForUpdate(ctx, db.GetTransactionForUpdateParams{ID: id, UserID: user.ID})
@@ -300,12 +316,22 @@ func (s *Service) Update(ctx context.Context, user db.User, id uuid.UUID, patch 
 		if err != nil {
 			return fmt.Errorf("transactions: update: %w", err)
 		}
+		wasExpense = current.Kind == string(KindExpense)
 		return s.merchantRule(ctx, q, updated)
 	})
 	if err != nil {
 		return db.Transaction{}, err
 	}
+	if wasExpense || updated.Kind == string(KindExpense) {
+		s.SpendChanged(ctx, user.ID)
+	}
 	return updated, nil
+}
+
+// SpendChanged runs the spend hook, for a feature that saved an expense
+// through CreateIn once its transaction has committed.
+func (s *Service) SpendChanged(ctx context.Context, userID uuid.UUID) {
+	s.onSpend(ctx, userID)
 }
 
 // Delete removes the user's transaction.

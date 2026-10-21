@@ -572,6 +572,29 @@ func TestMerchantRuleHook(t *testing.T) {
 	assert.Equal(t, []call{{user.ID, "tesco", food.ID}, {user.ID, "tesco", transport.ID}}, calls)
 }
 
+func TestSpendHook(t *testing.T) {
+	t.Parallel()
+	var (
+		mu    sync.Mutex
+		calls []uuid.UUID
+	)
+	f := newFixture(t, transactions.WithSpendHook(func(_ context.Context, userID uuid.UUID) {
+		mu.Lock()
+		defer mu.Unlock()
+		calls = append(calls, userID)
+	}))
+	user := testutil.NewTestUser(t, f.pool)
+	food := testutil.NewCategory(t, f.pool, user.ID)
+
+	income := f.create(t, user, map[string]any{"kind": "income", "amount_minor": 100})
+	f.patch(t, user, income.ID, map[string]any{"note": "salary"})
+	assert.Empty(t, calls, "income adds no spending")
+
+	expense := f.create(t, user, map[string]any{"kind": "expense", "amount_minor": 100, "category_id": food.ID})
+	f.patch(t, user, expense.ID, map[string]any{"amount_minor": 200})
+	assert.Equal(t, []uuid.UUID{user.ID, user.ID}, calls, "a new expense and a changed one")
+}
+
 func TestMerchantRuleHook_FailureUndoesTheSave(t *testing.T) {
 	t.Parallel()
 	f := newFixture(t, transactions.WithMerchantRuleHook(

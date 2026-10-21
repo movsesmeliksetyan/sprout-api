@@ -25,6 +25,9 @@ type Querier interface {
 	// Each run of consecutive days is an island: within one, the day minus its
 	// rank is the same date.
 	ActivityStreak(ctx context.Context, arg ActivityStreakParams) (int64, error)
+	// The highest threshold each of the user's categories was alerted about in
+	// the month.
+	BudgetAlertThresholds(ctx context.Context, arg BudgetAlertThresholdsParams) ([]BudgetAlertThresholdsRow, error)
 	CategoryHasTransactions(ctx context.Context, arg CategoryHasTransactionsParams) (bool, error)
 	// Whether another active category of the user has this name, in any case.
 	CategoryNameTaken(ctx context.Context, arg CategoryNameTakenParams) (bool, error)
@@ -225,6 +228,7 @@ type Querier interface {
 	// rows; an unchanged learned row is left alone. A seed row that agrees
 	// takes the vote count; one that does not is left alone.
 	PromoteDictionaryEntries(ctx context.Context, arg PromoteDictionaryEntriesParams) (int64, error)
+	RecordBudgetAlert(ctx context.Context, arg RecordBudgetAlertParams) error
 	// Counts an import read with a template, and whether it went well.
 	RecordMappingTemplateUse(ctx context.Context, arg RecordMappingTemplateUseParams) error
 	// Records the user's votes: each merchant's category, by its type. A

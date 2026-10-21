@@ -10,6 +10,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type BudgetAlert struct {
+	UserID     uuid.UUID
+	CategoryID uuid.UUID
+	Month      time.Time
+	Threshold  int16
+	CreatedAt  time.Time
+}
+
 type Category struct {
 	ID                 uuid.UUID
 	UserID             uuid.UUID

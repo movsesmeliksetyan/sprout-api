@@ -31,6 +31,7 @@ type CommitResult struct {
 // needing a mapping or failed is httpx.ErrConflict.
 func (s *Service) Commit(ctx context.Context, userID, id uuid.UUID) (CommitResult, error) {
 	var result CommitResult
+	var newlyCommitted bool
 	err := db.WithTx(ctx, s.db, func(tx pgx.Tx) error {
 		q := db.New(tx)
 		found, err := q.GetImportForUpdate(ctx, db.GetImportForUpdateParams{ID: id, UserID: userID})
@@ -74,11 +75,15 @@ func (s *Service) Commit(ctx context.Context, userID, id uuid.UUID) (CommitResul
 		if err := keepFile(ctx, q, found.UploadID, ClosedFileTTL); err != nil {
 			return err
 		}
+		newlyCommitted = true
 		result, err = committed(ctx, q, id)
 		return err
 	})
 	if err != nil {
 		return CommitResult{}, err
+	}
+	if newlyCommitted {
+		s.jobs.EnqueueBudgetCheck(ctx, userID, &id)
 	}
 	return result, nil
 }

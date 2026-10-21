@@ -36,7 +36,8 @@ const (
 
 // Client inserts jobs, and runs them in a worker process.
 type Client struct {
-	river *river.Client[pgx.Tx]
+	river  *river.Client[pgx.Tx]
+	logger *slog.Logger
 }
 
 // NewInserter returns a client that only inserts jobs, for the API.
@@ -45,7 +46,7 @@ func NewInserter(pool *pgxpool.Pool, logger *slog.Logger) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("jobs: client: %w", err)
 	}
-	return &Client{river: client}, nil
+	return &Client{river: client, logger: logger}, nil
 }
 
 // Deps are what the jobs work with besides the database.
@@ -68,7 +69,7 @@ type Deps struct {
 func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, error) {
 	// The jobs enqueue jobs of their own through c, whose river client is
 	// set once it exists; nothing runs before then.
-	c := &Client{}
+	c := &Client{logger: logger}
 	notifier := notify.NewService(pool, c, notify.WithPusher(deps.Pusher))
 	workers := river.NewWorkers()
 	river.AddWorker(workers, &processImport{pool: pool, logger: logger, processor: imports.NewProcessor(pool, deps.Store, deps.LLM,
@@ -80,6 +81,7 @@ func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, err
 	river.AddWorker(workers, &purgeReceipts{pool: pool, logger: logger})
 	river.AddWorker(workers, &refreshInsights{pool: pool, logger: logger})
 	river.AddWorker(workers, &sendPush{logger: logger, service: notifier})
+	river.AddWorker(workers, &checkBudgets{logger: logger, service: notifier})
 
 	client, err := river.NewClient(riverpgxv5.New(pool), &river.Config{
 		Logger:       logger,

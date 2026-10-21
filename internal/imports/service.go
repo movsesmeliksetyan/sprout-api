@@ -61,9 +61,12 @@ type Summary struct {
 var periods = map[string]bool{"week": true, "month": true, "year": true, "all": true}
 
 // Enqueuer starts processing an import in the background, in the
-// transaction that creates it, so an import is never left without a job.
+// transaction that creates it, so an import is never left without a job;
+// and checks the budgets once a commit has added its expenses, with one
+// combined alert.
 type Enqueuer interface {
 	EnqueueImport(ctx context.Context, tx pgx.Tx, importID uuid.UUID) error
+	EnqueueBudgetCheck(ctx context.Context, userID uuid.UUID, importID *uuid.UUID)
 }
 
 // Database is what the service needs from the pool: queries, and
