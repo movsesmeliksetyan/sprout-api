@@ -1,0 +1,4 @@
+$kind: collection
+name: imports
+description: 'Bank statements on their way into the ledger. Request an upload with purpose "statement" and send the file first, then create the import from its uploadId and poll it while it is processed.'
+order: 10000

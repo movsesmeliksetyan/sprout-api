@@ -400,30 +400,20 @@ func TestIdempotency_AbandonedRequestIsTakenOver(t *testing.T) {
 	})
 }
 
-func TestPurgeIdempotencyKeysEvery(t *testing.T) {
+func TestPurgeIdempotencyKeys(t *testing.T) {
 	t.Parallel()
 	f := newIdempotencyFixture(t, httpx.IdempotencyConfig{})
 	user := testutil.NewTestUser(t, f.pool)
 	require.Equal(t, http.StatusCreated, f.create(t, user, uuid.NewString(), 100).Code)
 
-	ctx, cancel := context.WithCancel(context.Background())
-	stopped := make(chan struct{})
-	go func() {
-		defer close(stopped)
-		httpx.PurgeIdempotencyKeysEvery(ctx, f.pool, testutil.Logger(t), 20*time.Millisecond)
-	}()
-
-	// Nothing has expired yet; then the key does, and a later round removes it.
-	time.Sleep(60 * time.Millisecond)
-	require.Equal(t, 1, f.count(t, "idempotency_keys"))
-	_, err := f.pool.Exec(context.Background(), "UPDATE idempotency_keys SET expires_at = now() - interval '1 minute'")
+	removed, err := httpx.PurgeIdempotencyKeys(context.Background(), f.pool)
 	require.NoError(t, err)
-	assert.Eventually(t, func() bool { return f.count(t, "idempotency_keys") == 0 }, 5*time.Second, 20*time.Millisecond)
+	assert.Zero(t, removed, "nothing has expired yet")
 
-	cancel()
-	select {
-	case <-stopped:
-	case <-time.After(5 * time.Second):
-		t.Fatal("the purge loop did not stop when its context was cancelled")
-	}
+	_, err = f.pool.Exec(context.Background(), "UPDATE idempotency_keys SET expires_at = now() - interval '1 minute'")
+	require.NoError(t, err)
+	removed, err = httpx.PurgeIdempotencyKeys(context.Background(), f.pool)
+	require.NoError(t, err)
+	assert.Equal(t, int64(1), removed)
+	assert.Equal(t, 0, f.count(t, "idempotency_keys"))
 }

@@ -67,10 +67,70 @@ type IdempotencyKey struct {
 	CreatedAt           time.Time
 }
 
+type Import struct {
+	ID                uuid.UUID
+	UserID            uuid.UUID
+	UploadID          uuid.UUID
+	Status            string
+	Period            string
+	Filename          *string
+	Format            *string
+	BankHint          *string
+	MappingSource     *string
+	MappingSpec       []byte
+	MappingRequest    []byte
+	HeaderFingerprint *string
+	Summary           []byte
+	Failure           []byte
+	CommittedAt       *time.Time
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+type ImportRow struct {
+	ID                 uuid.UUID
+	ImportID           uuid.UUID
+	UserID             uuid.UUID
+	RowIndex           int32
+	Raw                []byte
+	Status             string
+	Included           bool
+	Kind               *string
+	AmountMinor        *int64
+	OccurredAt         *time.Time
+	LocalDate          *time.Time
+	Merchant           *string
+	MerchantKey        string
+	RawDescription     string
+	Mcc                *string
+	ExternalRef        *string
+	CategoryID         *uuid.UUID
+	CategoryConfidence *float64
+	CategorySource     *string
+	DedupHash          *string
+	DuplicateOf        *uuid.UUID
+	Error              *string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+}
+
 type KeywordRule struct {
 	Pattern      string
 	CategoryType string
 	Priority     int32
+}
+
+type MappingTemplate struct {
+	ID                uuid.UUID
+	HeaderFingerprint string
+	Format            string
+	BankHint          *string
+	Spec              []byte
+	Source            string
+	UseCount          int32
+	SuccessCount      int32
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }
 
 type MccMap struct {

@@ -53,6 +53,7 @@ type Querier interface {
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateContribution(ctx context.Context, arg CreateContributionParams) (GoalContribution, error)
 	CreateGoal(ctx context.Context, arg CreateGoalParams) (Goal, error)
+	CreateImport(ctx context.Context, arg CreateImportParams) (Import, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)
 	CreateUpload(ctx context.Context, arg CreateUploadParams) (Upload, error)
 	// Returns no row when a user with this auth0_sub already exists.
@@ -63,6 +64,9 @@ type Querier interface {
 	DeleteExpiredIdempotencyKeys(ctx context.Context) (int64, error)
 	DeleteExpiredLLMEntries(ctx context.Context, now time.Time) (int64, error)
 	DeleteGoal(ctx context.Context, arg DeleteGoalParams) (int64, error)
+	// Discards an import that has not been committed.
+	DeleteImport(ctx context.Context, arg DeleteImportParams) (int64, error)
+	DeleteImportRows(ctx context.Context, importID uuid.UUID) error
 	DeleteKeywordRulesExcept(ctx context.Context, patterns []string) (int64, error)
 	DeleteMCCMapExcept(ctx context.Context, mccs []string) (int64, error)
 	// Removes the seed merchants the seed file no longer has.
@@ -71,9 +75,13 @@ type Querier interface {
 	// Removes learned and llm rows that too few voters agree with: under 60 %
 	// of at least @min_voters votes for the key.
 	DemoteDictionaryEntries(ctx context.Context, minVoters int64) (int64, error)
+	FailImport(ctx context.Context, arg FailImportParams) error
 	GetCategory(ctx context.Context, arg GetCategoryParams) (Category, error)
 	GetGoal(ctx context.Context, arg GetGoalParams) (GetGoalRow, error)
 	GetIdempotencyKey(ctx context.Context, arg GetIdempotencyKeyParams) (IdempotencyKey, error)
+	GetImport(ctx context.Context, arg GetImportParams) (Import, error)
+	// An import by id alone, for the job that processes it.
+	GetImportByID(ctx context.Context, id uuid.UUID) (Import, error)
 	GetTransaction(ctx context.Context, arg GetTransactionParams) (Transaction, error)
 	// Locks the row until the database transaction ends.
 	GetTransactionForUpdate(ctx context.Context, arg GetTransactionForUpdateParams) (Transaction, error)
@@ -162,6 +170,9 @@ type Querier interface {
 	// The user's expenses on the calendar days from_date to to_date, both
 	// included, day by day; days without any are left out.
 	SpentByDay(ctx context.Context, arg SpentByDayParams) ([]SpentByDayRow, error)
+	// Puts an import back to the start of processing: what an earlier run
+	// found is cleared.
+	StartImportProcessing(ctx context.Context, id uuid.UUID) error
 	// A null argument leaves its column as it is. Archiving an archived category
 	// keeps the time it was first archived.
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error)

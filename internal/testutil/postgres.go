@@ -26,6 +26,7 @@ import (
 
 	"github.com/movsesmeliksetyan/sprout-api/internal/backfill"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
+	"github.com/movsesmeliksetyan/sprout-api/internal/jobs/schema"
 )
 
 const (
@@ -113,7 +114,7 @@ func createDatabase(t testing.TB, migrated bool) string {
 	if migrated && !server.templateReady {
 		_, err := admin.Exec(ctx, "CREATE DATABASE "+templateDatabase)
 		require.NoError(t, err)
-		require.NoError(t, db.Migrate(ctx, databaseURL(t, templateDatabase), db.MigrateUp, io.Discard, backfill.Migrations()...))
+		require.NoError(t, db.Migrate(ctx, databaseURL(t, templateDatabase), db.MigrateUp, io.Discard, append(backfill.Migrations(), schema.Migration())...))
 		server.templateReady = true
 	}
 

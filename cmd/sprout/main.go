@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 	_ "time/tzdata" // users' timezones are resolved by name; the production image has no system database
 
 	"github.com/movsesmeliksetyan/sprout-api/api"
@@ -23,6 +22,9 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/goals"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
+	"github.com/movsesmeliksetyan/sprout-api/internal/imports"
+	"github.com/movsesmeliksetyan/sprout-api/internal/jobs"
+	"github.com/movsesmeliksetyan/sprout-api/internal/jobs/schema"
 	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
 	"github.com/movsesmeliksetyan/sprout-api/internal/logging"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
@@ -32,16 +34,11 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/users"
 )
 
-// idempotencyPurgeInterval is how often expired idempotency keys are deleted.
-const idempotencyPurgeInterval = time.Hour
-
 const (
 	exitOK    = 0
 	exitError = 1
 	exitUsage = 2
 )
-
-var errNotImplemented = errors.New("not implemented yet")
 
 // usageError marks a command invoked with the wrong arguments.
 type usageError struct{ usage string }
@@ -67,7 +64,7 @@ type command struct {
 
 var commands = []command{
 	{name: "api", summary: "Serve the HTTP API", run: runAPI},
-	{name: "worker", summary: "Run background and periodic jobs", run: configuredStub},
+	{name: "worker", summary: "Run background and periodic jobs", run: runWorker},
 	{name: "migrate", summary: "Apply or inspect database migrations (up, down, status)", run: runMigrate},
 	{name: "seed-rules", summary: "Load the categorisation seeds: merchants, MCC codes, keywords", run: runSeedRules},
 	{name: "seed", summary: "Fill a user's ledger with generated transactions", hidden: true, run: runSeed},
@@ -167,18 +164,10 @@ func runAPI(c cli, _ []string) error {
 	if err != nil {
 		return err
 	}
-	// Until the job runner exists (BE-37), expired idempotency keys are
-	// purged from here. The purge stops before the pool closes.
-	purgeCtx, stopPurge := context.WithCancel(c.ctx)
-	purged := make(chan struct{})
-	go func() {
-		defer close(purged)
-		httpx.PurgeIdempotencyKeysEvery(purgeCtx, pool, logger, idempotencyPurgeInterval)
-	}()
-	defer func() {
-		stopPurge()
-		<-purged
-	}()
+	inserter, err := jobs.NewInserter(pool, logger)
+	if err != nil {
+		return err
+	}
 
 	responder := httpx.NewResponder(logger)
 	uploadService := uploads.NewService(pool, store)
@@ -204,7 +193,8 @@ func runAPI(c cli, _ []string) error {
 		),
 		httpx.WithAPI(newAPI(userService, uploadService, categoryService, transactionService,
 			summary.NewService(pool, transactionService),
-			goals.NewService(pool, goals.WithImages(uploadService, store, logger)), engine)),
+			goals.NewService(pool, goals.WithImages(uploadService, store, logger)), engine,
+			imports.NewService(pool, uploadService, inserter))),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))
@@ -216,16 +206,32 @@ func runAPI(c cli, _ []string) error {
 	return nil
 }
 
-// configuredStub validates the configuration and sets up logging, which is
-// as far as the worker command goes for now.
-func configuredStub(c cli, _ []string) error {
+// runWorker runs the background and periodic jobs until the process is
+// asked to stop, then lets running jobs finish (jobs.StopTimeout).
+func runWorker(c cli, _ []string) error {
 	cfg, err := config.Load(c.lookup)
 	if err != nil {
 		return err
 	}
 	logger := logging.New(c.stdout, cfg.LogLevel)
 	logger.Info("config loaded", "config", cfg)
-	return errNotImplemented
+
+	pool, err := db.Open(c.ctx, cfg.DatabaseURL.Reveal())
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+
+	worker, err := jobs.NewWorker(pool, logger)
+	if err != nil {
+		return err
+	}
+	logger.Info("worker started")
+	if err := worker.Run(c.ctx); err != nil {
+		return err
+	}
+	logger.Info("worker stopped")
+	return nil
 }
 
 // runMigrate applies or inspects database migrations. It needs only
@@ -245,7 +251,7 @@ func runMigrate(c cli, args []string) error {
 	if err != nil {
 		return err
 	}
-	return db.Migrate(c.ctx, databaseURL.Reveal(), args[0], c.stdout, backfill.Migrations()...)
+	return db.Migrate(c.ctx, databaseURL.Reveal(), args[0], c.stdout, append(backfill.Migrations(), schema.Migration())...)
 }
 
 // runSeedRules makes the global categorisation tables match the seed files

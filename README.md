@@ -20,7 +20,7 @@ cp .env.example .env
 docker compose up -d --wait
 make migrate-up
 make seed-rules
-make run
+make run      # and, in another terminal, make worker
 ```
 
 `docker compose` starts Postgres on `localhost:5432` and MinIO on `localhost:9000` (console on `:9001`, bucket `sprout`), with the credentials in `.env.example`. `docker compose down -v` wipes both.
@@ -53,7 +53,7 @@ Run `make` to list every target.
 
 The API is described by [api/openapi.yaml](api/openapi.yaml), served at `/v1/openapi.yaml` outside production, with a Swagger UI page for browsing and trying it at `/v1/docs`. Every `/v1` operation exists and answers `501` until its task in the PRD implements it.
 
-`sprout migrate up|down|status` and `sprout seed-rules` need only `DATABASE_URL`; run `seed-rules` after migrating, and again whenever the seed files change. The `worker` subcommand is a stub for now and exits with "not implemented yet"; it and the evaluation set are filled in by later tasks in the PRD.
+`sprout migrate up|down|status` and `sprout seed-rules` need only `DATABASE_URL`; run `seed-rules` after migrating, and again whenever the seed files change. `sprout worker` runs the background jobs on river (statement imports) and the periodic ones (the nightly merchant-dictionary promotion, the hourly purge of expired idempotency keys); stop it with Ctrl-C or SIGTERM and running jobs get 30 s to finish.
 
 ## Layout
 

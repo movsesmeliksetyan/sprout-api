@@ -1,0 +1,16 @@
+$kind: http-request
+name: 'Delete import'
+method: DELETE
+url: '{{baseUrl}}/v1/imports/{{importId}}'
+order: 9000
+pathVariables:
+  - key: importId
+    value: '{{importId}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      if (pm.response.code === 204) {
+          pm.collectionVariables.set("importId", "");
+          console.log("✅ import discarded; importId cleared");
+      }
