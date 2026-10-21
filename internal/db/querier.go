@@ -82,6 +82,9 @@ type Querier interface {
 	GetImport(ctx context.Context, arg GetImportParams) (Import, error)
 	// An import by id alone, for the job that processes it.
 	GetImportByID(ctx context.Context, id uuid.UUID) (Import, error)
+	// The template for a header fingerprint, unless it has been disabled: a
+	// success rate under 80 % over at least 5 uses.
+	GetMappingTemplate(ctx context.Context, headerFingerprint string) (MappingTemplate, error)
 	GetTransaction(ctx context.Context, arg GetTransactionParams) (Transaction, error)
 	// Locks the row until the database transaction ends.
 	GetTransactionForUpdate(ctx context.Context, arg GetTransactionForUpdateParams) (Transaction, error)
@@ -133,6 +136,8 @@ type Querier interface {
 	// rows; an unchanged learned row is left alone. A seed row that agrees
 	// takes the vote count; one that does not is left alone.
 	PromoteDictionaryEntries(ctx context.Context, arg PromoteDictionaryEntriesParams) (int64, error)
+	// Counts an import read with a template, and whether it went well.
+	RecordMappingTemplateUse(ctx context.Context, arg RecordMappingTemplateUseParams) error
 	// Records the user's votes: each merchant's category, by its type. A
 	// category without a type, or not the user's, casts no vote.
 	RecordMerchantVotes(ctx context.Context, arg RecordMerchantVotesParams) (int64, error)
@@ -145,6 +150,10 @@ type Querier interface {
 	// merchant the model did not know; an expires_at of the zero time (year 1)
 	// is a row that does not expire.
 	SaveLLMDictionaryEntries(ctx context.Context, arg SaveLLMDictionaryEntriesParams) error
+	// Stores a validated spec for a fingerprint. A user's spec replaces any
+	// other; any other replaces neither a user's nor a seed's, and counters
+	// start over when the spec changes.
+	SaveMappingTemplate(ctx context.Context, arg SaveMappingTemplateParams) error
 	// Everything the user has put into goals and not taken back: top-ups minus
 	// withdrawals.
 	SavedInGoals(ctx context.Context, userID uuid.UUID) (int64, error)
