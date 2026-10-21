@@ -1,0 +1,50 @@
+[
+  {
+    "row_index": 0,
+    "posted_at": "2025-07-14T00:00:00-07:00",
+    "amount_minor": 5612,
+    "direction": "debit",
+    "currency": "USD",
+    "raw_description": "WHOLE FOODS MARKET #10234 SEATTLE WA",
+    "counterparty": "WHOLE FOODS MARKET #10234",
+    "mcc": "5411",
+    "external_ref": "FIT0001",
+    "balance_after": null
+  },
+  {
+    "row_index": 1,
+    "posted_at": "2025-07-13T00:00:00+01:00",
+    "amount_minor": 4000,
+    "direction": "debit",
+    "currency": "USD",
+    "raw_description": "SHELL OIL 57444",
+    "counterparty": "SHELL OIL 57444",
+    "mcc": "5541",
+    "external_ref": "FIT0002",
+    "balance_after": null
+  },
+  {
+    "row_index": 2,
+    "posted_at": "2025-07-12T00:00:00+01:00",
+    "amount_minor": 50000,
+    "direction": "credit",
+    "currency": "USD",
+    "raw_description": "PAYMENT THANK YOU",
+    "counterparty": "PAYMENT THANK YOU",
+    "mcc": "",
+    "external_ref": "FIT0003",
+    "balance_after": null
+  },
+  {
+    "row_index": 3,
+    "posted_at": "2025-07-11T00:00:00+01:00",
+    "amount_minor": 1299,
+    "direction": "credit",
+    "currency": "EUR",
+    "raw_description": "REFUND ZALANDO",
+    "counterparty": "REFUND ZALANDO",
+    "mcc": "",
+    "external_ref": "FIT0004",
+    "balance_after": null
+  }
+]

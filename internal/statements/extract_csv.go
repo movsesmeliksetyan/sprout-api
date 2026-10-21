@@ -60,6 +60,12 @@ func ExtractCSV(d Detection) (RawTable, error) {
 // with trailing rows that are not data moved to the footer.
 func tableOf(records [][]string, header int, delimiter string) RawTable {
 	table := RawTable{Preamble: []string{}, Footer: [][]string{}, Rows: [][]string{}}
+	headers := trimCells(records[header])
+	if header > 0 && twoRowHeader(records[header-1], headers) {
+		headers = joinHeaders(trimCells(records[header-1]), headers)
+		header--
+		records = append(records[:header:header], append([][]string{headers}, records[header+2:]...)...)
+	}
 	for _, record := range records[:header] {
 		if line := strings.TrimSpace(strings.Join(nonEmptyTail(record), delimiter)); line != "" {
 			table.Preamble = append(table.Preamble, line)
@@ -75,7 +81,7 @@ func tableOf(records [][]string, header int, delimiter string) RawTable {
 		width = max(width, len(nonEmptyTail(record)))
 		rows = append(rows, record)
 	}
-	table.Headers = pad(trimCells(records[header]), width)
+	table.Headers = pad(headers, width)
 	for i := range rows {
 		rows[i] = pad(rows[i], width)
 	}
@@ -121,6 +127,45 @@ func footerRows(rows [][]string) int {
 		n++
 	}
 	return n
+}
+
+// twoRowHeader reports whether a header has gaps that the row above it,
+// of labels and about as wide, fills: a label spanning columns over
+// labels that split it ("Betrag" over "Soll" and "Haben").
+func twoRowHeader(above, header []string) bool {
+	gaps := 0
+	for _, cell := range header {
+		if strings.TrimSpace(cell) == "" {
+			gaps++
+		}
+	}
+	width := len(nonEmptyTail(header))
+	return gaps > 0 && labels(above) && len(nonEmptyTail(above)) >= width-1 && len(nonEmptyTail(above)) <= width+1
+}
+
+// joinHeaders puts the label above over each label of the header, dropping
+// repeats: "Betrag" over "Soll" is "Betrag Soll", "Datum" over nothing is
+// "Datum".
+func joinHeaders(above, header []string) []string {
+	out := make([]string, max(len(above), len(header)))
+	for i := range out {
+		var top, bottom string
+		if i < len(above) {
+			top = above[i]
+		}
+		if i < len(header) {
+			bottom = header[i]
+		}
+		switch {
+		case top == "" || top == bottom:
+			out[i] = bottom
+		case bottom == "":
+			out[i] = top
+		default:
+			out[i] = top + " " + bottom
+		}
+	}
+	return out
 }
 
 func trimCells(record []string) []string {

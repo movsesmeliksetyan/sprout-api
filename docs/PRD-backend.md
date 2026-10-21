@@ -531,7 +531,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-40 · OFX/QFX and XLSX extractors**
 - Do: OFX 1.x (SGML) and 2.x (XML) `STMTTRN` → `NormalizedTransaction` directly (`TRNAMT` sign, `DTPOSTED`, `NAME`+`MEMO`, `FITID` → `ExternalRef`). XLSX first non-empty sheet → `RawTable`, converting Excel serial dates to ISO strings.
-- Files: `internal/statements/extract_ofx.go`, `extract_xlsx.go`
+- Files: `internal/statements/normalized.go`, `extract_ofx.go`, `extract_xlsx.go`, `testdata/statements/ofx/`, `testdata/statements/xlsx/`
+- Notes: `ExtractOFX(Detection, *time.Location)` tokenises tags, so one reader takes SGML (unclosed leaves) and XML, bank and credit-card statements alike: each `STMTTRN` gives `DTPOSTED` (a date alone is midnight in the user's timezone; `[±h:TZ]` offsets are honoured), `TRNAMT` (sign → direction, parsed exactly into minor units), `NAME` (+ `MEMO` when different) as the description and `NAME` as counterparty, `FITID` → `ExternalRef`, `SIC` → `MCC`, `CURRENCY` or the statement's `CURDEF`. A malformed transaction makes the file `ErrUnreadable`. `ExtractXLSX(data)` reads the first sheet with a table (a header and a row) via `excelize`: raw cell values, with cells whose number format is a date (built-in formats or custom ones with `d` and `y`) turned from Excel serials into ISO dates, merged ranges filled with their value, then the CSV table logic. Shared with CSV: a header with gaps under a label row of about its width is joined with it (`Betrag` over `Soll`/`Haben` → `Betrag Soll`, `Betrag Haben`). XLSX fixtures are built by the test with excelize (`-update` rewrites them and the goldens). `NormalizedTransaction` (§4.1) lives in `normalized.go`.
 - Done when: golden tests for OFX 1/2, credit-card and bank statements, XLSX with merged header cells.
 - Needs: BE-38
 

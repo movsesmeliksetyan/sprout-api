@@ -1,0 +1,50 @@
+[
+  {
+    "row_index": 0,
+    "posted_at": "2025-07-14T00:00:00+01:00",
+    "amount_minor": 4280,
+    "direction": "debit",
+    "currency": "GBP",
+    "raw_description": "TESCO STORES 3297 LONDON GB",
+    "counterparty": "TESCO STORES 3297",
+    "mcc": "",
+    "external_ref": "202507140001",
+    "balance_after": null
+  },
+  {
+    "row_index": 1,
+    "posted_at": "2025-07-13T00:00:00+01:00",
+    "amount_minor": 450,
+    "direction": "debit",
+    "currency": "GBP",
+    "raw_description": "PRET A MANGER",
+    "counterparty": "PRET A MANGER",
+    "mcc": "",
+    "external_ref": "202507130001",
+    "balance_after": null
+  },
+  {
+    "row_index": 2,
+    "posted_at": "2025-07-12T09:00:00+01:00",
+    "amount_minor": 250000,
+    "direction": "credit",
+    "currency": "GBP",
+    "raw_description": "ACME WIDGETS LTD SALARY",
+    "counterparty": "ACME WIDGETS LTD",
+    "mcc": "",
+    "external_ref": "202507120001",
+    "balance_after": null
+  },
+  {
+    "row_index": 3,
+    "posted_at": "2025-07-10T00:00:00+01:00",
+    "amount_minor": 2999,
+    "direction": "debit",
+    "currency": "GBP",
+    "raw_description": "VODAFONE \u0026 CO",
+    "counterparty": "VODAFONE \u0026 CO",
+    "mcc": "",
+    "external_ref": "202507100001",
+    "balance_after": null
+  }
+]
