@@ -75,7 +75,7 @@ func (q *Queries) ListDayTotals(ctx context.Context, arg ListDayTotalsParams) ([
 }
 
 const listTransactions = `-- name: ListTransactions :many
-SELECT id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at FROM transactions
+SELECT id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at, external_ref FROM transactions
 WHERE user_id = $1
   AND ($2::date IS NULL OR local_date >= $2::date)
   AND ($3::date IS NULL OR local_date <= $3::date)
@@ -138,6 +138,7 @@ func (q *Queries) ListTransactions(ctx context.Context, arg ListTransactionsPara
 			&i.DedupHash,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.ExternalRef,
 		); err != nil {
 			return nil, err
 		}

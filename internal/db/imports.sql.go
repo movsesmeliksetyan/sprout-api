@@ -296,9 +296,51 @@ type InsertImportRowsParams struct {
 	CategoryID         *uuid.UUID
 	CategoryConfidence *float64
 	CategorySource     *string
-	DedupHash          *string
+	DedupHash          []byte
 	DuplicateOf        *uuid.UUID
 	Error              *string
+}
+
+const listLedgerMatches = `-- name: ListLedgerMatches :many
+SELECT id, dedup_hash, external_ref
+FROM transactions
+WHERE user_id = $1
+  AND (dedup_hash = ANY ($2::bytea[]) OR external_ref = ANY ($3::text[]))
+ORDER BY created_at, id
+`
+
+type ListLedgerMatchesParams struct {
+	UserID       uuid.UUID
+	Hashes       [][]byte
+	ExternalRefs []string
+}
+
+type ListLedgerMatchesRow struct {
+	ID          uuid.UUID
+	DedupHash   []byte
+	ExternalRef *string
+}
+
+// The user's transactions a statement's rows may duplicate: those with one
+// of the rows' hashes or bank references, oldest first.
+func (q *Queries) ListLedgerMatches(ctx context.Context, arg ListLedgerMatchesParams) ([]ListLedgerMatchesRow, error) {
+	rows, err := q.db.Query(ctx, listLedgerMatches, arg.UserID, arg.Hashes, arg.ExternalRefs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListLedgerMatchesRow
+	for rows.Next() {
+		var i ListLedgerMatchesRow
+		if err := rows.Scan(&i.ID, &i.DedupHash, &i.ExternalRef); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const startImportProcessing = `-- name: StartImportProcessing :exec

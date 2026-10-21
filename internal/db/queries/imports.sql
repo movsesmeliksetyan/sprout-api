@@ -62,3 +62,12 @@ WHERE id = @id AND status <> 'committed';
 
 -- name: GetImportForUpdate :one
 SELECT * FROM imports WHERE id = @id AND user_id = @user_id FOR UPDATE;
+
+-- name: ListLedgerMatches :many
+-- The user's transactions a statement's rows may duplicate: those with one
+-- of the rows' hashes or bank references, oldest first.
+SELECT id, dedup_hash, external_ref
+FROM transactions
+WHERE user_id = @user_id
+  AND (dedup_hash = ANY (@hashes::bytea[]) OR external_ref = ANY (@external_refs::text[]))
+ORDER BY created_at, id;

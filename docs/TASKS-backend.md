@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 45 / 63**
+**Progress: 46 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -100,7 +100,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
   - The pipeline (`imports.Processor`: read file → detect → extract → resolve → transform → rows → ready/needs_mapping/failed) is assembled here so the done-when checks run end to end; BE-45–47 add their stages to it. Storage gains `Get`. The PRD's BE-44 notes have the details.
 - [x] BE-45 · Validation, reconciliation, period filter — 2026-10-21, 24f5d88
   - The 5,000-row cap counts the rows the period keeps; under 50 % readable fails as `unreadable`. The PRD's BE-45 notes have the details.
-- [ ] BE-46 · De-duplication
+- [x] BE-46 · De-duplication — 2026-10-21, b5d9b54
+  - Migration 00018 adds `transactions.external_ref`, which commit fills, so bank references are matched against the ledger; `import_rows.dedup_hash` becomes `BYTEA`. The PRD's BE-46 notes have the details.
 - [ ] BE-47 · Review API and pipeline assembly
 - [ ] BE-48 · Commit, discard, retention
 - [ ] BE-49 · Statement corpus and end-to-end tests
