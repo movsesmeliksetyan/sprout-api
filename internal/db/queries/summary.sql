@@ -5,6 +5,7 @@
 -- it has expenses in the period. Largest first; equal amounts come in
 -- display order.
 SELECT c.id AS category_id,
+       c.name,
        c.monthly_budget_minor,
        COALESCE(sum(t.amount_minor) FILTER (WHERE t.local_date >= sqlc.arg(from_date)::date), 0)::bigint AS spent_minor,
        (count(t.id) FILTER (WHERE t.local_date >= sqlc.arg(from_date)::date))::integer AS txn_count,

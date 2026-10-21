@@ -115,6 +115,32 @@ type ImportRow struct {
 	Note               *string
 }
 
+type Insight struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	Period      string
+	PeriodStart time.Time
+	Position    int32
+	Kind        string
+	Tone        string
+	Icon        string
+	Title       string
+	Body        string
+	CategoryID  *uuid.UUID
+	GoalID      *uuid.UUID
+	Score       int32
+	CreatedAt   time.Time
+}
+
+type InsightRun struct {
+	UserID        uuid.UUID
+	Period        string
+	PeriodStart   time.Time
+	LedgerVersion int64
+	ComputedOn    time.Time
+	ComputedAt    time.Time
+}
+
 type KeywordRule struct {
 	Pattern      string
 	CategoryType string
@@ -247,4 +273,5 @@ type User struct {
 	WeeklyRecap          bool
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
+	LedgerVersion        int64
 }

@@ -1,0 +1,4 @@
+$kind: collection
+name: insights
+description: 'Insight cards for a week, month or year: at most five, most relevant first. Computed on read and kept until the ledger changes.'
+order: 12000

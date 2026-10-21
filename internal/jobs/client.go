@@ -69,6 +69,7 @@ func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, err
 	river.AddWorker(workers, &purgeIdempotencyKeys{pool: pool, logger: logger})
 	river.AddWorker(workers, &purgeUploadFiles{pool: pool, store: deps.Store, logger: logger})
 	river.AddWorker(workers, &purgeReceipts{pool: pool, logger: logger})
+	river.AddWorker(workers, &refreshInsights{pool: pool, logger: logger})
 
 	client, err := river.NewClient(riverpgxv5.New(pool), &river.Config{
 		Logger:       logger,
@@ -88,12 +89,27 @@ func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, err
 			river.NewPeriodicJob(river.PeriodicInterval(purgeEvery),
 				func() (river.JobArgs, *river.InsertOpts) { return PurgeReceiptsArgs{}, nil },
 				&river.PeriodicJobOpts{RunOnStart: true}),
+			river.NewPeriodicJob(nightly{},
+				func() (river.JobArgs, *river.InsertOpts) { return RefreshInsightsArgs{}, nil }, nil),
 		},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("jobs: worker: %w", err)
 	}
 	return &Client{river: client}, nil
+}
+
+// nightly schedules a periodic job at 03:00 UTC, when few users are
+// reading.
+type nightly struct{}
+
+func (nightly) Next(current time.Time) time.Time {
+	current = current.UTC()
+	next := time.Date(current.Year(), current.Month(), current.Day(), 3, 0, 0, 0, time.UTC)
+	if !next.After(current) {
+		next = next.AddDate(0, 0, 1)
+	}
+	return next
 }
 
 // Run works jobs until ctx is cancelled, then lets running jobs finish

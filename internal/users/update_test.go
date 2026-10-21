@@ -76,7 +76,9 @@ func TestUpdateMe_EachField(t *testing.T) {
 			require.Equal(t, http.StatusOK, rec.Code, "body: %s", rec.Body.String())
 			got := storedUser(t, pool, user)
 			assert.False(t, got.UpdatedAt.Before(user.UpdatedAt))
-			got.UpdatedAt = want.UpdatedAt
+			// The currency and the timezone move the ledger version
+			// (insights).
+			got.UpdatedAt, got.LedgerVersion = want.UpdatedAt, want.LedgerVersion
 			assert.Equal(t, want, got, "only the patched fields change")
 
 			me := testutil.DecodeJSON[httpx.Me](t, rec)

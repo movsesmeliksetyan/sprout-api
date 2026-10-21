@@ -101,7 +101,7 @@ All tables: `id UUID PRIMARY KEY` (v7), `created_at`, `updated_at` unless noted.
 | `mcc_map` | `mcc` (primary key), `category_type` | Static seed; no `id` or timestamps |
 | `keyword_rules` | `pattern` (primary key), `category_type`, `priority` | Static seed; no `id` or timestamps |
 | `receipts` | `user_id`, `upload_id`, `status`, `merchant`, `purchased_at`, `total_minor`, `currency`, `payment_method`, `category_id`, `category_confidence`, `line_items JSONB`, `raw_extraction JSONB`, `transaction_id`, `failure JSONB` | |
-| `insights` | `user_id`, `period`, `period_start`, `kind`, `tone`, `icon`, `title`, `body`, `category_id`, `goal_id`, `score` | Unique `(user_id, period, period_start, kind, category_id, goal_id)` |
+| `insights` | `user_id`, `period`, `period_start`, `position`, `kind`, `tone`, `icon`, `title`, `body`, `category_id`, `goal_id`, `score`; freshness in `insight_runs` (`ledger_version`, `computed_on`) | Unique `(user_id, period, period_start, kind, category_id, goal_id)` |
 | `devices` | `user_id`, `device_id`, `apns_token`, `environment`, `app_version`, `locale`, `last_seen_at`, `invalidated_at` | Unique `(user_id, device_id)` |
 | `notifications` | `user_id`, `kind`, `title`, `body`, `deep_link`, `dedup_key`, `read_at`, `sent_at` | Unique `(user_id, dedup_key)` |
 | `idempotency_keys` | `user_id`, `key`, `request_hash`, `status` (`processing`/`completed`), `locked_until`, `response_status`, `response_content_type`, `response_body`, `expires_at` | Primary key `(user_id, key)` |
@@ -633,9 +633,10 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-54 · Insight generation and `GET /insights`**
 - Do: Compute on read with a short cache: stored rows refreshed when the user's ledger changed since last computation (track `users.ledger_version`, bumped on writes). Nightly periodic job pre-computes the current month for active users.
-- Files: `internal/insights/service.go`, `handler.go`, `internal/jobs/insights_refresh.go`, `migrations/00014_insights.sql`
+- Files: `internal/insights/service.go`, `handler.go`, `internal/jobs/insights_refresh.go`, `migrations/00022_insights.sql`
 - Done when: adding a transaction changes the next read; unchanged ledger serves from the table with no recomputation (asserted).
 - Needs: BE-53
+- Notes: migration `00022_insights.sql` (00014 was taken). `users.ledger_version` is bumped by statement-level triggers on `transactions`, `categories`, `goals` and `goal_contributions` (one bump per statement, so an import commit costs one update) and by a change of the user's currency or timezone. `insight_runs` records, per (user, period, period_start), the version and the user's calendar day the cards were computed at; `GET /insights` serves the stored `insights` rows while both match and otherwise recomputes under the user's row lock (a second reader waits and serves what the first stored). A new day recomputes too, since near-budget and "less than last month" depend on how far the period is. Cards keep their `position`; the unique key uses `NULLS NOT DISTINCT`. The nightly job is `refresh_insights` at 03:00 UTC: the current month of every user who added a transaction in the last 30 days. Postman gains the insights folder with List insights.
 
 ### Milestone 11 — Notifications
 

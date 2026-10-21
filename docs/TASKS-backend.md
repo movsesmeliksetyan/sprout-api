@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 53 / 63**
+**Progress: 54 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -122,7 +122,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 - [x] BE-53 · Insight rule engine — 2026-10-21, b43b031
   - Notes: the engine is pure: `insights.Snapshot` is built by the caller (BE-54's service reads it from the summaries, the ledger and the goals). Rules: category spend down (≥5 % less, once a current period is half over) or up (≥20 % more), either only when the change is ≥2 % of the period's spending; over budget (naming the expense that is more than half the category's spend); near budget (≥85 %, current period only); peak weekday (≥20 % of a month's or year's spend); total spend down/up on the same thresholds; goal almost there (≥80 % saved) and on track (positive pace with an ETA). Selection also keeps one card per goal. Golden files are `testdata/insights/<rule>.golden.json` (`go test ./internal/insights -update`). Copy says "one $90 expense at Serenity Spa" where the design says "one $90 spa visit": the server knows the merchant, not what was bought.
-- [ ] BE-54 · Insight generation and `GET /insights`
+- [x] BE-54 · Insight generation and `GET /insights` — 2026-10-21, da75278
+  - Notes: migration `00022_insights.sql` (00014 was taken). `users.ledger_version` is bumped by statement-level triggers on `transactions`, `categories`, `goals` and `goal_contributions` (one bump per statement, so an import commit costs one update) and by a change of the user's currency or timezone. `insight_runs` records, per (user, period, period_start), the version and the user's calendar day the cards were computed at; `GET /insights` serves the stored `insights` rows while both match and otherwise recomputes under the user's row lock (a second reader waits and serves what the first stored). A new day recomputes too, since near-budget and "less than last month" depend on how far the period is. Cards keep their `position`; the unique key uses `NULLS NOT DISTINCT`. The nightly job is `refresh_insights` at 03:00 UTC: the current month of every user who added a transaction in the last 30 days. Postman gains the insights folder with List insights.
 
 ## Milestone 11 — Notifications
 
