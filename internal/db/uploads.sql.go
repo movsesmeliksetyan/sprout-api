@@ -16,7 +16,7 @@ const consumeUpload = `-- name: ConsumeUpload :one
 UPDATE uploads
 SET status = 'consumed', size_bytes = $3
 WHERE id = $1 AND user_id = $2 AND status = 'pending'
-RETURNING id, user_id, purpose, object_key, content_type, size_bytes, filename, status, expires_at, created_at, updated_at
+RETURNING id, user_id, purpose, object_key, content_type, size_bytes, filename, status, expires_at, created_at, updated_at, purge_after, purged_at
 `
 
 type ConsumeUploadParams struct {
@@ -41,6 +41,8 @@ func (q *Queries) ConsumeUpload(ctx context.Context, arg ConsumeUploadParams) (U
 		&i.ExpiresAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.PurgeAfter,
+		&i.PurgedAt,
 	)
 	return i, err
 }
@@ -48,7 +50,7 @@ func (q *Queries) ConsumeUpload(ctx context.Context, arg ConsumeUploadParams) (U
 const createUpload = `-- name: CreateUpload :one
 INSERT INTO uploads (id, user_id, purpose, object_key, content_type, size_bytes, filename, expires_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, user_id, purpose, object_key, content_type, size_bytes, filename, status, expires_at, created_at, updated_at
+RETURNING id, user_id, purpose, object_key, content_type, size_bytes, filename, status, expires_at, created_at, updated_at, purge_after, purged_at
 `
 
 type CreateUploadParams struct {
@@ -86,12 +88,14 @@ func (q *Queries) CreateUpload(ctx context.Context, arg CreateUploadParams) (Upl
 		&i.ExpiresAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.PurgeAfter,
+		&i.PurgedAt,
 	)
 	return i, err
 }
 
 const getUpload = `-- name: GetUpload :one
-SELECT id, user_id, purpose, object_key, content_type, size_bytes, filename, status, expires_at, created_at, updated_at FROM uploads WHERE id = $1 AND user_id = $2
+SELECT id, user_id, purpose, object_key, content_type, size_bytes, filename, status, expires_at, created_at, updated_at, purge_after, purged_at FROM uploads WHERE id = $1 AND user_id = $2
 `
 
 type GetUploadParams struct {
@@ -114,6 +118,8 @@ func (q *Queries) GetUpload(ctx context.Context, arg GetUploadParams) (Upload, e
 		&i.ExpiresAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.PurgeAfter,
+		&i.PurgedAt,
 	)
 	return i, err
 }

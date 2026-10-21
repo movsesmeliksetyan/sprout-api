@@ -207,6 +207,8 @@ type Upload struct {
 	ExpiresAt   time.Time
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	PurgeAfter  *time.Time
+	PurgedAt    *time.Time
 }
 
 type User struct {

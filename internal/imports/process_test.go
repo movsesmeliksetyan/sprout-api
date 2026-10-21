@@ -122,8 +122,8 @@ func TestProcess_BalancesCorrectAnInvertedSign(t *testing.T) {
 	assert.Equal(t, int64(4280+450+6100+1099+14000), got.Summary.TotalExpenseMinor)
 }
 
-// commit stands in for committing an import: its included rows become
-// transactions, as BE-48's commit writes them.
+// commit writes an import's included rows as transactions the way Commit
+// does, without needing every expense to have a category.
 func (f fixture) commit(t *testing.T, user testutil.TestUser, id uuid.UUID) {
 	t.Helper()
 	category := testutil.NewCategory(t, f.pool, user.ID)

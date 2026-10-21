@@ -1,0 +1,18 @@
+$kind: http-request
+name: 'Commit import'
+method: POST
+url: '{{baseUrl}}/v1/imports/{{importId}}/commit'
+order: 8000
+pathVariables:
+  - key: importId
+    value: '{{importId}}'
+headers:
+  - key: Idempotency-Key
+    value: '{{$guid}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      if (pm.response.code === 422) {
+          console.log("⚠️ these rows need a category: " + Object.keys(pm.response.json().error.fields).join(", "));
+      }
