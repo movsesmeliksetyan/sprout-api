@@ -88,7 +88,7 @@ All tables: `id UUID PRIMARY KEY` (v7), `created_at`, `updated_at` unless noted.
 |---|---|---|
 | `users` | `auth0_sub UNIQUE`, `email`, `name`, `avatar_key`, `currency`, `timezone`, `starting_balance_minor`, `onboarding_completed`, `notifications_enabled`, `budget_alerts`, `weekly_recap` | |
 | `categories` | `user_id`, `name`, `icon`, `shade`, `sort_order`, `monthly_budget_minor`, `archived_at` | Unique `(user_id, lower(name))` where not archived |
-| `transactions` | `user_id`, `kind`, `amount_minor`, `category_id NULL`, `merchant`, `merchant_key`, `note`, `occurred_at`, `local_date`, `source`, `import_id NULL`, `receipt_id NULL`, `dedup_hash` | Indexes: `(user_id, local_date DESC, id DESC)`, `(user_id, category_id, local_date)`, `(user_id, dedup_hash)` |
+| `transactions` | `user_id`, `kind`, `amount_minor`, `category_id NULL`, `merchant`, `merchant_key`, `note`, `occurred_at`, `local_date`, `source`, `import_id NULL`, `receipt_id NULL`, `dedup_hash`, `external_ref NULL` | Indexes: `(user_id, local_date DESC, id DESC)`, `(user_id, category_id, local_date)`, `(user_id, dedup_hash)`, `(user_id, external_ref)` where set |
 | `goals` | `user_id`, `title`, `emoji`, `image_key`, `target_minor`, `status`, `sort_order`, `completed_at` | `saved_minor` is derived (sum of contributions), not stored |
 | `goal_contributions` | `user_id`, `goal_id`, `kind`, `amount_minor`, `occurred_at`, `local_date` | |
 | `uploads` | `user_id`, `purpose`, `object_key`, `content_type`, `size_bytes`, `filename`, `status` (`pending`/`uploaded`/`consumed`), `expires_at` | |
@@ -576,6 +576,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 - Files: `internal/statements/dedup.go`
 - Done when: re-importing the same file yields 100 % duplicates; overlapping-month files only flag the overlap; two identical coffees survive.
 - Needs: BE-45, BE-17
+- Notes: Migration `00018` adds `transactions.external_ref` (the bank's id for a row, copied on commit) and makes `import_rows.dedup_hash` `BYTEA` like `transactions.dedup_hash`. The import row's hash is `transactions.DedupHash` of its local date, amount, kind by direction (debit → expense, credit → income) and merchant key. `statements.Dedup` is pure: it is given the rows' hashes and references and the user's transactions with any of them (one query, oldest first) and gives each row the transaction it duplicates. A row with a reference is matched on it first; otherwise, or when no transaction has it, on the hash — against transactions with no reference when the row has one. Each transaction is claimed by one row at most, which keeps genuine in-file repeats. A duplicate is `status: duplicate`, `included: false`, `duplicate_of` set, counted in `duplicate_count` and left out of the totals. The ledger covers every transaction, so an earlier committed import is matched through the transactions it wrote.
 
 **BE-47 · Review API and pipeline assembly**
 - Do: Assemble all stages in `ProcessImport` (detect → extract → resolve → transform → validate → dedup → kind → categorise → persist → `ready`). `GET /imports/{id}/rows` (uncategorised first), `PATCH …/rows/{row_id}` (recompute summary; category change calls `Learn`). Enqueue `import_ready` notification when processing took > 10 s.

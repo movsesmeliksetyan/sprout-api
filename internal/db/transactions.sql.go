@@ -48,7 +48,7 @@ const createTransaction = `-- name: CreateTransaction :one
 INSERT INTO transactions (id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note,
                           occurred_at, local_date, source, import_id, receipt_id, dedup_hash)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-RETURNING id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at
+RETURNING id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at, external_ref
 `
 
 type CreateTransactionParams struct {
@@ -103,6 +103,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.DedupHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ExternalRef,
 	)
 	return i, err
 }
@@ -125,7 +126,7 @@ func (q *Queries) DeleteTransaction(ctx context.Context, arg DeleteTransactionPa
 }
 
 const getTransaction = `-- name: GetTransaction :one
-SELECT id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at FROM transactions WHERE id = $1 AND user_id = $2
+SELECT id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at, external_ref FROM transactions WHERE id = $1 AND user_id = $2
 `
 
 type GetTransactionParams struct {
@@ -153,12 +154,13 @@ func (q *Queries) GetTransaction(ctx context.Context, arg GetTransactionParams) 
 		&i.DedupHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ExternalRef,
 	)
 	return i, err
 }
 
 const getTransactionForUpdate = `-- name: GetTransactionForUpdate :one
-SELECT id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at FROM transactions WHERE id = $1 AND user_id = $2 FOR UPDATE
+SELECT id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at, external_ref FROM transactions WHERE id = $1 AND user_id = $2 FOR UPDATE
 `
 
 type GetTransactionForUpdateParams struct {
@@ -187,6 +189,7 @@ func (q *Queries) GetTransactionForUpdate(ctx context.Context, arg GetTransactio
 		&i.DedupHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ExternalRef,
 	)
 	return i, err
 }
@@ -203,7 +206,7 @@ SET kind         = $1,
     local_date   = $8,
     dedup_hash   = $9
 WHERE id = $10 AND user_id = $11
-RETURNING id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at
+RETURNING id, user_id, kind, amount_minor, category_id, merchant, merchant_key, note, occurred_at, local_date, source, import_id, receipt_id, dedup_hash, created_at, updated_at, external_ref
 `
 
 type UpdateTransactionParams struct {
@@ -254,6 +257,7 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 		&i.DedupHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ExternalRef,
 	)
 	return i, err
 }

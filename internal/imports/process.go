@@ -13,8 +13,10 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/categorize"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
+	"github.com/movsesmeliksetyan/sprout-api/internal/period"
 	"github.com/movsesmeliksetyan/sprout-api/internal/statements"
 	"github.com/movsesmeliksetyan/sprout-api/internal/storage"
+	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
 )
 
 // MaxFileBytes is the largest statement read (PRD §4.5).
@@ -191,10 +193,14 @@ func (p *Processor) save(ctx context.Context, importID uuid.UUID, source db.GetI
 		if result.failure != nil {
 			return fail(ctx, q, importID, *result.failure)
 		}
-		rows, summary, err := draftRows(importID, source.UserID, loc, result.rows)
+		rows, err := draftRows(importID, source.UserID, loc, result.rows)
 		if err != nil {
 			return err
 		}
+		if err := markDuplicates(ctx, q, source.UserID, rows); err != nil {
+			return err
+		}
+		summary := summarize(rows)
 		summary.OutOfPeriodCount = result.outOfPeriod
 		if len(rows) > 0 {
 			if _, err := q.InsertImportRows(ctx, rows); err != nil {
@@ -226,42 +232,41 @@ func (p *Processor) save(ctx context.Context, importID uuid.UUID, source db.GetI
 	})
 }
 
-// draftRows turns the pipeline's rows into import rows and their summary.
-func draftRows(importID, userID uuid.UUID, loc *time.Location, rows []statements.Row) ([]db.InsertImportRowsParams, Summary, error) {
-	var summary Summary
+// draftRows turns the pipeline's rows into import rows.
+func draftRows(importID, userID uuid.UUID, loc *time.Location, rows []statements.Row) ([]db.InsertImportRowsParams, error) {
 	out := make([]db.InsertImportRowsParams, 0, len(rows))
 	for _, row := range rows {
 		id, err := uuid.NewV7()
 		if err != nil {
-			return nil, Summary{}, fmt.Errorf("imports: new id: %w", err)
+			return nil, fmt.Errorf("imports: new id: %w", err)
 		}
 		raw, err := json.Marshal(row.Raw)
 		if err != nil {
-			return nil, Summary{}, err
+			return nil, err
 		}
 		params := db.InsertImportRowsParams{
 			ID: id, ImportID: importID, UserID: userID, RowIndex: int32(row.RowIndex), Raw: raw,
 			RawDescription: row.RawDescription,
 		}
-		summary.RowCount++
 		if row.Error != "" {
 			params.Status, params.Included = "error", false
 			params.Error = &row.Error
-			summary.ErrorCount++
 			out = append(out, params)
 			continue
 		}
 		merchant := categorize.Normalize(row.RawDescription)
-		kind := "expense"
+		kind := transactions.KindExpense
 		if row.Direction == statements.Credit {
-			kind = "income"
+			kind = transactions.KindIncome
 		}
 		occurred := row.PostedAt
-		localDate := time.Date(occurred.In(loc).Year(), occurred.In(loc).Month(), occurred.In(loc).Day(), 0, 0, 0, 0, time.UTC)
+		localDate := period.LocalDate(occurred, loc)
 		amount := row.AmountMinor
-		params.Status, params.Included, params.Kind = "ok", true, &kind
+		kindName := string(kind)
+		params.Status, params.Included, params.Kind = "ok", true, &kindName
 		params.AmountMinor, params.OccurredAt, params.LocalDate = &amount, &occurred, &localDate
 		params.MerchantKey = merchant.Key
+		params.DedupHash = transactions.DedupHash(localDate, amount, kind, merchant.Key)
 		if merchant.Display != "" {
 			params.Merchant = &merchant.Display
 		}
@@ -275,16 +280,74 @@ func draftRows(importID, userID uuid.UUID, loc *time.Location, rows []statements
 		}
 		none := string(categorize.SourceNone)
 		params.CategorySource = &none
-		summary.IncludedCount++
-		if kind == "expense" {
-			summary.TotalExpenseMinor += amount
-			summary.UncategorizedCount++
-		} else {
-			summary.TotalIncomeMinor += amount
-		}
 		out = append(out, params)
 	}
-	return out, summary, nil
+	return out, nil
+}
+
+// markDuplicates marks the rows already in the user's ledger as
+// duplicates, left out of the import (PRD §4.3 stage 6).
+func markDuplicates(ctx context.Context, q db.Querier, userID uuid.UUID, rows []db.InsertImportRowsParams) error {
+	keys := make([]statements.DedupRow, len(rows))
+	params := db.ListLedgerMatchesParams{UserID: userID}
+	for i, row := range rows {
+		keys[i].Hash = row.DedupHash
+		if row.DedupHash != nil {
+			params.Hashes = append(params.Hashes, row.DedupHash)
+		}
+		if row.ExternalRef != nil && row.DedupHash != nil {
+			keys[i].ExternalRef = *row.ExternalRef
+			params.ExternalRefs = append(params.ExternalRefs, *row.ExternalRef)
+		}
+	}
+	if len(params.Hashes) == 0 {
+		return nil
+	}
+	found, err := q.ListLedgerMatches(ctx, params)
+	if err != nil {
+		return fmt.Errorf("imports: ledger matches: %w", err)
+	}
+	ledger := make([]statements.LedgerEntry, len(found))
+	for i, tx := range found {
+		ledger[i] = statements.LedgerEntry{ID: tx.ID, Hash: tx.DedupHash}
+		if tx.ExternalRef != nil {
+			ledger[i].ExternalRef = *tx.ExternalRef
+		}
+	}
+	for i, match := range statements.Dedup(keys, ledger) {
+		if match != uuid.Nil {
+			rows[i].Status, rows[i].Included = "duplicate", false
+			rows[i].DuplicateOf = &match
+		}
+	}
+	return nil
+}
+
+// summarize counts an import's rows; the totals are of the included ones.
+func summarize(rows []db.InsertImportRowsParams) Summary {
+	var summary Summary
+	for _, row := range rows {
+		summary.RowCount++
+		switch row.Status {
+		case "error":
+			summary.ErrorCount++
+		case "duplicate":
+			summary.DuplicateCount++
+		}
+		if !row.Included {
+			continue
+		}
+		summary.IncludedCount++
+		if *row.Kind == string(transactions.KindIncome) {
+			summary.TotalIncomeMinor += *row.AmountMinor
+			continue
+		}
+		summary.TotalExpenseMinor += *row.AmountMinor
+		if row.CategoryID == nil {
+			summary.UncategorizedCount++
+		}
+	}
+	return summary
 }
 
 func jsonOrNil(v any) ([]byte, error) {

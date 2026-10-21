@@ -122,6 +122,67 @@ func TestProcess_BalancesCorrectAnInvertedSign(t *testing.T) {
 	assert.Equal(t, int64(4280+450+6100+1099+14000), got.Summary.TotalExpenseMinor)
 }
 
+// commit stands in for committing an import: its included rows become
+// transactions, as BE-48's commit writes them.
+func (f fixture) commit(t *testing.T, user testutil.TestUser, id uuid.UUID) {
+	t.Helper()
+	category := testutil.NewCategory(t, f.pool, user.ID)
+	_, err := f.pool.Exec(context.Background(), `INSERT INTO transactions (id, user_id, kind, amount_minor, category_id, merchant,
+		merchant_key, occurred_at, local_date, source, import_id, dedup_hash, external_ref)
+		SELECT id, user_id, kind, amount_minor, CASE WHEN kind = 'expense' THEN $2::uuid END, merchant, merchant_key, occurred_at,
+		       local_date, 'import', import_id, dedup_hash, external_ref
+		FROM import_rows WHERE import_id = $1 AND included`, id, category.ID)
+	require.NoError(t, err)
+}
+
+func TestProcess_FindsDuplicates(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	user := testutil.NewTestUser(t, f.pool)
+	early := "Date,Description,Amount\n" +
+		"14/07/2025,TESCO STORES 3297,-42.80\n15/07/2025,PRET A MANGER,-3.10\n15/07/2025,PRET A MANGER,-3.10\n16/07/2025,SALARY ACME,2500.00\n"
+	late := "Date,Description,Amount\n" +
+		"16/07/2025,SALARY ACME,2500.00\n17/07/2025,PRET A MANGER,-3.10\n18/07/2025,SHELL FUEL,-61.00\n"
+
+	first := f.imported(t, user, early)
+	assert.Zero(t, first.Summary.DuplicateCount, "two coffees on one day are two coffees")
+	assert.Equal(t, 4, first.Summary.IncludedCount)
+	f.commit(t, user, first.ID)
+
+	again := f.imported(t, user, early)
+	assert.Equal(t, httpx.ImportSummary{RowCount: 4, DuplicateCount: 4}, again.Summary, "the same file again is all duplicates")
+	assert.Equal(t, 4, f.count(t, `SELECT count(*) FROM import_rows r JOIN transactions t ON t.id = r.duplicate_of
+		WHERE r.import_id = $1 AND r.status = 'duplicate' AND NOT r.included`, again.ID))
+	assert.Equal(t, 4, f.count(t, `SELECT count(DISTINCT duplicate_of) FROM import_rows WHERE import_id = $1`, again.ID))
+
+	overlap := f.imported(t, user, late)
+	assert.Equal(t, 1, overlap.Summary.DuplicateCount, "only the salary overlaps")
+	assert.Equal(t, int64(310+6100), overlap.Summary.TotalExpenseMinor)
+
+	// One coffee of two is already in: the other is new.
+	other := testutil.NewTestUser(t, f.pool)
+	single := f.imported(t, other, "Date,Description,Amount\n14/07/2025,TESCO STORES 3297,-42.80\n15/07/2025,PRET A MANGER,-3.10\n")
+	f.commit(t, other, single.ID)
+	two := f.imported(t, other, early)
+	assert.Equal(t, 2, two.Summary.DuplicateCount, "Tesco and one coffee")
+	assert.Equal(t, int64(310), two.Summary.TotalExpenseMinor)
+	assert.Equal(t, int64(250000), two.Summary.TotalIncomeMinor)
+}
+
+func TestProcess_DuplicatesByReference(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	user := testutil.NewTestUser(t, f.pool)
+	ofx := "OFXHEADER:100\n<OFX><STMTTRN><DTPOSTED>20250714<TRNAMT>-42.80<FITID>F1<NAME>TESCO</STMTTRN>" +
+		"<STMTTRN><DTPOSTED>20250715<TRNAMT>-3.10<FITID>F2<NAME>PRET</STMTTRN></OFX>"
+	first := f.imported(t, user, ofx)
+	f.commit(t, user, first.ID)
+	// The bank renamed a merchant: the reference still matches.
+	renamed := strings.Replace(ofx, "<NAME>PRET", "<NAME>PRET A MANGER LONDON", 1)
+	got := f.imported(t, user, renamed)
+	assert.Equal(t, 2, got.Summary.DuplicateCount)
+}
+
 func TestProcess_OFXIsNative(t *testing.T) {
 	t.Parallel()
 	f := newFixture(t)

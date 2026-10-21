@@ -121,6 +121,9 @@ type Querier interface {
 	ListGoals(ctx context.Context, userID uuid.UUID) ([]ListGoalsRow, error)
 	// Every keyword rule, in the order they are tried.
 	ListKeywordRules(ctx context.Context) ([]KeywordRule, error)
+	// The user's transactions a statement's rows may duplicate: those with one
+	// of the rows' hashes or bank references, oldest first.
+	ListLedgerMatches(ctx context.Context, arg ListLedgerMatchesParams) ([]ListLedgerMatchesRow, error)
 	ListMCCTypes(ctx context.Context, mccs []string) ([]MccMap, error)
 	// The user's rules for any of the keys whose category is still active.
 	ListMerchantRules(ctx context.Context, arg ListMerchantRulesParams) ([]ListMerchantRulesRow, error)

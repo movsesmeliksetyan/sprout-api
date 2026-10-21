@@ -107,7 +107,7 @@ type ImportRow struct {
 	CategoryID         *uuid.UUID
 	CategoryConfidence *float64
 	CategorySource     *string
-	DedupHash          *string
+	DedupHash          []byte
 	DuplicateOf        *uuid.UUID
 	Error              *string
 	CreatedAt          time.Time
@@ -191,6 +191,7 @@ type Transaction struct {
 	DedupHash   []byte
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	ExternalRef *string
 }
 
 type Upload struct {
