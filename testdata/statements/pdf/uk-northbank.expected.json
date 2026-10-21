@@ -1,0 +1,80 @@
+{
+  "bank": "Text PDF, two pages",
+  "country": "GB",
+  "llm": {
+    "statement_page_table": [
+      {
+        "headers": [
+          "Date",
+          "Description",
+          "Paid out",
+          "Paid in",
+          "Balance"
+        ],
+        "rows": [
+          [
+            "02 Jul 2025",
+            "CARD PAYMENT SAINSBURYS 0441",
+            "23.40",
+            "",
+            "1,176.60"
+          ],
+          [
+            "03 Jul 2025",
+            "SALARY CONTOSO LTD",
+            "",
+            "2,100.00",
+            "3,276.60"
+          ],
+          [
+            "07 Jul 2025",
+            "DIRECT DEBIT THAMES WATER",
+            "41.00",
+            "",
+            "3,235.60"
+          ],
+          [
+            "11 Jul 2025",
+            "CARD PAYMENT PRET A MANGER",
+            "4.95",
+            "",
+            "3,230.65"
+          ]
+        ]
+      },
+      {
+        "headers": [
+          "Date",
+          "Description",
+          "Paid out",
+          "Paid in",
+          "Balance"
+        ],
+        "rows": [
+          [
+            "18 Jul 2025",
+            "CARD PAYMENT TFL TRAVEL CH",
+            "7.80",
+            "",
+            "3,222.85"
+          ],
+          [
+            "25 Jul 2025",
+            "STANDING ORDER RENT",
+            "950.00",
+            "",
+            "2,272.85"
+          ]
+        ]
+      }
+    ]
+  },
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 6,
+  "error_rows": 0,
+  "expense_minor": 102715,
+  "income_minor": 210000,
+  "first_date": "2025-07-02",
+  "last_date": "2025-07-25"
+}

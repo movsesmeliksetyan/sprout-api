@@ -92,7 +92,9 @@ func TestExtractPDF(t *testing.T) {
 
 	t.Run("rows that do not add up", func(t *testing.T) {
 		t.Parallel()
-		_, err := statements.ExtractPDF(context.Background(), makePDF([][]string{page1, page2}), newPageReader(&pageReader{drop: "PRET"}))
+		// One row of three missing could be a balance brought forward; two
+		// cannot.
+		_, err := statements.ExtractPDF(context.Background(), makePDF([][]string{page1, page2}), newPageReader(&pageReader{drop: " A"}))
 		assert.ErrorIs(t, err, statements.ErrUnreadable)
 	})
 

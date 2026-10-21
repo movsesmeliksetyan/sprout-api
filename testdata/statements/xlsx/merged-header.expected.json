@@ -1,0 +1,12 @@
+{
+  "bank": "XLSX, merged Soll/Haben header",
+  "country": "DE",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 2,
+  "error_rows": 0,
+  "expense_minor": 4280,
+  "income_minor": 250000,
+  "first_date": "2025-07-12",
+  "last_date": "2025-07-14"
+}

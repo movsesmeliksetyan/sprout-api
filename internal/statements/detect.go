@@ -234,8 +234,10 @@ func readRecords(text string, delimiter rune, limit int) [][]string {
 func modalWidth(records [][]string) (width, count int) {
 	counts := map[int]int{}
 	for _, record := range records {
-		if n := len(nonEmptyTail(record)); n > 1 {
-			counts[n]++
+		// The record's own width, empty cells at the end included: a
+		// debit/credit layout leaves the last column empty on half its rows.
+		if len(nonEmptyTail(record)) > 1 {
+			counts[len(record)]++
 		}
 	}
 	for w, c := range counts {

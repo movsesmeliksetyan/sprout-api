@@ -1,0 +1,56 @@
+{
+  "bank": "Chequing CSV, two currencies",
+  "country": "CA",
+  "month_first": true,
+  "llm": {
+    "statement_mapping": [
+      {
+        "columns": [
+          {
+            "index": 0,
+            "role": "ignore"
+          },
+          {
+            "index": 1,
+            "role": "ignore"
+          },
+          {
+            "index": 2,
+            "role": "date"
+          },
+          {
+            "index": 3,
+            "role": "reference"
+          },
+          {
+            "index": 4,
+            "role": "description"
+          },
+          {
+            "index": 5,
+            "role": "description"
+          },
+          {
+            "index": 6,
+            "role": "amount"
+          },
+          {
+            "index": 7,
+            "role": "ignore"
+          }
+        ],
+        "date_format": "MM/DD/YYYY",
+        "amount_sign": "negative_is_expense",
+        "confidence": 0.9
+      }
+    ]
+  },
+  "status": "ready",
+  "mapping_source": "llm",
+  "rows": 6,
+  "error_rows": 0,
+  "expense_minor": 110090,
+  "income_minor": 240000,
+  "first_date": "2025-07-01",
+  "last_date": "2025-07-22"
+}

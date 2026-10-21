@@ -1,0 +1,12 @@
+{
+  "bank": "Spanish, tab separated",
+  "country": "ES",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 2,
+  "error_rows": 0,
+  "expense_minor": 4390,
+  "income_minor": 0,
+  "first_date": "2025-07-13",
+  "last_date": "2025-07-14"
+}

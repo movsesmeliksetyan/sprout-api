@@ -1,0 +1,12 @@
+{
+  "bank": "Italian, Uscite/Entrate",
+  "country": "IT",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 8,
+  "error_rows": 0,
+  "expense_minor": 126809,
+  "income_minor": 187500,
+  "first_date": "2025-07-01",
+  "last_date": "2025-07-19"
+}

@@ -1,0 +1,76 @@
+{
+  "headers": [
+    "Account Type",
+    "Account Number",
+    "Transaction Date",
+    "Cheque Number",
+    "Description 1",
+    "Description 2",
+    "CAD$",
+    "USD$"
+  ],
+  "rows": [
+    [
+      "Chequing",
+      "00000-0000000",
+      "7/1/2025",
+      "",
+      "LOBLAWS 1102",
+      "",
+      "-64.18",
+      ""
+    ],
+    [
+      "Chequing",
+      "00000-0000000",
+      "7/2/2025",
+      "",
+      "PAYROLL DEPOSIT",
+      "NORTHWIND CORP",
+      "2400.00",
+      ""
+    ],
+    [
+      "Chequing",
+      "00000-0000000",
+      "7/5/2025",
+      "",
+      "TIM HORTONS #2231",
+      "",
+      "-4.35",
+      ""
+    ],
+    [
+      "Chequing",
+      "00000-0000000",
+      "7/9/2025",
+      "113",
+      "CHEQUE",
+      "",
+      "-950.00",
+      ""
+    ],
+    [
+      "Chequing",
+      "00000-0000000",
+      "7/16/2025",
+      "",
+      "PETRO-CANADA 0442",
+      "",
+      "-58.90",
+      ""
+    ],
+    [
+      "Chequing",
+      "00000-0000000",
+      "7/22/2025",
+      "",
+      "SHOPPERS DRUG MART",
+      "",
+      "-23.47",
+      ""
+    ]
+  ],
+  "preamble": [],
+  "footer": []
+}

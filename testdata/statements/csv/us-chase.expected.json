@@ -1,0 +1,13 @@
+{
+  "bank": "Chase-style export",
+  "country": "US",
+  "month_first": true,
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 3,
+  "error_rows": 0,
+  "expense_minor": 9612,
+  "income_minor": 320000,
+  "first_date": "2025-07-12",
+  "last_date": "2025-07-14"
+}

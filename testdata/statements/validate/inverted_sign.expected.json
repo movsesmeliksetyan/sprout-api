@@ -1,0 +1,12 @@
+{
+  "bank": "Inverted signs, with balance",
+  "country": "GB",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 7,
+  "error_rows": 0,
+  "expense_minor": 25929,
+  "income_minor": 252500,
+  "first_date": "2025-07-14",
+  "last_date": "2025-07-24"
+}

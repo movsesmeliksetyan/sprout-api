@@ -1,0 +1,12 @@
+{
+  "bank": "Monzo-style export",
+  "country": "GB",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 2,
+  "error_rows": 0,
+  "expense_minor": 450,
+  "income_minor": 2000,
+  "first_date": "2025-07-13",
+  "last_date": "2025-07-14"
+}

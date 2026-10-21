@@ -1,0 +1,54 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Length 775 >>
+stream
+BT /F1 10 Tf 40 800 Td (Northbank plc   Current account statement) Tj ET
+BT /F1 10 Tf 40 786 Td (Account ****1234   Sort code **-**-**) Tj ET
+BT /F1 10 Tf 40 772 Td (Date        Description                    Paid out   Paid in   Balance) Tj ET
+BT /F1 10 Tf 40 758 Td (01 Jul 2025 Balance brought forward                               1,200.00) Tj ET
+BT /F1 10 Tf 40 744 Td (02 Jul 2025 CARD PAYMENT SAINSBURYS 0441      23.40               1,176.60) Tj ET
+BT /F1 10 Tf 40 730 Td (03 Jul 2025 SALARY CONTOSO LTD                           2,100.00 3,276.60) Tj ET
+BT /F1 10 Tf 40 716 Td (07 Jul 2025 DIRECT DEBIT THAMES WATER          41.00              3,235.60) Tj ET
+BT /F1 10 Tf 40 702 Td (11 Jul 2025 CARD PAYMENT PRET A MANGER          4.95              3,230.65) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 449 >>
+stream
+BT /F1 10 Tf 40 800 Td (Northbank plc   Page 2) Tj ET
+BT /F1 10 Tf 40 786 Td (Date        Description                    Paid out   Paid in   Balance) Tj ET
+BT /F1 10 Tf 40 772 Td (18 Jul 2025 CARD PAYMENT TFL TRAVEL CH          7.80              3,222.85) Tj ET
+BT /F1 10 Tf 40 758 Td (25 Jul 2025 STANDING ORDER RENT              950.00               2,272.85) Tj ET
+BT /F1 10 Tf 40 744 Td (Total paid out 1,027.15   Total paid in 2,100.00) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000218 00000 n 
+0000001043 00000 n 
+0000001169 00000 n 
+0000001668 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+1794
+%%EOF

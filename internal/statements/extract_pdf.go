@@ -21,6 +21,10 @@ const (
 	// pdfRowTolerance is how far, in percent, the rows the model returns
 	// may stray from the lines that start with a date.
 	pdfRowTolerance = 10
+	// pdfRowSlack is how many rows apart they may be whatever the
+	// percentage: a short statement's dated lines may include a balance
+	// brought forward.
+	pdfRowSlack = 1
 	// pdfTokensPerLine bounds a page's answer.
 	pdfTokensPerLine = 40
 )
@@ -84,7 +88,7 @@ func ExtractPDF(ctx context.Context, data []byte, client llm.Client) (RawTable, 
 	if len(table.Headers) == 0 || len(table.Rows) == 0 {
 		return RawTable{}, fmt.Errorf("%w: no transaction table found", ErrUnreadable)
 	}
-	if diff := len(table.Rows) - expected; diff*diff*100*100 > expected*expected*pdfRowTolerance*pdfRowTolerance {
+	if diff := abs(len(table.Rows) - expected); diff > pdfRowSlack && diff*100 > expected*pdfRowTolerance {
 		return RawTable{}, fmt.Errorf("%w: %d rows read, but %d lines start with a date", ErrUnreadable, len(table.Rows), expected)
 	}
 	width := len(table.Headers)
@@ -226,4 +230,11 @@ func sameCells(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
 }

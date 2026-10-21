@@ -1,0 +1,12 @@
+{
+  "bank": "Multi-line descriptions",
+  "country": "GB",
+  "status": "ready",
+  "mapping_source": "heuristic",
+  "rows": 2,
+  "error_rows": 0,
+  "expense_minor": 2279,
+  "income_minor": 0,
+  "first_date": "2025-07-13",
+  "last_date": "2025-07-14"
+}
