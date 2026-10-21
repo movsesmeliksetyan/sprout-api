@@ -1,0 +1,41 @@
+{
+  "headers": [
+    "Buchungstag",
+    "Valuta",
+    "Verwendungszweck",
+    "Betrag (EUR)"
+  ],
+  "rows": [
+    [
+      "14.07.2025",
+      "14.07.2025",
+      "KARTENZAHLUNG REWE MARKT GMBH",
+      "-42,80"
+    ],
+    [
+      "13.07.2025",
+      "13.07.2025",
+      "LASTSCHRIFT VODAFONE GMBH",
+      "-29,99"
+    ],
+    [
+      "12.07.2025",
+      "12.07.2025",
+      "GEHALT ACME GMBH",
+      "2.500,00"
+    ]
+  ],
+  "preamble": [
+    "Umsatzanzeige",
+    "Konto;DE12 **** **** 1234",
+    "Zeitraum;01.07.2025 - 31.07.2025"
+  ],
+  "footer": [
+    [
+      "Kontostand am 31.07.2025",
+      "",
+      "",
+      "1.203,11"
+    ]
+  ]
+}

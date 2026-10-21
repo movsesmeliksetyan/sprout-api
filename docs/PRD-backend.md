@@ -524,7 +524,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-39 · CSV extractor**
 - Do: Tolerant delimited reader → `RawTable` (ragged rows padded, embedded newlines, stray quotes, trailing summary rows identified as footer).
-- Files: `internal/statements/extract_csv.go`
+- Files: `internal/statements/extract_csv.go`, `testdata/statements/csv/`
+- Notes: `ExtractCSV(Detection) (RawTable, error)`; `RawTable{Headers, Rows, Preamble, Footer}`. Quoted cells may span lines, stray quotes stay as text (`LazyQuotes`), a record that cannot be parsed is skipped, cells are trimmed, blank rows dropped, and every row and the header are padded to the widest row. The preamble keeps the non-blank lines before the header. Footer: trailing rows without a date in the date column (the first column whose first row and at least half of the rows hold a date), or, without a date column, trailing rows less than half full. Date-likeness (shared with detection) allows at most one word of up to nine letters, so `Kontostand am 31.07.2025` and `Solde au 31/07/2025` are not dates, and accepts `YYYYMMDD`. A header with nothing under it is `ErrNoRows`. Twelve fixtures with golden JSON (`go test ./internal/statements -update` rewrites them): UK signed and paid-in/out with preamble and totals, German semicolon with preamble and closing balance, Spanish tab, French debit/credit with two footer rows, Dutch fully quoted with compact dates, multi-line cells, stray quotes, ragged rows, Monzo, a US bank, Ameriabank with Armenian headers.
 - Done when: golden tests over ≥ 10 varied CSV fixtures.
 - Needs: BE-38
 

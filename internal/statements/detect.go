@@ -309,25 +309,46 @@ func looksNumeric(cell string) bool {
 }
 
 // looksDate reports whether a cell is a date: two or three groups of
-// digits joined by one of ./- or spaces, or digits around a month name.
+// digits joined by one of ./- or spaces, around at most one word of up to
+// nine letters (a month name: "14 Jul 2025", "14. März 2025"), or eight
+// digits that read as YYYYMMDD.
 func looksDate(cell string) bool {
-	groups, separators := 0, 0
-	inDigits := false
+	if len(cell) == 8 && allDigits(cell) {
+		month, day := (cell[4]-'0')*10+(cell[5]-'0'), (cell[6]-'0')*10+(cell[7]-'0')
+		return (cell[:2] == "19" || cell[:2] == "20") && month >= 1 && month <= 12 && day >= 1 && day <= 31
+	}
+	groups, separators, words, letters := 0, 0, 0, 0
+	inDigits, inWord := false, false
 	for _, r := range cell {
 		switch {
 		case unicode.IsDigit(r):
 			if !inDigits {
 				groups++
 			}
-			inDigits = true
+			inDigits, inWord = true, false
+			continue
+		case unicode.IsLetter(r):
+			if !inWord {
+				words++
+			}
+			letters++
+			inDigits, inWord = false, true
 			continue
 		case strings.ContainsRune("./- ", r):
 			separators++
-		case unicode.IsLetter(r):
 		default:
 			return false
 		}
-		inDigits = false
+		inDigits, inWord = false, false
 	}
-	return groups >= 2 && groups <= 3 && separators >= 1
+	return groups >= 2 && groups <= 3 && separators >= 1 && words <= 1 && letters <= 9
+}
+
+func allDigits(s string) bool {
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return s != ""
 }

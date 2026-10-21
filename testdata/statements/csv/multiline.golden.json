@@ -1,0 +1,21 @@
+{
+  "headers": [
+    "Date",
+    "Description",
+    "Amount"
+  ],
+  "rows": [
+    [
+      "2025-07-14",
+      "AMAZON MKTPLACE\nORDER 123-456",
+      "-19.99"
+    ],
+    [
+      "2025-07-13",
+      "TFL TRAVEL CH",
+      "-2.80"
+    ]
+  ],
+  "preamble": [],
+  "footer": []
+}
