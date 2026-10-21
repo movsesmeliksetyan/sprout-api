@@ -30,3 +30,20 @@ WHERE r.id = @id;
 -- Ends processing with a failure, unless the receipt was confirmed or
 -- deleted meanwhile.
 UPDATE receipts SET status = 'failed', failure = @failure WHERE id = @id AND status = 'processing';
+
+-- name: FinishReceipt :exec
+-- Records what extraction read, unless the receipt was confirmed or
+-- deleted meanwhile.
+UPDATE receipts
+SET status              = 'ready',
+    merchant            = @merchant,
+    purchased_at        = @purchased_at,
+    total_minor         = @total_minor,
+    currency            = @currency,
+    payment_method      = @payment_method,
+    category_id         = @category_id,
+    category_confidence = @category_confidence,
+    line_items          = @line_items,
+    raw_extraction      = @raw_extraction,
+    failure             = NULL
+WHERE id = @id AND status = 'processing';

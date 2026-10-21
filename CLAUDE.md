@@ -42,6 +42,7 @@ make seed                # 50,000 generated transactions for a development user 
 make perf-notes          # re-measure the read endpoints and rewrite docs/perf-notes.md
 make eval                # deterministic categorisation eval (part of make check once it exists)
 make eval-llm            # on demand only; calls the real LLM
+make eval-receipts       # on demand only; reads testdata/receipts with the real vision model
 ```
 
 ## Layout rules

@@ -50,10 +50,11 @@ Run `make` to list every target.
 | `make migrate-up` / `make migrate-down` | Apply all pending migrations / roll back the latest one |
 | `make seed-rules` | Load the categorisation seeds built into the binary: merchants, MCC codes and keywords (`sprout seed-rules`; safe to run again) |
 | `make eval` | Run the deterministic categorisation evaluation |
+| `make eval-llm` / `make eval-receipts` | On demand, with the real model from `.env`: the full categorisation evaluation / reading the receipt images in `testdata/receipts` |
 
 The API is described by [api/openapi.yaml](api/openapi.yaml), served at `/v1/openapi.yaml` outside production, with a Swagger UI page for browsing and trying it at `/v1/docs`. Every `/v1` operation exists and answers `501` until its task in the PRD implements it.
 
-`sprout migrate up|down|status` and `sprout seed-rules` need only `DATABASE_URL`; run `seed-rules` after migrating, and again whenever the seed files change. `sprout worker` runs the background jobs on river (statement imports) and the periodic ones (the nightly merchant-dictionary promotion, the hourly purge of expired idempotency keys); stop it with Ctrl-C or SIGTERM and running jobs get 30 s to finish.
+`sprout migrate up|down|status` and `sprout seed-rules` need only `DATABASE_URL`; run `seed-rules` after migrating, and again whenever the seed files change. `sprout worker` runs the background jobs on river (statement imports, receipt scans) and the periodic ones (the nightly merchant-dictionary promotion, the hourly purges of expired idempotency keys and of statement and receipt files past their retention); stop it with Ctrl-C or SIGTERM and running jobs get 30 s to finish.
 
 ## Layout
 
