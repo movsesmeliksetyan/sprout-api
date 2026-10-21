@@ -100,6 +100,37 @@ func (q *Queries) ListDictionaryEntries(ctx context.Context, arg ListDictionaryE
 	return items, nil
 }
 
+const listExpenseMerchantKeys = `-- name: ListExpenseMerchantKeys :many
+SELECT DISTINCT merchant_key FROM transactions
+WHERE user_id = $1 AND kind = 'expense' AND merchant_key = ANY($2::text[])
+`
+
+type ListExpenseMerchantKeysParams struct {
+	UserID       uuid.UUID
+	MerchantKeys []string
+}
+
+// Which of the keys the user has spent money with before.
+func (q *Queries) ListExpenseMerchantKeys(ctx context.Context, arg ListExpenseMerchantKeysParams) ([]string, error) {
+	rows, err := q.db.Query(ctx, listExpenseMerchantKeys, arg.UserID, arg.MerchantKeys)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var merchant_key string
+		if err := rows.Scan(&merchant_key); err != nil {
+			return nil, err
+		}
+		items = append(items, merchant_key)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listKeywordRules = `-- name: ListKeywordRules :many
 SELECT pattern, category_type, priority FROM keyword_rules
 ORDER BY priority DESC, length(pattern) DESC, pattern

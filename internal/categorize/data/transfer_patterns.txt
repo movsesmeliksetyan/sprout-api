@@ -1,0 +1,76 @@
+# Words in a statement row that mark money moving between the user's own
+# accounts or cards rather than spending or income (PRD §5.4). One pattern
+# a line, in merchant-key form: lower case, whole words that must appear in
+# order; a word ending in * matches every word that starts with it. A
+# standing order is not listed: one to someone else is spending.
+
+# English
+transfer
+transfers
+transferred
+tfr
+trf
+xfer
+internal transfer
+own account
+to savings
+from savings
+savings transfer
+to current account
+from current account
+to isa
+pot transfer
+moved to pot
+moved from pot
+card repayment
+credit card repayment
+credit card payment
+card payment received
+payment received thank you
+payment thank you
+amex payment
+barclaycard payment
+balance transfer
+top up
+topup
+card to card
+c2c
+p2p
+between accounts
+
+# German
+überweisung
+ueberweisung
+umbuchung
+übertrag
+eigenüberweisung
+kreditkartenabrechnung
+
+# French
+virement interne
+virement vers livret
+remboursement carte
+
+# Spanish
+transferencia
+traspaso
+
+# Italian
+bonifico
+giroconto
+giro conto
+
+# Dutch
+overboeking
+overschrijving
+eigen rekening
+
+# Russian
+перевод
+перевод с карты
+перевод на карту
+пополнение
+
+# Armenian
+փոխանցում
+քարտից քարտ
