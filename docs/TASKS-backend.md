@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 50 / 63**
+**Progress: 51 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -113,7 +113,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 - [x] BE-50 · Receipts schema, endpoints, job — 2026-10-21, 401b356
   - Migration is 00021, not 00013. `DELETE` on a confirmed receipt is `409` (contract §2.11 now says so). The PRD's BE-50 notes have the details.
-- [ ] BE-51 · Receipt extraction
+- [x] BE-51 · Receipt extraction — 2026-10-21, 4b55ddf
+  - The live fixtures are synthetic receipts rendered from text, not photos. HEIC decodes without cgo. The PRD's BE-51 notes have the details.
 - [ ] BE-52 · Receipt confirm and retention
 
 ## Milestone 10 — Insights
