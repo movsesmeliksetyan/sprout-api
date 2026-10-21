@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 29 / 63**
+**Progress: 30 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -71,7 +71,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
   - 2026-10-21: Groq (`qwen/qwen3.8-27b`, over its OpenAI-compatible HTTP API) became the v1 provider; the Anthropic provider stays as `LLM_PROVIDER=anthropic`. The PRD's BE-28 notes describe both.
 - [x] BE-29 · Merchant normaliser — 2026-10-21, 746366c
   - Five data files beyond the three named (countries, regions, suffixes, legal forms, aliases); aliases come from `aliases.tsv`, not the dictionary, which does not exist until BE-30. The backfill is goose Go migration 00012 in `internal/backfill`. The PRD's BE-29 notes have the details.
-- [ ] BE-30 · Rule stores and seeds
+- [x] BE-30 · Rule stores and seeds — 2026-10-21, f569e1b
+  - Migration `00013_categorize.sql` (00009 was taken) and the loader in `seed.go`. `mcc_map` and `keyword_rules` are keyed by code and pattern, without `id` or timestamps. `sprout seed-rules` makes the tables match the files: it deletes codes, patterns and seed merchants the files no longer have, and replaces `llm` rows but never `learned` ones. The PRD's BE-30 notes have the details.
 - [ ] BE-31 · Engine pipeline (deterministic layers)
 - [ ] BE-32 · LLM classification layer
 - [ ] BE-33 · Kind detection
