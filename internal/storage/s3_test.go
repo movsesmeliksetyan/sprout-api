@@ -60,7 +60,15 @@ func TestS3_UploadAndDownloadThroughPresignedURLs(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Equal(t, body, got)
 
+	read, err := store.Get(ctx, key, int64(len(body)))
+	require.NoError(t, err)
+	assert.Equal(t, body, read)
+	_, err = store.Get(ctx, key, int64(len(body))-1)
+	assert.ErrorIs(t, err, storage.ErrTooLarge)
+
 	require.NoError(t, store.Delete(ctx, key))
+	_, err = store.Get(ctx, key, 1024)
+	require.ErrorIs(t, err, storage.ErrNotFound)
 	_, err = store.Head(ctx, key)
 	require.ErrorIs(t, err, storage.ErrNotFound)
 	assert.NoError(t, store.Delete(ctx, key), "deleting a missing object succeeds")

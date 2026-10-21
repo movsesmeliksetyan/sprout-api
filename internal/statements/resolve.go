@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
+	"github.com/movsesmeliksetyan/sprout-api/internal/llm"
 )
 
 // MappingSource says how a mapping was found (contract §2.10).
@@ -47,12 +48,13 @@ type Resolution struct {
 type HeuristicFunc func(RawTable, Hints) (MappingSpec, int)
 
 // Resolver finds how to read a table (PRD §4.3 stage 3): a template saved
-// for its headers, else the heuristics. A spec the heuristics find is
-// saved as a template, so the next file with the same headers needs no
-// heuristics.
+// for its headers, else the heuristics, else the model. A spec found is
+// saved as a template, so the next file with the same headers needs
+// neither.
 type Resolver struct {
 	q         db.Querier
 	heuristic HeuristicFunc
+	llm       llm.Client
 }
 
 // ResolverOption configures a Resolver.
@@ -61,6 +63,12 @@ type ResolverOption func(*Resolver)
 // WithHeuristic replaces Heuristic.
 func WithHeuristic(fn HeuristicFunc) ResolverOption {
 	return func(r *Resolver) { r.heuristic = fn }
+}
+
+// WithLLM lets the resolver ask the model when the heuristics are not sure
+// (PRD §4.3 stage 3c).
+func WithLLM(client llm.Client) ResolverOption {
+	return func(r *Resolver) { r.llm = client }
 }
 
 // NewResolver returns a resolver keeping its templates through q.
@@ -83,8 +91,8 @@ func Fingerprint(headers []string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// Resolve finds a mapping for a table of format. ErrNoMapping says neither
-// a template nor the heuristics could read it.
+// Resolve finds a mapping for a table of format. ErrNoMapping says no
+// stage could read it: the user is asked (NewMappingRequest).
 func (r *Resolver) Resolve(ctx context.Context, table RawTable, format Format, hints Hints) (Resolution, error) {
 	fingerprint := Fingerprint(table.Headers)
 	template, err := r.q.GetMappingTemplate(ctx, fingerprint)
@@ -100,14 +108,24 @@ func (r *Resolver) Resolve(ctx context.Context, table RawTable, format Format, h
 	}
 
 	spec, confidence := r.heuristic(table, hints)
-	resolution := Resolution{Spec: spec, Source: SourceHeuristic, Fingerprint: fingerprint, Confidence: confidence}
-	if confidence < HeuristicThreshold || spec.Check(table, checkSamples) != nil {
-		return resolution, ErrNoMapping
+	if confidence >= HeuristicThreshold && spec.Check(table, checkSamples) == nil {
+		if err := r.Save(ctx, fingerprint, format, nil, spec, SourceHeuristic); err != nil {
+			return Resolution{}, err
+		}
+		return Resolution{Spec: spec, Source: SourceHeuristic, Fingerprint: fingerprint, Confidence: confidence}, nil
 	}
-	if err := r.Save(ctx, fingerprint, format, nil, spec, SourceHeuristic); err != nil {
-		return Resolution{}, err
+
+	if r.llm != nil {
+		// A failure or a mapping that does not read the file leaves the
+		// user to say how to read it; it never fails the import.
+		if spec, err := InferMapping(ctx, r.llm, table); err == nil {
+			if err := r.Save(ctx, fingerprint, format, nil, spec, SourceLLM); err != nil {
+				return Resolution{}, err
+			}
+			return Resolution{Spec: spec, Source: SourceLLM, Fingerprint: fingerprint, Confidence: 100}, nil
+		}
 	}
-	return resolution, nil
+	return Resolution{Fingerprint: fingerprint}, ErrNoMapping
 }
 
 // Save stores a validated spec as the template for a fingerprint. A user's

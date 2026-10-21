@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -97,6 +98,49 @@ func (q *Queries) FailImport(ctx context.Context, arg FailImportParams) error {
 	return err
 }
 
+const finishImport = `-- name: FinishImport :exec
+UPDATE imports
+SET status             = $1,
+    format             = $2,
+    bank_hint          = $3,
+    mapping_source     = $4,
+    mapping_spec       = $5,
+    mapping_request    = $6,
+    header_fingerprint = $7,
+    summary            = $8,
+    failure            = NULL
+WHERE id = $9 AND status <> 'committed'
+`
+
+type FinishImportParams struct {
+	Status            string
+	Format            *string
+	BankHint          *string
+	MappingSource     *string
+	MappingSpec       []byte
+	MappingRequest    []byte
+	HeaderFingerprint *string
+	Summary           []byte
+	ID                uuid.UUID
+}
+
+// Records what processing found, unless the import was committed or
+// discarded meanwhile.
+func (q *Queries) FinishImport(ctx context.Context, arg FinishImportParams) error {
+	_, err := q.db.Exec(ctx, finishImport,
+		arg.Status,
+		arg.Format,
+		arg.BankHint,
+		arg.MappingSource,
+		arg.MappingSpec,
+		arg.MappingRequest,
+		arg.HeaderFingerprint,
+		arg.Summary,
+		arg.ID,
+	)
+	return err
+}
+
 const getImport = `-- name: GetImport :one
 SELECT id, user_id, upload_id, status, period, filename, format, bank_hint, mapping_source, mapping_spec, mapping_request, header_fingerprint, summary, failure, committed_at, created_at, updated_at FROM imports WHERE id = $1 AND user_id = $2
 `
@@ -159,6 +203,102 @@ func (q *Queries) GetImportByID(ctx context.Context, id uuid.UUID) (Import, erro
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getImportForUpdate = `-- name: GetImportForUpdate :one
+SELECT id, user_id, upload_id, status, period, filename, format, bank_hint, mapping_source, mapping_spec, mapping_request, header_fingerprint, summary, failure, committed_at, created_at, updated_at FROM imports WHERE id = $1 AND user_id = $2 FOR UPDATE
+`
+
+type GetImportForUpdateParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+func (q *Queries) GetImportForUpdate(ctx context.Context, arg GetImportForUpdateParams) (Import, error) {
+	row := q.db.QueryRow(ctx, getImportForUpdate, arg.ID, arg.UserID)
+	var i Import
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.UploadID,
+		&i.Status,
+		&i.Period,
+		&i.Filename,
+		&i.Format,
+		&i.BankHint,
+		&i.MappingSource,
+		&i.MappingSpec,
+		&i.MappingRequest,
+		&i.HeaderFingerprint,
+		&i.Summary,
+		&i.Failure,
+		&i.CommittedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getImportSource = `-- name: GetImportSource :one
+SELECT i.id, i.user_id, i.status, i.period, u.object_key, usr.timezone, usr.currency, usr.name
+FROM imports i
+JOIN uploads u ON u.id = i.upload_id
+JOIN users usr ON usr.id = i.user_id
+WHERE i.id = $1
+`
+
+type GetImportSourceRow struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Status    string
+	Period    string
+	ObjectKey string
+	Timezone  string
+	Currency  string
+	Name      string
+}
+
+// What processing an import needs: the stored file and the user's
+// timezone and currency.
+func (q *Queries) GetImportSource(ctx context.Context, id uuid.UUID) (GetImportSourceRow, error) {
+	row := q.db.QueryRow(ctx, getImportSource, id)
+	var i GetImportSourceRow
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Status,
+		&i.Period,
+		&i.ObjectKey,
+		&i.Timezone,
+		&i.Currency,
+		&i.Name,
+	)
+	return i, err
+}
+
+type InsertImportRowsParams struct {
+	ID                 uuid.UUID
+	ImportID           uuid.UUID
+	UserID             uuid.UUID
+	RowIndex           int32
+	Raw                []byte
+	Status             string
+	Included           bool
+	Kind               *string
+	AmountMinor        *int64
+	OccurredAt         *time.Time
+	LocalDate          *time.Time
+	Merchant           *string
+	MerchantKey        string
+	RawDescription     string
+	Mcc                *string
+	ExternalRef        *string
+	CategoryID         *uuid.UUID
+	CategoryConfidence *float64
+	CategorySource     *string
+	DedupHash          *string
+	DuplicateOf        *uuid.UUID
+	Error              *string
 }
 
 const startImportProcessing = `-- name: StartImportProcessing :exec

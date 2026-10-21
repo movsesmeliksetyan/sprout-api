@@ -16,6 +16,9 @@ type Object struct {
 	ContentType string
 }
 
+// ErrTooLarge is an object larger than its reader allows.
+var ErrTooLarge = errors.New("storage: object too large")
+
 // Store is the object storage the API needs. Clients move the bytes
 // themselves through presigned URLs; the API only signs, inspects and
 // deletes.
@@ -28,6 +31,9 @@ type Store interface {
 	PresignGet(ctx context.Context, key string, ttl time.Duration) (string, error)
 	// Head describes the object, or returns ErrNotFound.
 	Head(ctx context.Context, key string) (Object, error)
+	// Get reads the whole object, or returns ErrNotFound; an object over
+	// maxBytes is ErrTooLarge.
+	Get(ctx context.Context, key string, maxBytes int64) ([]byte, error)
 	// Delete removes the object. Deleting one that does not exist succeeds.
 	Delete(ctx context.Context, key string) error
 	// Ready reports whether the bucket can be reached.
