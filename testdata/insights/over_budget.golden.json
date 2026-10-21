@@ -1,0 +1,66 @@
+[
+  {
+    "scenario": "the design",
+    "cards": [
+      {
+        "kind": "category_over_budget",
+        "tone": "warning",
+        "icon": "warning",
+        "title": "Self-care is over budget",
+        "body": "$10 above your $150 limit. Most of it was one $90 expense at Serenity Spa on the 12th.",
+        "category_id": "01900000-0000-7000-8000-000000000002",
+        "goal_id": null,
+        "score": 91
+      }
+    ]
+  },
+  {
+    "scenario": "spread over many expenses",
+    "cards": [
+      {
+        "kind": "category_over_budget",
+        "tone": "warning",
+        "icon": "warning",
+        "title": "Self-care is over budget",
+        "body": "$10 above your $150 limit.",
+        "category_id": "01900000-0000-7000-8000-000000000002",
+        "goal_id": null,
+        "score": 91
+      }
+    ]
+  },
+  {
+    "scenario": "no merchant",
+    "cards": [
+      {
+        "kind": "category_over_budget",
+        "tone": "warning",
+        "icon": "warning",
+        "title": "Self-care is over budget",
+        "body": "$10 above your $150 limit. Most of it was one $90 expense on the 12th.",
+        "category_id": "01900000-0000-7000-8000-000000000002",
+        "goal_id": null,
+        "score": 91
+      }
+    ]
+  },
+  {
+    "scenario": "no budget",
+    "cards": null
+  },
+  {
+    "scenario": "in a year",
+    "cards": [
+      {
+        "kind": "category_over_budget",
+        "tone": "warning",
+        "icon": "warning",
+        "title": "Self-care is over budget",
+        "body": "$10 above your $150 limit. Most of it was one $90 expense at Serenity Spa on 12 July.",
+        "category_id": "01900000-0000-7000-8000-000000000002",
+        "goal_id": null,
+        "score": 91
+      }
+    ]
+  }
+]

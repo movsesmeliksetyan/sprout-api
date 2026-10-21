@@ -1,0 +1,69 @@
+[
+  {
+    "scenario": "the design",
+    "cards": [
+      {
+        "kind": "category_spend_down",
+        "tone": "positive",
+        "icon": "sparkle",
+        "title": "You spent 8% less on Food",
+        "body": "$1,240 this month, down from $1,350 last month. Nice work.",
+        "category_id": "01900000-0000-7000-8000-000000000001",
+        "goal_id": null,
+        "score": 62
+      }
+    ]
+  },
+  {
+    "scenario": "early in the month nothing is less yet",
+    "cards": null
+  },
+  {
+    "scenario": "more on travel",
+    "cards": [
+      {
+        "kind": "category_spend_down",
+        "tone": "positive",
+        "icon": "sparkle",
+        "title": "You spent 8% less on Food",
+        "body": "$1,240 this month, down from $1,350 last month. Nice work.",
+        "category_id": "01900000-0000-7000-8000-000000000001",
+        "goal_id": null,
+        "score": 62
+      },
+      {
+        "kind": "category_spend_up",
+        "tone": "neutral",
+        "icon": "chart",
+        "title": "You spent 150% more on Travel",
+        "body": "$300 this month, up from $120 last month.",
+        "category_id": "01900000-0000-7000-8000-000000000003",
+        "goal_id": null,
+        "score": 65
+      }
+    ]
+  },
+  {
+    "scenario": "a small change is not news",
+    "cards": null
+  },
+  {
+    "scenario": "nothing spent before",
+    "cards": null
+  },
+  {
+    "scenario": "a past month",
+    "cards": [
+      {
+        "kind": "category_spend_down",
+        "tone": "positive",
+        "icon": "sparkle",
+        "title": "You spent 8% less on Food",
+        "body": "$1,240 in July 2025, down from $1,350 the month before. Nice work.",
+        "category_id": "01900000-0000-7000-8000-000000000001",
+        "goal_id": null,
+        "score": 62
+      }
+    ]
+  }
+]

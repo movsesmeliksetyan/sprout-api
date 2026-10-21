@@ -1,0 +1,36 @@
+[
+  {
+    "scenario": "food close to its budget",
+    "cards": [
+      {
+        "kind": "category_near_budget",
+        "tone": "warning",
+        "icon": "warning",
+        "title": "Food is close to its budget",
+        "body": "$100 left of your $1,500 limit, with 10 days to go.",
+        "category_id": "01900000-0000-7000-8000-000000000001",
+        "goal_id": null,
+        "score": 78
+      }
+    ]
+  },
+  {
+    "scenario": "on the last day",
+    "cards": [
+      {
+        "kind": "category_near_budget",
+        "tone": "warning",
+        "icon": "warning",
+        "title": "Food is close to its budget",
+        "body": "$100 left of your $1,500 limit.",
+        "category_id": "01900000-0000-7000-8000-000000000001",
+        "goal_id": null,
+        "score": 78
+      }
+    ]
+  },
+  {
+    "scenario": "a past month",
+    "cards": null
+  }
+]
