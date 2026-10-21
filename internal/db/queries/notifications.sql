@@ -48,3 +48,19 @@ UPDATE notifications SET read_at = now() WHERE user_id = $1 AND read_at IS NULL;
 
 -- name: HasUnreadNotifications :one
 SELECT EXISTS (SELECT 1 FROM notifications WHERE user_id = $1 AND read_at IS NULL);
+
+-- name: ListRecapUsers :many
+-- The users with the weekly recap on for whom it is Monday between 09:00
+-- and 09:59 at the given instant, in their own timezone.
+SELECT * FROM users
+WHERE weekly_recap
+  AND extract(isodow FROM sqlc.arg(at)::timestamptz AT TIME ZONE timezone) = 1
+  AND extract(hour FROM sqlc.arg(at)::timestamptz AT TIME ZONE timezone) = 9
+ORDER BY id;
+
+-- name: CountTransactionsBetween :one
+-- How many transactions, of any kind, the user has on the calendar days
+-- from_date to to_date, both included.
+SELECT count(*) FROM transactions
+WHERE user_id = sqlc.arg(user_id)
+  AND local_date BETWEEN sqlc.arg(from_date)::date AND sqlc.arg(to_date)::date;

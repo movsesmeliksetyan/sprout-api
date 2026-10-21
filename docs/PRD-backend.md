@@ -666,6 +666,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 - Files: `internal/jobs/weekly_recap.go`
 - Done when: time-travel tests across three timezones send exactly once per user per week.
 - Needs: BE-56, BE-23
+- Notes: `notify.WeeklyRecaps(ctx, now)` is the work; the `weekly_recap` job runs a minute past every hour (the `hourly` schedule), so each run falls inside one local hour of every timezone, half-hour offsets included. Users are picked in SQL (`weekly_recap` on, Monday and hour 9 at `now` in their timezone); one with no transaction of any kind last week gets none. With `notifications_enabled` off the recap still reaches the inbox but is not pushed, as for every kind. The dedup key is `weekly_recap:{week start}`, so a repeated run within the hour sends nothing twice. Copy: title "Your week in review"; body "You spent $184 last week, 12% less than the week before. Food took the most: $96." (the comparison is left out when nothing was spent the week before; "You spent nothing last week." for income only). The time-travel test runs the job twice an hour over ten days for users in New York, London and Kolkata.
 
 ### Milestone 12 — Hardening and release
 

@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -23,6 +24,27 @@ type CountNotificationsParams struct {
 // How many of ids are the user's.
 func (q *Queries) CountNotifications(ctx context.Context, arg CountNotificationsParams) (int64, error) {
 	row := q.db.QueryRow(ctx, countNotifications, arg.UserID, arg.Ids)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countTransactionsBetween = `-- name: CountTransactionsBetween :one
+SELECT count(*) FROM transactions
+WHERE user_id = $1
+  AND local_date BETWEEN $2::date AND $3::date
+`
+
+type CountTransactionsBetweenParams struct {
+	UserID   uuid.UUID
+	FromDate time.Time
+	ToDate   time.Time
+}
+
+// How many transactions, of any kind, the user has on the calendar days
+// from_date to to_date, both included.
+func (q *Queries) CountTransactionsBetween(ctx context.Context, arg CountTransactionsBetweenParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countTransactionsBetween, arg.UserID, arg.FromDate, arg.ToDate)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -206,6 +228,52 @@ func (q *Queries) ListPushDevices(ctx context.Context, userID uuid.UUID) ([]Devi
 			&i.InvalidatedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listRecapUsers = `-- name: ListRecapUsers :many
+SELECT id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at, ledger_version FROM users
+WHERE weekly_recap
+  AND extract(isodow FROM $1::timestamptz AT TIME ZONE timezone) = 1
+  AND extract(hour FROM $1::timestamptz AT TIME ZONE timezone) = 9
+ORDER BY id
+`
+
+// The users with the weekly recap on for whom it is Monday between 09:00
+// and 09:59 at the given instant, in their own timezone.
+func (q *Queries) ListRecapUsers(ctx context.Context, at time.Time) ([]User, error) {
+	rows, err := q.db.Query(ctx, listRecapUsers, at)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Auth0Sub,
+			&i.Email,
+			&i.Name,
+			&i.AvatarKey,
+			&i.Currency,
+			&i.Timezone,
+			&i.StartingBalanceMinor,
+			&i.OnboardingCompleted,
+			&i.NotificationsEnabled,
+			&i.BudgetAlerts,
+			&i.WeeklyRecap,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.LedgerVersion,
 		); err != nil {
 			return nil, err
 		}

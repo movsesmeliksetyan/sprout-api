@@ -65,6 +65,9 @@ type Querier interface {
 	CountGoals(ctx context.Context, userID uuid.UUID) (int64, error)
 	// How many of ids are the user's.
 	CountNotifications(ctx context.Context, arg CountNotificationsParams) (int64, error)
+	// How many transactions, of any kind, the user has on the calendar days
+	// from_date to to_date, both included.
+	CountTransactionsBetween(ctx context.Context, arg CountTransactionsBetweenParams) (int64, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateContribution(ctx context.Context, arg CreateContributionParams) (GoalContribution, error)
 	CreateGoal(ctx context.Context, arg CreateGoalParams) (Goal, error)
@@ -203,6 +206,9 @@ type Querier interface {
 	ListPromotionCandidates(ctx context.Context, minVoters int64) ([]ListPromotionCandidatesRow, error)
 	// The user's devices APNs has not rejected.
 	ListPushDevices(ctx context.Context, userID uuid.UUID) ([]Device, error)
+	// The users with the weekly recap on for whom it is Monday between 09:00
+	// and 09:59 at the given instant, in their own timezone.
+	ListRecapUsers(ctx context.Context, at time.Time) ([]User, error)
 	// The newest contributions of one of the user's goals.
 	ListRecentContributions(ctx context.Context, arg ListRecentContributionsParams) ([]GoalContribution, error)
 	// A page of the user's transactions, newest first. A null filter is not

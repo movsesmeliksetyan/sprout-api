@@ -82,6 +82,7 @@ func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, err
 	river.AddWorker(workers, &refreshInsights{pool: pool, logger: logger})
 	river.AddWorker(workers, &sendPush{logger: logger, service: notifier})
 	river.AddWorker(workers, &checkBudgets{logger: logger, service: notifier})
+	river.AddWorker(workers, &sendWeeklyRecaps{logger: logger, service: notifier})
 
 	client, err := river.NewClient(riverpgxv5.New(pool), &river.Config{
 		Logger:       logger,
@@ -103,6 +104,8 @@ func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, err
 				&river.PeriodicJobOpts{RunOnStart: true}),
 			river.NewPeriodicJob(nightly{},
 				func() (river.JobArgs, *river.InsertOpts) { return RefreshInsightsArgs{}, nil }, nil),
+			river.NewPeriodicJob(hourly{},
+				func() (river.JobArgs, *river.InsertOpts) { return SendWeeklyRecapsArgs{}, nil }, nil),
 		},
 	})
 	if err != nil {
