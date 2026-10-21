@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 40 / 63**
+**Progress: 41 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -92,7 +92,7 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 - [x] BE-38 · Container detection — 2026-10-21, 8a6a7c1
 - [x] BE-39 · CSV extractor — 2026-10-21, bf0017d
 - [x] BE-40 · OFX/QFX and XLSX extractors — 2026-10-21, f344305
-- [ ] BE-41 · PDF extractor
+- [x] BE-41 · PDF extractor — 2026-10-21, 4efda93
 - [ ] BE-42 · Mapping spec and deterministic transform
 - [ ] BE-43 · Mapping resolution: templates and heuristics
 - [ ] BE-44 · Mapping resolution: LLM inference and user mapping
