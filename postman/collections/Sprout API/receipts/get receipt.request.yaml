@@ -1,0 +1,8 @@
+$kind: http-request
+name: 'Get receipt'
+method: GET
+url: '{{baseUrl}}/v1/receipts/{{receiptId}}'
+order: 2000
+pathVariables:
+  - key: receiptId
+    value: '{{receiptId}}'

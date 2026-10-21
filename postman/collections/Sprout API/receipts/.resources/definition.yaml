@@ -1,0 +1,4 @@
+$kind: collection
+name: receipts
+description: 'Photographed receipts on their way into the ledger. Request an upload with purpose "receipt" and send the image first, then create the receipt from its uploadId and poll it while it is read.'
+order: 11000

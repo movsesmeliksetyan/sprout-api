@@ -175,6 +175,27 @@ type MerchantVote struct {
 	UpdatedAt    time.Time
 }
 
+type Receipt struct {
+	ID                 uuid.UUID
+	UserID             uuid.UUID
+	UploadID           uuid.UUID
+	Status             string
+	Merchant           *string
+	PurchasedAt        *time.Time
+	TotalMinor         *int64
+	Currency           *string
+	PaymentMethod      *string
+	CategoryID         *uuid.UUID
+	CategoryConfidence *float64
+	LineItems          []byte
+	RawExtraction      []byte
+	TransactionID      *uuid.UUID
+	Failure            []byte
+	ConfirmedAt        *time.Time
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+}
+
 type Transaction struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID

@@ -60,6 +60,7 @@ type Querier interface {
 	CreateContribution(ctx context.Context, arg CreateContributionParams) (GoalContribution, error)
 	CreateGoal(ctx context.Context, arg CreateGoalParams) (Goal, error)
 	CreateImport(ctx context.Context, arg CreateImportParams) (Import, error)
+	CreateReceipt(ctx context.Context, arg CreateReceiptParams) (Receipt, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)
 	CreateUpload(ctx context.Context, arg CreateUploadParams) (Upload, error)
 	// Returns no row when a user with this auth0_sub already exists.
@@ -75,6 +76,7 @@ type Querier interface {
 	DeleteImportRows(ctx context.Context, importID uuid.UUID) error
 	DeleteKeywordRulesExcept(ctx context.Context, patterns []string) (int64, error)
 	DeleteMCCMapExcept(ctx context.Context, mccs []string) (int64, error)
+	DeleteReceipt(ctx context.Context, id uuid.UUID) error
 	// Removes the seed merchants the seed file no longer has.
 	DeleteSeedDictionaryExcept(ctx context.Context, merchantKeys []string) (int64, error)
 	DeleteTransaction(ctx context.Context, arg DeleteTransactionParams) (int64, error)
@@ -82,6 +84,9 @@ type Querier interface {
 	// of at least @min_voters votes for the key.
 	DemoteDictionaryEntries(ctx context.Context, minVoters int64) (int64, error)
 	FailImport(ctx context.Context, arg FailImportParams) error
+	// Ends processing with a failure, unless the receipt was confirmed or
+	// deleted meanwhile.
+	FailReceipt(ctx context.Context, arg FailReceiptParams) error
 	// Records what processing found, unless the import was committed or
 	// discarded meanwhile.
 	FinishImport(ctx context.Context, arg FinishImportParams) error
@@ -99,6 +104,13 @@ type Querier interface {
 	// The template for a header fingerprint, unless it has been disabled: a
 	// success rate under 80 % over at least 5 uses.
 	GetMappingTemplate(ctx context.Context, headerFingerprint string) (MappingTemplate, error)
+	// One of the user's receipts, with its image's key and when the image was
+	// deleted from storage, if it was.
+	GetReceipt(ctx context.Context, arg GetReceiptParams) (GetReceiptRow, error)
+	GetReceiptForUpdate(ctx context.Context, arg GetReceiptForUpdateParams) (Receipt, error)
+	// What processing a receipt needs: the stored image and the user's
+	// currency and timezone.
+	GetReceiptSource(ctx context.Context, id uuid.UUID) (GetReceiptSourceRow, error)
 	GetTransaction(ctx context.Context, arg GetTransactionParams) (Transaction, error)
 	// Locks the row until the database transaction ends.
 	GetTransactionForUpdate(ctx context.Context, arg GetTransactionForUpdateParams) (Transaction, error)

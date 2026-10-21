@@ -6,6 +6,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/goals"
 	"github.com/movsesmeliksetyan/sprout-api/internal/httpx"
 	"github.com/movsesmeliksetyan/sprout-api/internal/imports"
+	"github.com/movsesmeliksetyan/sprout-api/internal/receipts"
 	"github.com/movsesmeliksetyan/sprout-api/internal/summary"
 	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
 	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
@@ -23,6 +24,7 @@ type (
 	goalsAPI        = goals.Handler
 	categorizeAPI   = categorize.Handler
 	importsAPI      = imports.Handler
+	receiptsAPI     = receipts.Handler
 )
 
 // apiHandlers is the implementation of every /v1 operation: the feature
@@ -36,6 +38,7 @@ type apiHandlers struct {
 	*goalsAPI
 	*categorizeAPI
 	*importsAPI
+	*receiptsAPI
 	unimplemented
 }
 
@@ -54,6 +57,7 @@ func newAPI(
 	goalService *goals.Service,
 	engine *categorize.Engine,
 	importService *imports.Service,
+	receiptService *receipts.Service,
 ) apiHandlers {
 	return apiHandlers{
 		usersAPI:        users.NewHandler(userService),
@@ -64,5 +68,6 @@ func newAPI(
 		goalsAPI:        goals.NewHandler(goalService),
 		categorizeAPI:   categorize.NewHandler(engine),
 		importsAPI:      imports.NewHandler(importService),
+		receiptsAPI:     receipts.NewHandler(receiptService),
 	}
 }

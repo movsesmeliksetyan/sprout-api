@@ -603,9 +603,10 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-50 · Receipts schema, endpoints, job**
 - Do: Migration; `POST /receipts`, `GET /receipts/{id}` (`image_url` presigned), `DELETE`; `ProcessReceipt` job skeleton.
-- Files: `migrations/00013_receipts.sql`, `internal/receipts/service.go`, `handler.go`, `internal/jobs/process_receipt.go`
+- Files: `migrations/00021_receipts.sql`, `internal/receipts/service.go`, `handler.go`, `process.go`, `internal/jobs/process_receipt.go`, `postman/collections/Sprout API/receipts/`
 - Done when: post → `processing` → job runs; cross-user `404`.
 - Needs: BE-37
+- Notes: The table is migration `00021` (00013 was taken), which also gives `transactions.receipt_id` its foreign key (`ON DELETE SET NULL`). `POST /receipts` consumes a `receipt` upload, creates the receipt and inserts its `process_receipt` job (3 attempts, then `failed: internal`) in one transaction (`receipts.Enqueuer`, implemented by `jobs.Client`); a refused upload is `422`. It sets the photo's `uploads.purge_after` 7 days ahead, the retention of BE-48, which BE-52 lifts on confirm. `image_url` is presigned for an hour and `null` once the photo is purged; `line_items` is `[]` until extraction. `DELETE` removes an unconfirmed receipt and makes its photo due for the next purge; a confirmed one is `409`. `receipts.Processor` is the job's work: until BE-51 it marks a receipt `failed: internal`. The Postman collection has a `receipts` folder.
 
 **BE-51 · Receipt extraction**
 - Do: Normalise the image (HEIC→JPEG, EXIF rotate, max 2,000 px long edge), vision LLM call with structured output: merchant, purchase date/time, total, currency, payment method (brand + last 4 only), line items, and `is_receipt`. Validation: `is_receipt=false` → `not_a_receipt`; line items sum within 2 % of total else keep total and flag items; currency mismatch with user's → keep amount, note in `raw_extraction`. Category via `categorize.Engine` (merchant + line-item names as hint).
