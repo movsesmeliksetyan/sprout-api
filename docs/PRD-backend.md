@@ -494,7 +494,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-35 · `POST /categorization/suggest`**
 - Do: Deterministic-only classification for a single input; p95 < 50 ms.
-- Files: `internal/categorize/handler.go`
+- Files: `internal/categorize/handler.go`, `postman/collections/Sprout API/categorization/`
+- Notes: one `Input` (direction debit): `merchant` gives the merchant; `note` is the description, so it feeds the keyword layer and names the merchant when `merchant` is empty. `Classify` runs without `AllowLLM`, and the test's engine has a model that fails the test when called. An empty body answers `{category_id: null, confidence: 0, source: none}`. p95 over 200 requests on a seeded database is about 1 ms (the timing test is skipped under `-race` and `-short`).
 - Done when: returns the user's rule after one correction; never calls the LLM (asserted with a fake that fails on use).
 - Needs: BE-31
 

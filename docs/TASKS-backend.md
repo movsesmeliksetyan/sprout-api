@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 34 / 63**
+**Progress: 35 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -81,7 +81,7 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
   - The labelled fixture is `testdata/categorize/kinds.tsv` (75 rows); refunds match by key prefix and never pair as transfers. The PRD's BE-33 notes have the details.
 - [x] BE-34 · Learning loop — 2026-10-21, cc22d27
   - Migration `00014_merchant_votes.sql`. The nightly river job is registered by BE-37, which brings river; BE-34 ships `PromoteDictionary`, the function it runs. Demotion needs at least 3 voters. The PRD's BE-34 notes have the details.
-- [ ] BE-35 · `POST /categorization/suggest`
+- [x] BE-35 · `POST /categorization/suggest` — 2026-10-21, ca881ee
 - [ ] BE-36 · Evaluation harness
 
 ## Milestone 8 — Statement normalisation (§4)
