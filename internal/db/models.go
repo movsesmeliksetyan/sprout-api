@@ -103,6 +103,17 @@ type MerchantRule struct {
 	UpdatedAt   time.Time
 }
 
+type MerchantVote struct {
+	ID           uuid.UUID
+	UserID       uuid.UUID
+	MerchantKey  string
+	CategoryType string
+	DisplayName  string
+	VotedAt      time.Time
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
 type Transaction struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID

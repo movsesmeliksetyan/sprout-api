@@ -6,6 +6,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -60,12 +61,16 @@ type Querier interface {
 	// Removes a contribution of one of the user's goals and returns it.
 	DeleteContribution(ctx context.Context, arg DeleteContributionParams) (GoalContribution, error)
 	DeleteExpiredIdempotencyKeys(ctx context.Context) (int64, error)
+	DeleteExpiredLLMEntries(ctx context.Context, now time.Time) (int64, error)
 	DeleteGoal(ctx context.Context, arg DeleteGoalParams) (int64, error)
 	DeleteKeywordRulesExcept(ctx context.Context, patterns []string) (int64, error)
 	DeleteMCCMapExcept(ctx context.Context, mccs []string) (int64, error)
 	// Removes the seed merchants the seed file no longer has.
 	DeleteSeedDictionaryExcept(ctx context.Context, merchantKeys []string) (int64, error)
 	DeleteTransaction(ctx context.Context, arg DeleteTransactionParams) (int64, error)
+	// Removes learned and llm rows that too few voters agree with: under 60 %
+	// of at least @min_voters votes for the key.
+	DemoteDictionaryEntries(ctx context.Context, minVoters int64) (int64, error)
 	GetCategory(ctx context.Context, arg GetCategoryParams) (Category, error)
 	GetGoal(ctx context.Context, arg GetGoalParams) (GetGoalRow, error)
 	GetIdempotencyKey(ctx context.Context, arg GetIdempotencyKeyParams) (IdempotencyKey, error)
@@ -100,6 +105,9 @@ type Querier interface {
 	ListMCCTypes(ctx context.Context, mccs []string) ([]MccMap, error)
 	// The user's rules for any of the keys whose category is still active.
 	ListMerchantRules(ctx context.Context, arg ListMerchantRulesParams) ([]ListMerchantRulesRow, error)
+	// The merchants whose most voted type has at least @min_voters users and
+	// 80 % of the votes, with that type and its votes.
+	ListPromotionCandidates(ctx context.Context, minVoters int64) ([]ListPromotionCandidatesRow, error)
 	// The newest contributions of one of the user's goals.
 	ListRecentContributions(ctx context.Context, arg ListRecentContributionsParams) ([]GoalContribution, error)
 	// A page of the user's transactions, newest first. A null filter is not
@@ -113,6 +121,13 @@ type Querier interface {
 	// The position after the user's last goal.
 	NextGoalSortOrder(ctx context.Context, userID uuid.UUID) (int32, error)
 	Ping(ctx context.Context) (int32, error)
+	// Writes promoted merchants as learned rows, replacing llm and learned
+	// rows; an unchanged learned row is left alone. A seed row that agrees
+	// takes the vote count; one that does not is left alone.
+	PromoteDictionaryEntries(ctx context.Context, arg PromoteDictionaryEntriesParams) (int64, error)
+	// Records the user's votes: each merchant's category, by its type. A
+	// category without a type, or not the user's, casts no vote.
+	RecordMerchantVotes(ctx context.Context, arg RecordMerchantVotesParams) (int64, error)
 	// Gives the key up so that a retry runs again.
 	ReleaseIdempotencyKey(ctx context.Context, arg ReleaseIdempotencyKeyParams) (int64, error)
 	// Puts the user's categories in the order of ids.

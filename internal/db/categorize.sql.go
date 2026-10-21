@@ -12,6 +12,18 @@ import (
 	"github.com/google/uuid"
 )
 
+const deleteExpiredLLMEntries = `-- name: DeleteExpiredLLMEntries :execrows
+DELETE FROM merchant_dictionary WHERE source = 'llm' AND expires_at <= $1::timestamptz
+`
+
+func (q *Queries) DeleteExpiredLLMEntries(ctx context.Context, now time.Time) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteExpiredLLMEntries, now)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const deleteKeywordRulesExcept = `-- name: DeleteKeywordRulesExcept :execrows
 DELETE FROM keyword_rules WHERE NOT pattern = ANY($1::text[])
 `
@@ -44,6 +56,26 @@ WHERE source = 'seed' AND NOT merchant_key = ANY($1::text[])
 // Removes the seed merchants the seed file no longer has.
 func (q *Queries) DeleteSeedDictionaryExcept(ctx context.Context, merchantKeys []string) (int64, error) {
 	result, err := q.db.Exec(ctx, deleteSeedDictionaryExcept, merchantKeys)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const demoteDictionaryEntries = `-- name: DemoteDictionaryEntries :execrows
+DELETE FROM merchant_dictionary d
+USING (SELECT merchant_key, count(*) AS total FROM merchant_votes GROUP BY merchant_key) t
+WHERE d.merchant_key = t.merchant_key
+  AND d.source IN ('learned', 'llm')
+  AND t.total >= $1::bigint
+  AND (SELECT count(*) FROM merchant_votes v
+       WHERE v.merchant_key = d.merchant_key AND v.category_type = d.category_type) * 100 < t.total * 60
+`
+
+// Removes learned and llm rows that too few voters agree with: under 60 %
+// of at least @min_voters votes for the key.
+func (q *Queries) DemoteDictionaryEntries(ctx context.Context, minVoters int64) (int64, error) {
+	result, err := q.db.Exec(ctx, demoteDictionaryEntries, minVoters)
 	if err != nil {
 		return 0, err
 	}
@@ -219,6 +251,52 @@ func (q *Queries) ListMerchantRules(ctx context.Context, arg ListMerchantRulesPa
 	return items, nil
 }
 
+const listPromotionCandidates = `-- name: ListPromotionCandidates :many
+SELECT b.merchant_key, b.category_type, b.votes::integer AS votes, b.display_name::text AS display_name
+FROM (
+    SELECT DISTINCT ON (merchant_key) merchant_key, category_type, n AS votes, display_name,
+           sum(n) OVER (PARTITION BY merchant_key) AS total
+    FROM (SELECT merchant_key, category_type, count(*) AS n, max(display_name) AS display_name
+          FROM merchant_votes GROUP BY merchant_key, category_type) tally
+    ORDER BY merchant_key, n DESC, category_type
+) b
+WHERE b.votes >= $1::bigint AND b.votes * 100 >= b.total * 80
+`
+
+type ListPromotionCandidatesRow struct {
+	MerchantKey  string
+	CategoryType string
+	Votes        int32
+	DisplayName  string
+}
+
+// The merchants whose most voted type has at least @min_voters users and
+// 80 % of the votes, with that type and its votes.
+func (q *Queries) ListPromotionCandidates(ctx context.Context, minVoters int64) ([]ListPromotionCandidatesRow, error) {
+	rows, err := q.db.Query(ctx, listPromotionCandidates, minVoters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPromotionCandidatesRow
+	for rows.Next() {
+		var i ListPromotionCandidatesRow
+		if err := rows.Scan(
+			&i.MerchantKey,
+			&i.CategoryType,
+			&i.Votes,
+			&i.DisplayName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listTypedCategories = `-- name: ListTypedCategories :many
 SELECT c.id, c.category_type::text AS category_type,
        (SELECT count(*) FROM transactions t WHERE t.user_id = c.user_id AND t.category_id = c.id)::bigint AS transactions
@@ -253,6 +331,92 @@ func (q *Queries) ListTypedCategories(ctx context.Context, userID uuid.UUID) ([]
 		return nil, err
 	}
 	return items, nil
+}
+
+const promoteDictionaryEntries = `-- name: PromoteDictionaryEntries :execrows
+INSERT INTO merchant_dictionary (id, merchant_key, category_type, display_name, source, votes)
+SELECT unnest($1::uuid[]), unnest($2::text[]), unnest($3::text[]),
+       unnest($4::text[]), 'learned', unnest($5::integer[])
+ON CONFLICT (merchant_key) DO UPDATE
+SET source        = CASE WHEN merchant_dictionary.source = 'seed' THEN 'seed' ELSE 'learned' END,
+    category_type = EXCLUDED.category_type,
+    display_name  = CASE WHEN merchant_dictionary.source = 'seed' THEN merchant_dictionary.display_name
+                         ELSE EXCLUDED.display_name END,
+    votes         = EXCLUDED.votes,
+    confidence    = NULL,
+    model         = NULL,
+    expires_at    = NULL
+WHERE merchant_dictionary.source = 'llm'
+   OR (merchant_dictionary.source = 'learned'
+       AND (merchant_dictionary.category_type, merchant_dictionary.display_name, merchant_dictionary.votes)
+           IS DISTINCT FROM (EXCLUDED.category_type, EXCLUDED.display_name, EXCLUDED.votes))
+   OR (merchant_dictionary.source = 'seed' AND merchant_dictionary.category_type = EXCLUDED.category_type
+       AND merchant_dictionary.votes <> EXCLUDED.votes)
+`
+
+type PromoteDictionaryEntriesParams struct {
+	Ids           []uuid.UUID
+	MerchantKeys  []string
+	CategoryTypes []string
+	DisplayNames  []string
+	Votes         []int32
+}
+
+// Writes promoted merchants as learned rows, replacing llm and learned
+// rows; an unchanged learned row is left alone. A seed row that agrees
+// takes the vote count; one that does not is left alone.
+func (q *Queries) PromoteDictionaryEntries(ctx context.Context, arg PromoteDictionaryEntriesParams) (int64, error) {
+	result, err := q.db.Exec(ctx, promoteDictionaryEntries,
+		arg.Ids,
+		arg.MerchantKeys,
+		arg.CategoryTypes,
+		arg.DisplayNames,
+		arg.Votes,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const recordMerchantVotes = `-- name: RecordMerchantVotes :execrows
+INSERT INTO merchant_votes (id, user_id, merchant_key, category_type, display_name, voted_at)
+SELECT DISTINCT ON (v.merchant_key) v.id, $1, v.merchant_key, c.category_type, v.display_name, $2
+FROM (SELECT unnest($3::uuid[]) AS id, unnest($4::text[]) AS merchant_key,
+             unnest($5::text[]) AS display_name, unnest($6::uuid[]) AS category_id) AS v
+JOIN categories c ON c.id = v.category_id AND c.user_id = $1 AND c.category_type IS NOT NULL
+WHERE v.merchant_key <> ''
+ORDER BY v.merchant_key
+ON CONFLICT (user_id, merchant_key) DO UPDATE
+SET category_type = EXCLUDED.category_type,
+    display_name  = EXCLUDED.display_name,
+    voted_at      = EXCLUDED.voted_at
+`
+
+type RecordMerchantVotesParams struct {
+	UserID       uuid.UUID
+	VotedAt      time.Time
+	Ids          []uuid.UUID
+	MerchantKeys []string
+	DisplayNames []string
+	CategoryIds  []uuid.UUID
+}
+
+// Records the user's votes: each merchant's category, by its type. A
+// category without a type, or not the user's, casts no vote.
+func (q *Queries) RecordMerchantVotes(ctx context.Context, arg RecordMerchantVotesParams) (int64, error) {
+	result, err := q.db.Exec(ctx, recordMerchantVotes,
+		arg.UserID,
+		arg.VotedAt,
+		arg.Ids,
+		arg.MerchantKeys,
+		arg.DisplayNames,
+		arg.CategoryIds,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
 const saveLLMDictionaryEntries = `-- name: SaveLLMDictionaryEntries :exec

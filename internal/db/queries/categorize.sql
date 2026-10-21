@@ -120,3 +120,68 @@ ORDER BY c.sort_order, c.id;
 -- Which of the keys the user has spent money with before.
 SELECT DISTINCT merchant_key FROM transactions
 WHERE user_id = @user_id AND kind = 'expense' AND merchant_key = ANY(@merchant_keys::text[]);
+
+-- name: RecordMerchantVotes :execrows
+-- Records the user's votes: each merchant's category, by its type. A
+-- category without a type, or not the user's, casts no vote.
+INSERT INTO merchant_votes (id, user_id, merchant_key, category_type, display_name, voted_at)
+SELECT DISTINCT ON (v.merchant_key) v.id, @user_id, v.merchant_key, c.category_type, v.display_name, @voted_at
+FROM (SELECT unnest(@ids::uuid[]) AS id, unnest(@merchant_keys::text[]) AS merchant_key,
+             unnest(@display_names::text[]) AS display_name, unnest(@category_ids::uuid[]) AS category_id) AS v
+JOIN categories c ON c.id = v.category_id AND c.user_id = @user_id AND c.category_type IS NOT NULL
+WHERE v.merchant_key <> ''
+ORDER BY v.merchant_key
+ON CONFLICT (user_id, merchant_key) DO UPDATE
+SET category_type = EXCLUDED.category_type,
+    display_name  = EXCLUDED.display_name,
+    voted_at      = EXCLUDED.voted_at;
+
+-- name: DeleteExpiredLLMEntries :execrows
+DELETE FROM merchant_dictionary WHERE source = 'llm' AND expires_at <= @now::timestamptz;
+
+-- name: DemoteDictionaryEntries :execrows
+-- Removes learned and llm rows that too few voters agree with: under 60 %
+-- of at least @min_voters votes for the key.
+DELETE FROM merchant_dictionary d
+USING (SELECT merchant_key, count(*) AS total FROM merchant_votes GROUP BY merchant_key) t
+WHERE d.merchant_key = t.merchant_key
+  AND d.source IN ('learned', 'llm')
+  AND t.total >= @min_voters::bigint
+  AND (SELECT count(*) FROM merchant_votes v
+       WHERE v.merchant_key = d.merchant_key AND v.category_type = d.category_type) * 100 < t.total * 60;
+
+-- name: ListPromotionCandidates :many
+-- The merchants whose most voted type has at least @min_voters users and
+-- 80 % of the votes, with that type and its votes.
+SELECT b.merchant_key, b.category_type, b.votes::integer AS votes, b.display_name::text AS display_name
+FROM (
+    SELECT DISTINCT ON (merchant_key) merchant_key, category_type, n AS votes, display_name,
+           sum(n) OVER (PARTITION BY merchant_key) AS total
+    FROM (SELECT merchant_key, category_type, count(*) AS n, max(display_name) AS display_name
+          FROM merchant_votes GROUP BY merchant_key, category_type) tally
+    ORDER BY merchant_key, n DESC, category_type
+) b
+WHERE b.votes >= @min_voters::bigint AND b.votes * 100 >= b.total * 80;
+
+-- name: PromoteDictionaryEntries :execrows
+-- Writes promoted merchants as learned rows, replacing llm and learned
+-- rows; an unchanged learned row is left alone. A seed row that agrees
+-- takes the vote count; one that does not is left alone.
+INSERT INTO merchant_dictionary (id, merchant_key, category_type, display_name, source, votes)
+SELECT unnest(@ids::uuid[]), unnest(@merchant_keys::text[]), unnest(@category_types::text[]),
+       unnest(@display_names::text[]), 'learned', unnest(@votes::integer[])
+ON CONFLICT (merchant_key) DO UPDATE
+SET source        = CASE WHEN merchant_dictionary.source = 'seed' THEN 'seed' ELSE 'learned' END,
+    category_type = EXCLUDED.category_type,
+    display_name  = CASE WHEN merchant_dictionary.source = 'seed' THEN merchant_dictionary.display_name
+                         ELSE EXCLUDED.display_name END,
+    votes         = EXCLUDED.votes,
+    confidence    = NULL,
+    model         = NULL,
+    expires_at    = NULL
+WHERE merchant_dictionary.source = 'llm'
+   OR (merchant_dictionary.source = 'learned'
+       AND (merchant_dictionary.category_type, merchant_dictionary.display_name, merchant_dictionary.votes)
+           IS DISTINCT FROM (EXCLUDED.category_type, EXCLUDED.display_name, EXCLUDED.votes))
+   OR (merchant_dictionary.source = 'seed' AND merchant_dictionary.category_type = EXCLUDED.category_type
+       AND merchant_dictionary.votes <> EXCLUDED.votes);

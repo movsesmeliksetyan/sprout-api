@@ -487,7 +487,8 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 
 **BE-34 · Learning loop**
 - Do: `Learn(userID, merchantKey, categoryID)` upserting user rules (called from transaction create/update, import row patch, receipt confirm). Vote recording on import commit. Nightly `river` job computing promotions/demotions per §5.3.
-- Files: `internal/categorize/learn.go`, `internal/jobs/dictionary_promote.go`, `migrations/00011_votes.sql`
+- Files: `internal/categorize/learn.go`, `migrations/00014_merchant_votes.sql`, `internal/db/queries/categorize.sql`, `cmd/sprout/main.go`
+- Notes: `categorize.Learn(ctx, q, userID, merchantKey, categoryID)` has the shape of `transactions.MerchantRuleHook`, and `sprout api` passes it with `transactions.WithMerchantRuleHook`, so a manual expense with a merchant writes the rule in the transaction that saves it; an empty key, or a category that is not one of the user's active ones, teaches nothing. Import row patches and receipt confirmation call it when they exist (BE-47, BE-51). `RecordVotes(ctx, q, userID, []Vote{MerchantKey, DisplayName, CategoryID}, at)` is one query: each merchant votes for its category's **type** (categories without a type cast no vote), one vote per user and merchant in `merchant_votes`, the latest winning; import commit calls it (BE-48). `PromoteDictionary(ctx, db, now)` runs in one transaction: it deletes `llm` rows past `expires_at`, writes keys whose top type has ≥ 5 voters and ≥ 80 % of them as `learned` rows (replacing `llm` rows; an unchanged learned row is not rewritten; a `seed` row of the same type takes the vote count, a disagreeing seed row is untouched), then deletes `learned` and `llm` rows that under 60 % of at least 3 voters agree with (fewer voters do not outweigh a row). Seed rows are never demoted. A second run with no new votes changes nothing. The migration is `00014` (00011 was taken). There is no job runner yet: BE-37 adds river and registers `PromoteDictionary` as the nightly periodic job (`internal/jobs/dictionary_promote.go`).
 - Done when: correcting a merchant once changes the next classification for that user only; 5 agreeing users promote a key, replacing an `llm` row; disagreement below 60 % demotes it; expired `llm` rows are deleted.
 - Needs: BE-31
 
@@ -506,7 +507,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 ### Milestone 8 — Statement normalisation (§4)
 
 **BE-37 · Imports schema, endpoints, job plumbing**
-- Do: Migrations for `imports`, `import_rows`, `mapping_templates`. `river` client + worker process wiring (first job in the codebase: queue config, retries, error handler, graceful stop). `POST /imports` (consume upload, insert, enqueue `ProcessImport`), `GET /imports/{id}`, `DELETE /imports/{id}`. Job skeleton that marks `failed: internal` until stages exist.
+- Do: Migrations for `imports`, `import_rows`, `mapping_templates`. `river` client + worker process wiring (first job in the codebase: queue config, retries, error handler, graceful stop), including the nightly `categorize.PromoteDictionary` periodic job from BE-34 (`internal/jobs/dictionary_promote.go`). `POST /imports` (consume upload, insert, enqueue `ProcessImport`), `GET /imports/{id}`, `DELETE /imports/{id}`. Job skeleton that marks `failed: internal` until stages exist.
 - Files: `migrations/00012_imports.sql`, `internal/imports/service.go`, `handler.go`, `internal/jobs/client.go`, `internal/jobs/process_import.go`
 - Done when: posting an import returns `202 processing` and the job runs in the worker; job retry is idempotent (re-run wipes and rebuilds rows).
 - Needs: BE-12, BE-13
