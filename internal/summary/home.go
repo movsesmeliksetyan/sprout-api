@@ -105,13 +105,16 @@ func (s *Service) Home(ctx context.Context, user db.User) (Home, error) {
 		return Home{}, err
 	}
 	recent.Next = nil
+	unread, err := q.HasUnreadNotifications(ctx, user.ID)
+	if err != nil {
+		return Home{}, fmt.Errorf("summary: unread notifications: %w", err)
+	}
 
 	return Home{
-		BalanceMinor: user.StartingBalanceMinor + net - saved,
-		Month:        month,
-		Recent:       recent,
-		// Until there is an inbox (BE-56) nothing is unread.
-		HasUnreadNotifications: false,
+		BalanceMinor:           user.StartingBalanceMinor + net - saved,
+		Month:                  month,
+		Recent:                 recent,
+		HasUnreadNotifications: unread,
 	}, nil
 }
 

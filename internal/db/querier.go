@@ -60,11 +60,16 @@ type Querier interface {
 	CountCommittedRows(ctx context.Context, importID uuid.UUID) (CountCommittedRowsRow, error)
 	// How many goals the user's list shows: the active and the completed ones.
 	CountGoals(ctx context.Context, userID uuid.UUID) (int64, error)
+	// How many of ids are the user's.
+	CountNotifications(ctx context.Context, arg CountNotificationsParams) (int64, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateContribution(ctx context.Context, arg CreateContributionParams) (GoalContribution, error)
 	CreateGoal(ctx context.Context, arg CreateGoalParams) (Goal, error)
 	CreateImport(ctx context.Context, arg CreateImportParams) (Import, error)
 	CreateInsight(ctx context.Context, arg CreateInsightParams) error
+	// Stores a notification unless the user already has one with the same
+	// dedup_key; then no row comes back.
+	CreateNotification(ctx context.Context, arg CreateNotificationParams) (Notification, error)
 	CreateReceipt(ctx context.Context, arg CreateReceiptParams) (Receipt, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)
 	CreateUpload(ctx context.Context, arg CreateUploadParams) (Upload, error)
@@ -123,6 +128,7 @@ type Querier interface {
 	// The template for a header fingerprint, unless it has been disabled: a
 	// success rate under 80 % over at least 5 uses.
 	GetMappingTemplate(ctx context.Context, headerFingerprint string) (MappingTemplate, error)
+	GetNotification(ctx context.Context, arg GetNotificationParams) (Notification, error)
 	// One of the user's receipts, with its image's key and when the image was
 	// deleted from storage, if it was.
 	GetReceipt(ctx context.Context, arg GetReceiptParams) (GetReceiptRow, error)
@@ -134,12 +140,17 @@ type Querier interface {
 	// Locks the row until the database transaction ends.
 	GetTransactionForUpdate(ctx context.Context, arg GetTransactionForUpdateParams) (Transaction, error)
 	GetUpload(ctx context.Context, arg GetUploadParams) (Upload, error)
+	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error)
 	// Locks the row until the transaction ends.
 	GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, error)
+	HasUnreadNotifications(ctx context.Context, userID uuid.UUID) (bool, error)
 	// An import's summary as its rows stand; totals are of the included rows.
 	ImportRowCounts(ctx context.Context, importID uuid.UUID) (ImportRowCountsRow, error)
 	InsertImportRows(ctx context.Context, arg []InsertImportRowsParams) (int64, error)
+	// Stops pushes to a token APNs rejected, unless the device has registered
+	// another since.
+	InvalidateDevice(ctx context.Context, arg InvalidateDeviceParams) error
 	// Each category's largest expense on the calendar days from_date to
 	// to_date; the earliest one on a tie.
 	LargestExpenses(ctx context.Context, arg LargestExpensesParams) ([]LargestExpensesRow, error)
@@ -181,9 +192,14 @@ type Querier interface {
 	ListMCCTypes(ctx context.Context, mccs []string) ([]MccMap, error)
 	// The user's rules for any of the keys whose category is still active.
 	ListMerchantRules(ctx context.Context, arg ListMerchantRulesParams) ([]ListMerchantRulesRow, error)
+	// A page of the inbox, newest first. The cursor is the last notification
+	// of the previous page.
+	ListNotifications(ctx context.Context, arg ListNotificationsParams) ([]Notification, error)
 	// The merchants whose most voted type has at least @min_voters users and
 	// 80 % of the votes, with that type and its votes.
 	ListPromotionCandidates(ctx context.Context, minVoters int64) ([]ListPromotionCandidatesRow, error)
+	// The user's devices APNs has not rejected.
+	ListPushDevices(ctx context.Context, userID uuid.UUID) ([]Device, error)
 	// The newest contributions of one of the user's goals.
 	ListRecentContributions(ctx context.Context, arg ListRecentContributionsParams) ([]GoalContribution, error)
 	// A page of the user's transactions, newest first. A null filter is not
@@ -194,7 +210,10 @@ type Querier interface {
 	ListTypedCategories(ctx context.Context, userID uuid.UUID) ([]ListTypedCategoriesRow, error)
 	// Statement files whose time has come, oldest first.
 	ListUploadsToPurge(ctx context.Context, arg ListUploadsToPurgeParams) ([]ListUploadsToPurgeRow, error)
+	MarkAllNotificationsRead(ctx context.Context, userID uuid.UUID) error
 	MarkImportCommitted(ctx context.Context, arg MarkImportCommittedParams) error
+	MarkNotificationSent(ctx context.Context, arg MarkNotificationSentParams) error
+	MarkNotificationsRead(ctx context.Context, arg MarkNotificationsReadParams) error
 	// Records that the file is gone, and forgets the rows' raw cells.
 	MarkUploadPurged(ctx context.Context, arg MarkUploadPurgedParams) error
 	// The position after the user's last active category.

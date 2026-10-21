@@ -54,6 +54,33 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const getUser = `-- name: GetUser :one
+SELECT id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at, ledger_version FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Auth0Sub,
+		&i.Email,
+		&i.Name,
+		&i.AvatarKey,
+		&i.Currency,
+		&i.Timezone,
+		&i.StartingBalanceMinor,
+		&i.OnboardingCompleted,
+		&i.NotificationsEnabled,
+		&i.BudgetAlerts,
+		&i.WeeklyRecap,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.LedgerVersion,
+	)
+	return i, err
+}
+
 const getUserByAuth0Sub = `-- name: GetUserByAuth0Sub :one
 SELECT id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at, ledger_version FROM users WHERE auth0_sub = $1
 `

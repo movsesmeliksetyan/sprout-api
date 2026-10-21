@@ -34,9 +34,9 @@ const (
 )
 
 // CompletionHook runs when a goal becomes completed, inside the database
-// transaction that records it: q reads and writes through that transaction,
+// transaction that records it: tx reads and writes through that transaction,
 // and an error undoes the change.
-type CompletionHook func(ctx context.Context, q db.Querier, goal db.Goal) error
+type CompletionHook func(ctx context.Context, tx pgx.Tx, goal db.Goal) error
 
 // WithCompletionHook sets what happens when a goal becomes completed.
 // Without it nothing does.
@@ -94,7 +94,7 @@ func (s *Service) Contribute(ctx context.Context, user db.User, goalID uuid.UUID
 
 	var created db.GoalContribution
 	var goal Goal
-	err = s.write(ctx, user.ID, func(q *db.Queries) error {
+	err = s.write(ctx, user.ID, func(tx pgx.Tx, q *db.Queries) error {
 		row, err := getGoal(ctx, q, user.ID, goalID)
 		if err != nil {
 			return err
@@ -115,7 +115,7 @@ func (s *Service) Contribute(ctx context.Context, user db.User, goalID uuid.UUID
 		if err != nil {
 			return fmt.Errorf("goals: create contribution: %w", err)
 		}
-		goal, err = s.resettle(ctx, q, row.Goal, saved)
+		goal, err = s.resettle(ctx, tx, q, row.Goal, saved)
 		if err != nil {
 			return err
 		}
@@ -175,7 +175,7 @@ func (s *Service) ListContributions(ctx context.Context, userID, goalID uuid.UUI
 func (s *Service) DeleteContribution(ctx context.Context, user db.User, goalID, id uuid.UUID) (Goal, error) {
 	userID := user.ID
 	var goal Goal
-	err := s.write(ctx, userID, func(q *db.Queries) error {
+	err := s.write(ctx, userID, func(tx pgx.Tx, q *db.Queries) error {
 		row, err := getGoal(ctx, q, userID, goalID)
 		if err != nil {
 			return err
@@ -192,7 +192,7 @@ func (s *Service) DeleteContribution(ctx context.Context, user db.User, goalID, 
 			return httpx.WithMessage(httpx.ErrConflict,
 				"This top-up cannot be removed: more has been withdrawn from the goal than would be left in it.")
 		}
-		goal, err = s.resettle(ctx, q, row.Goal, saved)
+		goal, err = s.resettle(ctx, tx, q, row.Goal, saved)
 		if err != nil {
 			return err
 		}
@@ -206,7 +206,7 @@ func (s *Service) DeleteContribution(ctx context.Context, user db.User, goalID, 
 
 // resettle gives the goal the status that savedMinor against its target
 // calls for, storing it only when it changed.
-func (s *Service) resettle(ctx context.Context, q *db.Queries, goal db.Goal, savedMinor int64) (Goal, error) {
+func (s *Service) resettle(ctx context.Context, tx pgx.Tx, q *db.Queries, goal db.Goal, savedMinor int64) (Goal, error) {
 	status, completedAt := settle(Status(goal.Status) == StatusArchived, savedMinor, goal.TargetMinor, goal.CompletedAt, s.now())
 	if string(status) == goal.Status && sameTime(completedAt, goal.CompletedAt) {
 		return newGoal(goal, savedMinor), nil
@@ -225,7 +225,7 @@ func (s *Service) resettle(ctx context.Context, q *db.Queries, goal db.Goal, sav
 	if err != nil {
 		return Goal{}, fmt.Errorf("goals: settle: %w", err)
 	}
-	if err := s.completed(ctx, q, goal, updated); err != nil {
+	if err := s.completed(ctx, tx, goal, updated); err != nil {
 		return Goal{}, err
 	}
 	return newGoal(updated, savedMinor), nil
@@ -233,11 +233,11 @@ func (s *Service) resettle(ctx context.Context, q *db.Queries, goal db.Goal, sav
 
 // completed runs the completion hook when the change from previous to
 // updated is the goal becoming completed.
-func (s *Service) completed(ctx context.Context, q db.Querier, previous, updated db.Goal) error {
+func (s *Service) completed(ctx context.Context, tx pgx.Tx, previous, updated db.Goal) error {
 	if previous.CompletedAt != nil || updated.CompletedAt == nil {
 		return nil
 	}
-	if err := s.onCompleted(ctx, q, updated); err != nil {
+	if err := s.onCompleted(ctx, tx, updated); err != nil {
 		return fmt.Errorf("goals: completion hook: %w", err)
 	}
 	return nil

@@ -91,7 +91,7 @@ func NewService(database Database, opts ...Option) *Service {
 	s := &Service{
 		db:          database,
 		now:         time.Now,
-		onCompleted: func(context.Context, db.Querier, db.Goal) error { return nil },
+		onCompleted: func(context.Context, pgx.Tx, db.Goal) error { return nil },
 	}
 	for _, opt := range opts {
 		opt(s)
@@ -222,7 +222,7 @@ func (s *Service) Create(ctx context.Context, userID uuid.UUID, params CreatePar
 		return Goal{}, fmt.Errorf("goals: new id: %w", err)
 	}
 	var created db.Goal
-	err = s.write(ctx, userID, func(q *db.Queries) error {
+	err = s.write(ctx, userID, func(_ pgx.Tx, q *db.Queries) error {
 		if err := checkRoom(ctx, q, userID); err != nil {
 			return err
 		}
@@ -307,7 +307,7 @@ func (s *Service) Update(ctx context.Context, user db.User, id uuid.UUID, patch 
 
 	var previous db.Goal
 	var updated Goal
-	err := s.write(ctx, userID, func(q *db.Queries) error {
+	err := s.write(ctx, userID, func(tx pgx.Tx, q *db.Queries) error {
 		row, err := q.GetGoal(ctx, db.GetGoalParams{ID: id, UserID: userID})
 		if errors.Is(err, pgx.ErrNoRows) {
 			return httpx.ErrNotFound
@@ -368,7 +368,7 @@ func (s *Service) Update(ctx context.Context, user db.User, id uuid.UUID, patch 
 		if err != nil {
 			return fmt.Errorf("goals: update: %w", err)
 		}
-		if err := s.completed(ctx, q, previous, stored); err != nil {
+		if err := s.completed(ctx, tx, previous, stored); err != nil {
 			return err
 		}
 		updated = newGoal(stored, saved)
@@ -388,7 +388,7 @@ func (s *Service) Update(ctx context.Context, user db.User, id uuid.UUID, patch 
 // picture. A goal that is missing or someone else's is httpx.ErrNotFound.
 func (s *Service) Delete(ctx context.Context, userID, id uuid.UUID) error {
 	var deleted db.Goal
-	err := s.write(ctx, userID, func(q *db.Queries) error {
+	err := s.write(ctx, userID, func(_ pgx.Tx, q *db.Queries) error {
 		row, err := q.GetGoal(ctx, db.GetGoalParams{ID: id, UserID: userID})
 		if errors.Is(err, pgx.ErrNoRows) {
 			return httpx.ErrNotFound
@@ -442,13 +442,13 @@ func settle(archived bool, savedMinor, targetMinor int64, completedAt *time.Time
 // write runs fn in a transaction that holds the user's row, so that one
 // user's goal changes happen one at a time: the limit and the order are then
 // checked against a list that cannot move.
-func (s *Service) write(ctx context.Context, userID uuid.UUID, fn func(q *db.Queries) error) error {
+func (s *Service) write(ctx context.Context, userID uuid.UUID, fn func(tx pgx.Tx, q *db.Queries) error) error {
 	return db.WithTx(ctx, s.db, func(tx pgx.Tx) error {
 		q := db.New(tx)
 		if _, err := q.GetUserForUpdate(ctx, userID); err != nil {
 			return fmt.Errorf("goals: lock user: %w", err)
 		}
-		return fn(q)
+		return fn(tx, q)
 	})
 }
 

@@ -433,7 +433,7 @@ Poll every 1 s (server target: < 8 s). `failure.code` ∈ `not_a_receipt`, `unre
                "deep_link": "sprout://category/…", "read_at": null, "created_at": "…" } ], "next_cursor": null }
 ```
 
-`POST /notifications/read` — `{ "ids": ["…"] }` or `{ "all": true }` → `204`.
+`POST /notifications/read` — `{ "ids": ["…"] }` or `{ "all": true }` → `204`. Send exactly one of the two, with at most 200 ids, otherwise `422`; marking a read notification again is fine, and an id that is not the caller's makes the whole request `404`, marking nothing.
 
 `kind` ∈ `budget_alert` (80 % and 100 % of a monthly budget), `weekly_recap`, `goal_completed`, `import_ready`.
 

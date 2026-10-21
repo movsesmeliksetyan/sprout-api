@@ -31,8 +31,11 @@ type api struct {
 type rest struct{ httpx.NotImplemented }
 
 type fixture struct {
-	pool   *pgxpool.Pool
-	server http.Handler
+	pool    *pgxpool.Pool
+	server  http.Handler
+	service *notify.Service
+	queue   *queue
+	apns    *notify.FakeAPNs
 }
 
 func newFixture(t *testing.T) fixture {
@@ -40,14 +43,16 @@ func newFixture(t *testing.T) fixture {
 	pool := testutil.NewDB(t)
 	logger := testutil.Logger(t)
 	responder := httpx.NewResponder(logger)
+	q, apns := &queue{}, &notify.FakeAPNs{}
+	service := notify.NewService(pool, q, notify.WithPusher(apns))
 	server := httpx.NewServer(logger,
 		httpx.WithAPIMiddleware(
 			auth.Middleware(testutil.TokenVerifier(), responder, logger),
 			users.Middleware(users.NewService(pool), responder),
 		),
-		httpx.WithAPI(api{Handler: notify.NewHandler(notify.NewService(pool))}),
+		httpx.WithAPI(api{Handler: notify.NewHandler(service)}),
 	).Handler()
-	return fixture{pool: pool, server: server}
+	return fixture{pool: pool, server: server, service: service, queue: q, apns: apns}
 }
 
 func (f fixture) do(t *testing.T, user testutil.TestUser, method, path string, body any) *httptest.ResponseRecorder {

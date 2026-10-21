@@ -38,16 +38,6 @@ type Database interface {
 	db.Beginner
 }
 
-// Service manages the user's devices and notifications.
-type Service struct {
-	db Database
-}
-
-// NewService returns a service over the database.
-func NewService(database Database) *Service {
-	return &Service{db: database}
-}
-
 // Registration is what a device sends to receive pushes.
 type Registration struct {
 	APNsToken   string

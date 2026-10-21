@@ -201,6 +201,22 @@ func TestGetHome_TheDesign(t *testing.T) {
 	assert.False(t, home.HasUnreadNotifications)
 }
 
+func TestGetHome_HasUnreadNotifications(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	user := testutil.NewTestUser(t, f.pool)
+	other := testutil.NewTestUser(t, f.pool)
+	testutil.NewNotification(t, f.pool, other.ID)
+	assert.False(t, f.home(t, user).HasUnreadNotifications, "someone else's inbox")
+
+	n := testutil.NewNotification(t, f.pool, user.ID)
+	assert.True(t, f.home(t, user).HasUnreadNotifications)
+
+	_, err := f.pool.Exec(context.Background(), "UPDATE notifications SET read_at = now() WHERE id = $1", n.ID)
+	require.NoError(t, err)
+	assert.False(t, f.home(t, user).HasUnreadNotifications)
+}
+
 func TestGetHome_BalanceCanBeNegative(t *testing.T) {
 	t.Parallel()
 	f := newFixture(t)

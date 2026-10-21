@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 55 / 63**
+**Progress: 56 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -129,7 +129,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 - [x] BE-55 · Device registration — 2026-10-21, 78fbd0e
   - Notes: migration `00023_notifications.sql` (00015 was taken) creates `devices` and the `notifications` inbox table BE-56 fills. An APNs token is unique across devices: registering it releases it from any other device, of this user or another, in the same transaction, then upserts on (`user_id`, `device_id`), refreshing `last_seen_at` and clearing `invalidated_at`. The token is lower-cased hex of 64–200 characters; `app_version` ≤ 32 and `locale` ≤ 35 characters, otherwise `422`. `DELETE` of a device that is missing or someone else's is `404` (contract §2.12 says so now). The service is `notify.Service`, which BE-56 extends. Postman gains the notifications folder with Register device and Delete device, and the `deviceId` variable.
-- [ ] BE-56 · APNs sender and inbox
+- [x] BE-56 · APNs sender and inbox — 2026-10-22, 90210d4
+  - Notes: no migration (00023 already made the tables). `notify.Send` stores the notification and, when the user wants pushes of its kind, enqueues `send_push` in the same transaction; `SendTx` does it inside a caller's transaction, so `goals.CompletionHook` now receives the `pgx.Tx` rather than a `db.Querier`. `goal_completed` is deduplicated per goal (`goal_completed:<id>`), so reopening and completing again does not notify twice; `import_ready` per import. `Deliver` (the job's work) reads the preferences again, pushes to every device not invalidated, retires a token on `410`, `Unregistered` or `BadDeviceToken`, and sets `sent_at` once any device took it; it fails for a retry (5 attempts) only when nothing arrived and some push failed for another reason, so a partly failed delivery is not repeated. The worker uses `notify.Discard` when `APNS_*` is unset (dev only). The inbox is ordered by `created_at` then id, newest first; its cursor keeps the shared format and only the id places it. `POST /notifications/read` takes exactly one of `ids` (≤ 200) or `all`, otherwise `422`; an id that is not the caller's is `404` for the whole request (contract §2.12 says so now). Postman gains List notifications and Mark notifications read, and the `notificationId` variable.
 - [ ] BE-57 · Budget alerts
 - [ ] BE-58 · Weekly recap
 

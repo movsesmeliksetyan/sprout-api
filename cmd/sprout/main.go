@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
@@ -179,7 +180,8 @@ func runAPI(c cli, _ []string) error {
 		return err
 	}
 	engine := categorize.NewEngine(db.New(pool), categorize.WithLLM(llmClient, logger), categorize.WithLLMBatch(cfg.LLM.CategorizeBatch))
-	goalService := goals.NewService(pool, goals.WithImages(uploadService, store, logger))
+	notifyService := notify.NewService(pool, inserter)
+	goalService := goals.NewService(pool, goals.WithImages(uploadService, store, logger), goals.WithCompletionHook(notifyService.GoalCompleted))
 	opts := []httpx.Option{
 		httpx.WithReadinessCheck("postgres", db.Ready(pool)),
 		httpx.WithReadinessCheck("storage", store.Ready),
@@ -194,7 +196,7 @@ func runAPI(c cli, _ []string) error {
 			imports.NewService(pool, uploadService, inserter),
 			receipts.NewService(pool, uploadService, store, inserter, transactionService),
 			insights.NewService(pool, goalService),
-			notify.NewService(pool))),
+			notifyService)),
 	}
 	if cfg.Env != config.EnvProd {
 		opts = append(opts, httpx.WithSpec(api.Spec))
@@ -227,7 +229,11 @@ func runWorker(c cli, _ []string) error {
 		return err
 	}
 	engine := categorize.NewEngine(db.New(pool), categorize.WithLLM(llmClient, logger), categorize.WithLLMBatch(cfg.LLM.CategorizeBatch))
-	worker, err := jobs.NewWorker(pool, logger, jobs.Deps{Store: newStore(cfg), LLM: llmClient, Engine: engine})
+	pusher, err := newPusher(cfg.APNS, logger)
+	if err != nil {
+		return err
+	}
+	worker, err := jobs.NewWorker(pool, logger, jobs.Deps{Store: newStore(cfg), LLM: llmClient, Engine: engine, Pusher: pusher})
 	if err != nil {
 		return err
 	}
@@ -304,4 +310,14 @@ func newStore(cfg config.Config) *storage.S3 {
 		SecretAccessKey: cfg.S3.SecretAccessKey.Reveal(),
 		UsePathStyle:    cfg.S3.UsePathStyle,
 	})
+}
+
+// newPusher delivers through APNs when it is configured, and otherwise,
+// which only dev allows, drops pushes while the inbox still fills.
+func newPusher(cfg config.APNS, logger *slog.Logger) (notify.Pusher, error) {
+	if cfg.KeyID == "" {
+		logger.Warn("APNs is not configured; pushes are dropped")
+		return notify.Discard{}, nil
+	}
+	return notify.NewAPNs(notify.APNsConfig{KeyID: cfg.KeyID, TeamID: cfg.TeamID, BundleID: cfg.BundleID, KeyPath: cfg.KeyPath})
 }
