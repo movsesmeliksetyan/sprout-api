@@ -3,6 +3,7 @@ package imports_test
 import (
 	"context"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -86,6 +87,39 @@ func TestProcess_Failures(t *testing.T) {
 		}
 		assert.Zero(t, f.rows(t, got.ID))
 	}
+}
+
+func TestProcess_KeepsThePeriod(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	user := testutil.NewTestUser(t, f.pool)
+	content := "Date,Description,Amount\n" +
+		"21/07/2025,NEXT WEEK,-1.00\n20/07/2025,SUNDAY,-2.00\n14/07/2025,MONDAY,-3.00\n" +
+		"13/07/2025,LAST WEEK,-4.00\n30/06/2025,LAST MONTH,-5.00\n"
+
+	week := f.importedFor(t, user, content, "week")
+	assert.Equal(t, httpx.ImportStatus("ready"), week.Status)
+	assert.Equal(t, 2, week.Summary.RowCount)
+	assert.Equal(t, int64(500), week.Summary.TotalExpenseMinor)
+	assert.Equal(t, 3, week.Summary.OutOfPeriodCount)
+	assert.Equal(t, 2, f.rows(t, week.ID))
+
+	month := f.importedFor(t, user, content, "month")
+	assert.Equal(t, 4, month.Summary.RowCount)
+	assert.Equal(t, 1, month.Summary.OutOfPeriodCount)
+}
+
+func TestProcess_BalancesCorrectAnInvertedSign(t *testing.T) {
+	t.Parallel()
+	f := newFixture(t)
+	user := testutil.NewTestUser(t, f.pool)
+	content, err := os.ReadFile("../../testdata/statements/validate/inverted_sign.csv")
+	require.NoError(t, err)
+
+	got := f.imported(t, user, string(content))
+	assert.Equal(t, httpx.ImportStatus("ready"), got.Status)
+	assert.Equal(t, int64(250000+2500), got.Summary.TotalIncomeMinor)
+	assert.Equal(t, int64(4280+450+6100+1099+14000), got.Summary.TotalExpenseMinor)
 }
 
 func TestProcess_OFXIsNative(t *testing.T) {

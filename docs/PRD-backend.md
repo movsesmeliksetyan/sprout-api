@@ -569,6 +569,7 @@ Format — **Do**: what to build · **Files**: main paths (from the repository r
 - Files: `internal/statements/validate.go`
 - Done when: fixture with inverted sign convention is auto-corrected via balances; `period=week` keeps only the current week and reports `out_of_period_count`.
 - Needs: BE-42
+- Notes: `statements.Validate` runs on every ready import, OFX included, after transform. No rows is `empty_file`; under 50 % of rows readable is `unreadable` (the contract has no separate code). The sign check compares each step between neighbouring readable rows with balances against the rows' directions and the opposite ones, in either row order (oldest or newest first); with at least 2 steps, the directions are flipped when the opposite ones explain ≥ 80 % of the steps and more than the file's do. The window is the current week (Monday to Sunday), month or year in the user's timezone at processing time (`all` keeps everything); readable rows outside it are dropped and counted in `out_of_period_count`, rows that could not be read are kept as errors. The 5,000-row cap applies to the rows the window keeps, so a long file with a short period still imports.
 
 **BE-46 · De-duplication**
 - Do: §4.3 stage 6 — hash computation shared with `transactions.dedup_hash`; match by `ExternalRef` first; preserve genuine in-file repeats by matching counts (if the ledger has 1 and the file has 2 identical rows, only 1 is a duplicate).
