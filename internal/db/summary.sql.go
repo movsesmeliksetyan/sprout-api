@@ -14,6 +14,7 @@ import (
 
 const categorySpending = `-- name: CategorySpending :many
 SELECT c.id AS category_id,
+       c.name,
        c.monthly_budget_minor,
        COALESCE(sum(t.amount_minor) FILTER (WHERE t.local_date >= $1::date), 0)::bigint AS spent_minor,
        (count(t.id) FILTER (WHERE t.local_date >= $1::date))::integer AS txn_count,
@@ -39,6 +40,7 @@ type CategorySpendingParams struct {
 
 type CategorySpendingRow struct {
 	CategoryID         uuid.UUID
+	Name               string
 	MonthlyBudgetMinor int64
 	SpentMinor         int64
 	TxnCount           int32
@@ -66,6 +68,7 @@ func (q *Queries) CategorySpending(ctx context.Context, arg CategorySpendingPara
 		var i CategorySpendingRow
 		if err := rows.Scan(
 			&i.CategoryID,
+			&i.Name,
 			&i.MonthlyBudgetMinor,
 			&i.SpentMinor,
 			&i.TxnCount,

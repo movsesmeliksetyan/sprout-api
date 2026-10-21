@@ -15,7 +15,7 @@ const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, auth0_sub, email, name)
 VALUES ($1, $2, $3, $4)
 ON CONFLICT (auth0_sub) DO NOTHING
-RETURNING id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at
+RETURNING id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at, ledger_version
 `
 
 type CreateUserParams struct {
@@ -49,12 +49,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.WeeklyRecap,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LedgerVersion,
 	)
 	return i, err
 }
 
 const getUserByAuth0Sub = `-- name: GetUserByAuth0Sub :one
-SELECT id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at FROM users WHERE auth0_sub = $1
+SELECT id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at, ledger_version FROM users WHERE auth0_sub = $1
 `
 
 func (q *Queries) GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User, error) {
@@ -75,12 +76,13 @@ func (q *Queries) GetUserByAuth0Sub(ctx context.Context, auth0Sub string) (User,
 		&i.WeeklyRecap,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LedgerVersion,
 	)
 	return i, err
 }
 
 const getUserForUpdate = `-- name: GetUserForUpdate :one
-SELECT id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at FROM users WHERE id = $1 FOR UPDATE
+SELECT id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at, ledger_version FROM users WHERE id = $1 FOR UPDATE
 `
 
 // Locks the row until the transaction ends.
@@ -102,6 +104,7 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id uuid.UUID) (User, err
 		&i.WeeklyRecap,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LedgerVersion,
 	)
 	return i, err
 }
@@ -118,7 +121,7 @@ SET name                   = COALESCE($1, name),
     weekly_recap           = COALESCE($8, weekly_recap),
     avatar_key             = CASE WHEN $9::boolean THEN NULL ELSE COALESCE($10, avatar_key) END
 WHERE id = $11
-RETURNING id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at
+RETURNING id, auth0_sub, email, name, avatar_key, currency, timezone, starting_balance_minor, onboarding_completed, notifications_enabled, budget_alerts, weekly_recap, created_at, updated_at, ledger_version
 `
 
 type UpdateUserParams struct {
@@ -166,6 +169,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.WeeklyRecap,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LedgerVersion,
 	)
 	return i, err
 }

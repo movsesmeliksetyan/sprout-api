@@ -16,6 +16,9 @@ type Querier interface {
 	// owns it: the key is new, has expired, or belongs to a request that never
 	// finished.
 	AcquireIdempotencyKey(ctx context.Context, arg AcquireIdempotencyKeyParams) (IdempotencyKey, error)
+	// The users who added a transaction since the given time: the ones whose
+	// insights are worth computing ahead of their next read.
+	ActiveInsightUsers(ctx context.Context, since time.Time) ([]User, error)
 	// How many calendar days in a row, ending today or yesterday, the user
 	// created at least one transaction or goal contribution on. Days are read in
 	// the given timezone.
@@ -61,6 +64,7 @@ type Querier interface {
 	CreateContribution(ctx context.Context, arg CreateContributionParams) (GoalContribution, error)
 	CreateGoal(ctx context.Context, arg CreateGoalParams) (Goal, error)
 	CreateImport(ctx context.Context, arg CreateImportParams) (Import, error)
+	CreateInsight(ctx context.Context, arg CreateInsightParams) error
 	CreateReceipt(ctx context.Context, arg CreateReceiptParams) (Receipt, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)
 	CreateUpload(ctx context.Context, arg CreateUploadParams) (Upload, error)
@@ -75,6 +79,7 @@ type Querier interface {
 	// Discards an import that has not been committed.
 	DeleteImport(ctx context.Context, arg DeleteImportParams) (int64, error)
 	DeleteImportRows(ctx context.Context, importID uuid.UUID) error
+	DeleteInsights(ctx context.Context, arg DeleteInsightsParams) error
 	DeleteKeywordRulesExcept(ctx context.Context, patterns []string) (int64, error)
 	DeleteMCCMapExcept(ctx context.Context, mccs []string) (int64, error)
 	DeleteReceipt(ctx context.Context, id uuid.UUID) error
@@ -87,6 +92,10 @@ type Querier interface {
 	// Removes learned and llm rows that too few voters agree with: under 60 %
 	// of at least @min_voters votes for the key.
 	DemoteDictionaryEntries(ctx context.Context, minVoters int64) (int64, error)
+	// The user's expenses on the calendar days from_date to to_date, both
+	// included, day by day: what was spent and how many; days without any are
+	// left out.
+	ExpensesByDay(ctx context.Context, arg ExpensesByDayParams) ([]ExpensesByDayRow, error)
 	FailImport(ctx context.Context, arg FailImportParams) error
 	// Ends processing with a failure, unless the receipt was confirmed or
 	// deleted meanwhile.
@@ -108,6 +117,8 @@ type Querier interface {
 	// What processing an import needs: the stored file and the user's
 	// timezone and currency.
 	GetImportSource(ctx context.Context, id uuid.UUID) (GetImportSourceRow, error)
+	GetInsightRun(ctx context.Context, arg GetInsightRunParams) (InsightRun, error)
+	GetLedgerVersion(ctx context.Context, id uuid.UUID) (int64, error)
 	// The template for a header fingerprint, unless it has been disabled: a
 	// success rate under 80 % over at least 5 uses.
 	GetMappingTemplate(ctx context.Context, headerFingerprint string) (MappingTemplate, error)
@@ -128,6 +139,9 @@ type Querier interface {
 	// An import's summary as its rows stand; totals are of the included rows.
 	ImportRowCounts(ctx context.Context, importID uuid.UUID) (ImportRowCountsRow, error)
 	InsertImportRows(ctx context.Context, arg []InsertImportRowsParams) (int64, error)
+	// Each category's largest expense on the calendar days from_date to
+	// to_date; the earliest one on a tie.
+	LargestExpenses(ctx context.Context, arg LargestExpensesParams) ([]LargestExpensesRow, error)
 	// Everything the user's transactions add up to: income minus expense.
 	LedgerNet(ctx context.Context, userID uuid.UUID) (int64, error)
 	// Active categories in display order, then the archived ones when asked for.
@@ -156,6 +170,7 @@ type Querier interface {
 	// The included expenses of an import that have no category, which block
 	// its commit.
 	ListIncompleteExpenseRows(ctx context.Context, importID uuid.UUID) ([]uuid.UUID, error)
+	ListInsights(ctx context.Context, arg ListInsightsParams) ([]Insight, error)
 	// Every keyword rule, in the order they are tried.
 	ListKeywordRules(ctx context.Context) ([]KeywordRule, error)
 	// The user's transactions a statement's rows may duplicate: those with one
@@ -198,6 +213,7 @@ type Querier interface {
 	ReleaseIdempotencyKey(ctx context.Context, arg ReleaseIdempotencyKeyParams) (int64, error)
 	// Puts the user's categories in the order of ids.
 	ReorderCategories(ctx context.Context, arg ReorderCategoriesParams) error
+	SaveInsightRun(ctx context.Context, arg SaveInsightRunParams) error
 	// Stores what the model said about merchants. An llm row replaces an llm
 	// row only, never a seed or learned one. An empty category_type is a
 	// merchant the model did not know; an expires_at of the zero time (year 1)
