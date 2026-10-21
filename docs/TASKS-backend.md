@@ -68,6 +68,7 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 ## Milestone 7 — Categorisation engine (§5)
 
 - [x] BE-28 · LLM client abstraction — 2026-10-16, 7ce1ea3
+  - 2026-10-21: Groq (`qwen/qwen3.8-27b`, over its OpenAI-compatible HTTP API) became the v1 provider; the Anthropic provider stays as `LLM_PROVIDER=anthropic`. The PRD's BE-28 notes describe both.
 - [ ] BE-29 · Merchant normaliser
 - [ ] BE-30 · Rule stores and seeds
 - [ ] BE-31 · Engine pipeline (deterministic layers)

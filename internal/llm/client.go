@@ -36,8 +36,10 @@ var (
 // Effort is how much thought the model puts into an answer.
 type Effort string
 
-// The effort levels. The zero value leaves it to the model.
+// The effort levels. The zero value leaves it to the model; EffortNone
+// asks for an answer without reasoning first, where the model allows it.
 const (
+	EffortNone   Effort = "none"
 	EffortLow    Effort = "low"
 	EffortMedium Effort = "medium"
 	EffortHigh   Effort = "high"
@@ -321,6 +323,7 @@ type price struct{ input, output int64 }
 // prices are the providers' list prices for the models in use. A model
 // that is not here has its tokens logged without a cost.
 var prices = map[string]price{
+	"qwen/qwen3.8-27b":  {input: 800, output: 4000},
 	"claude-opus-5-5":   {input: 4000, output: 20000},
 	"claude-sonnet-5-5": {input: 2000, output: 10000},
 	"claude-sonnet-5":   {input: 2000, output: 10000},

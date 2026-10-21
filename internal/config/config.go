@@ -345,11 +345,17 @@ func (l *loader) s3Endpoint() string {
 	return v
 }
 
+// The language-model providers there is a client for.
+const (
+	LLMProviderGroq      = "groq"
+	LLMProviderAnthropic = "anthropic"
+)
+
 func (l *loader) llmProvider() string {
 	const key = "LLM_PROVIDER"
 	v := l.required(key)
-	if v != "" && v != "anthropic" {
-		l.fail(key, "must be anthropic (got %q)", v)
+	if v != "" && v != LLMProviderGroq && v != LLMProviderAnthropic {
+		l.fail(key, "must be groq or anthropic (got %q)", v)
 	}
 	return v
 }

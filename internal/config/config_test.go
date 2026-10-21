@@ -29,7 +29,7 @@ func validEnv() map[string]string {
 		"S3_BUCKET":            "sprout-prod",
 		"S3_ACCESS_KEY_ID":     "AKIAEXAMPLE",
 		"S3_SECRET_ACCESS_KEY": testS3Secret,
-		"LLM_PROVIDER":         "anthropic",
+		"LLM_PROVIDER":         "groq",
 		"LLM_API_KEY":          testLLMKey,
 		"LLM_MODEL_TEXT":       "text-model",
 		"LLM_MODEL_VISION":     "vision-model",
@@ -81,7 +81,7 @@ func TestLoad_Valid(t *testing.T) {
 		Region: "eu-west-2", Bucket: "sprout-prod", AccessKeyID: "AKIAEXAMPLE", SecretAccessKey: testS3Secret,
 	}, cfg.S3)
 	assert.Equal(t, LLM{
-		Provider: "anthropic", APIKey: testLLMKey, ModelText: "text-model", ModelVision: "vision-model",
+		Provider: "groq", APIKey: testLLMKey, ModelText: "text-model", ModelVision: "vision-model",
 	}, cfg.LLM)
 	assert.Equal(t, APNS{
 		KeyID: "ABC123DEFG", TeamID: "TEAM123456", BundleID: "app.sprout.ios", KeyPath: "/secrets/apns.p8",
@@ -162,7 +162,7 @@ func TestLoad_InvalidValues(t *testing.T) {
 		{"s3 endpoint without scheme", "S3_ENDPOINT", "localhost:9000", "must be an http:// or https:// URL"},
 		{"s3 endpoint wrong scheme", "S3_ENDPOINT", "s3://bucket", "must be an http:// or https:// URL"},
 		{"path style not a bool", "S3_USE_PATH_STYLE", "yes", `must be true or false (got "yes")`},
-		{"unsupported llm provider", "LLM_PROVIDER", "openai", `must be anthropic (got "openai")`},
+		{"unsupported llm provider", "LLM_PROVIDER", "openai", `must be groq or anthropic (got "openai")`},
 	}
 
 	for _, tt := range tests {
