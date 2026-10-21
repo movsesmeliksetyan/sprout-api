@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 32 / 63**
+**Progress: 33 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -77,7 +77,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
   - Credits are not categorised (income has no category); confidences are whole percent divided once; three car-rental keywords added. The PRD's BE-31 notes have the details.
 - [x] BE-32 · LLM classification layer — 2026-10-21, e502bac
   - Merchants are re-normalised from redacted text before they are sent, and a key that changes is not saved; invented types are dropped in code. The PRD's BE-32 notes have the details.
-- [ ] BE-33 · Kind detection
+- [x] BE-33 · Kind detection — 2026-10-21, de94ea8
+  - The labelled fixture is `testdata/categorize/kinds.tsv` (75 rows); refunds match by key prefix and never pair as transfers. The PRD's BE-33 notes have the details.
 - [ ] BE-34 · Learning loop
 - [ ] BE-35 · `POST /categorization/suggest`
 - [ ] BE-36 · Evaluation harness
