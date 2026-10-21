@@ -156,7 +156,7 @@ func TestAggregationPerformance(t *testing.T) {
 		{"GET /transactions?cursor=", list(transactions.ListParams{After: old.Next})},
 		{"GET /transactions?category_id=&from=&to=", list(transactions.ListParams{CategoryID: &category, From: &from, To: &to})},
 		{"GET /transactions?kind=expense", list(transactions.ListParams{Kind: &expense})},
-		{"GET /transactions?q=merchant 01", list(transactions.ListParams{Query: "merchant 01"})},
+		{"GET /transactions?q=merchant ab", list(transactions.ListParams{Query: "merchant ab"})},
 	}
 
 	var notes strings.Builder

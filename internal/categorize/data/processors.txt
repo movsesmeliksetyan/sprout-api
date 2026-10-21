@@ -1,0 +1,29 @@
+# Payment processors and marketplaces that put their name in front of the
+# merchant's: the processor is stripped and the merchant after it kept.
+# Upper case, written without spaces around "*", which the normaliser
+# removes before matching ("SQ * BLUE BOTTLE" is matched as "SQ*BLUE BOTTLE").
+SQ*
+SQUARE*
+PAYPAL*
+PP*
+SUMUP*
+SUMUP
+IZ*
+IZETTLE*
+ZETTLE*
+ZTL*
+GOOGLE*
+GOOG*
+SP*
+SHOPIFY*
+TST*
+STRIPE*
+STR*
+PADDLE.NET*
+2CO.COM*
+FS*
+DNH*
+CKO*
+YOCO*
+PAYU*
+ZETTLE_*

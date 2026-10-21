@@ -24,6 +24,7 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 
+	"github.com/movsesmeliksetyan/sprout-api/internal/backfill"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 )
 
@@ -112,7 +113,7 @@ func createDatabase(t testing.TB, migrated bool) string {
 	if migrated && !server.templateReady {
 		_, err := admin.Exec(ctx, "CREATE DATABASE "+templateDatabase)
 		require.NoError(t, err)
-		require.NoError(t, db.Migrate(ctx, databaseURL(t, templateDatabase), db.MigrateUp, io.Discard))
+		require.NoError(t, db.Migrate(ctx, databaseURL(t, templateDatabase), db.MigrateUp, io.Discard, backfill.Migrations()...))
 		server.templateReady = true
 	}
 

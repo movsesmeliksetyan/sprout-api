@@ -163,7 +163,7 @@ func seedTransaction(rng *rand.Rand, userID uuid.UUID, categoryIDs []uuid.UUID, 
 		row.AmountMinor = 100 + rng.Int64N(12_000)
 	}
 	if rng.IntN(4) != 0 {
-		merchant := fmt.Sprintf("Merchant %03d", rng.IntN(seedMerchants))
+		merchant := seedMerchant(rng.IntN(seedMerchants))
 		row.Merchant = &merchant
 		row.MerchantKey = transactions.MerchantKey(merchant)
 	}
@@ -173,4 +173,17 @@ func seedTransaction(rng *rand.Rand, userID uuid.UUID, categoryIDs []uuid.UUID, 
 	}
 	row.DedupHash = transactions.DedupHash(row.LocalDate, row.AmountMinor, transactions.Kind(row.Kind), row.MerchantKey)
 	return row, nil
+}
+
+// seedMerchant names the n-th seeded merchant with letters, "Merchant Aec"
+// for 42, as the normaliser drops numbers from a merchant's key. The digits
+// map to the letters a to j, so a search for "merchant ab" matches the ten
+// merchants 10 to 19.
+func seedMerchant(n int) string {
+	code := []byte(fmt.Sprintf("%03d", n))
+	for i, digit := range code {
+		code[i] = 'a' + digit - '0'
+	}
+	code[0] -= 'a' - 'A'
+	return "Merchant " + string(code)
 }

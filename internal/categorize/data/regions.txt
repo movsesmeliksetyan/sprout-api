@@ -1,0 +1,7 @@
+# US state and Canadian province codes, which US and Canadian card
+# descriptions end with. Many are also ordinary words or country codes, so
+# one is stripped only after a known city ("BOSTON MA") or a stripped store
+# number ("SHAKE SHACK 1234 NY").
+AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO
+MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC
+AB BC MB NB NL NS ON PE QC SK YT

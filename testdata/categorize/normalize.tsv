@@ -1,0 +1,225 @@
+# Statement descriptions and merchants typed by hand, with the merchant the
+# normaliser must reduce each to. Columns, separated by tabs: description,
+# key, display. An empty key and display: the description names no merchant.
+# Anonymised: business names only, no people, accounts or card numbers.
+Ք: BAR B.Q. YEREVAN AM 629529	bar bq	Bar B.Q.
+Ք: SWEET COAST YEREVAN AM 934126	sweet coast	Sweet Coast
+Ք: GLOVO APP YEREVAN AM 165817	glovo	Glovo
+Ք: TUN LAHMAJO 4 YEREVAN AM 879767	tun lahmajo	Tun Lahmajo
+Ք: AMAZON PRIME PMTS Amzn.com/bill	amazon prime	Amazon Prime
+Ք: ANTHROPIC* CLAUDE SUB ANTHROPIC	anthropic	Anthropic
+Ք: YANDEX.GO YEREVAN AM 102938	yandex go	Yandex Go
+Ք: SAS SUPERMARKET 12 YEREVAN AM 554433	sas supermarket	SAS Supermarket
+Ք: YEREVAN CITY 34 YEREVAN AM 778899	yerevan city	Yerevan City
+Ք: CARREFOUR YEREVAN MALL YEREVAN AM 445566	carrefour	Carrefour
+Ք: STAR SUPERMARKET YEREVAN AM 112233	star supermarket	Star Supermarket
+Ք: GAZPROM ARMENIA 117 YEREVAN AM 990011	gazprom armenia	Gazprom Armenia
+Ք: TASHIR PIZZA YEREVAN AM 223344	tashir pizza	Tashir Pizza
+Ք: KARAS YEREVAN AM 334455	karas	Karas
+Ք: ZARA DALMA YEREVAN AM 667788	zara	Zara
+Ք: NATALI PHARM 27 YEREVAN AM 121212	natali pharm	Natali Pharm
+Ք: ALPHA PHARM YEREVAN AM 343434	alpha pharm	Alpha Pharm
+Ք: UCOM YEREVAN AM 565656	ucom	Ucom
+Ք: VIVA-MTS YEREVAN AM 787878	viva mts	Viva-MTS
+Ք: TEAM TELECOM ARMENIA YEREVAN AM 909090	team telecom armenia	Team Telecom Armenia
+Ք: GG TAXI YEREVAN AM 135791	gg taxi	GG Taxi
+Ք: MENU.AM YEREVAN AM 246802	menu am	Menu.am
+Ք: BUY.AM YEREVAN AM 112358	buy am	Buy.am
+Ք: WILDBERRIES YEREVAN AM 314159	wildberries	Wildberries
+Ք: ARMENIA CINEMA YEREVAN AM 271828	armenia cinema	Armenia Cinema
+Ք: JAZZVE CAFE YEREVAN AM 161803	jazzve cafe	Jazzve Cafe
+Ք: COFFEE HOUSE 3 GYUMRI AM 141421	coffee house	Coffee House
+Ք: SPAR VANADZOR AM 173205	spar	Spar
+Ք: NETFLIX.COM Los Gatos US	netflix	Netflix
+Ք: SPOTIFY P1A2B3C4D5 STOCKHOLM SE	spotify	Spotify
+Ք: GOOGLE *YouTube Premium g.co/helppay#	youtube premium	YouTube Premium
+Ք: OPENAI *CHATGPT SUBSCR OPENAI.COM US	openai	OpenAI
+Ք: APPLE.COM/BILL ITUNES.COM IE	apple	Apple
+Ք: BOOKING.COM AMSTERDAM NL	booking com	Booking.com
+Ք: AIRBNB * HMQ8XK2T4P SAN FRANCISCO US	airbnb	Airbnb
+CARD PAYMENT TO TESCO STORES 3297 LONDON GB ON 14-07	tesco	Tesco
+CARD PAYMENT TO TESCO EXPRESS 4412 MANCHESTER GB	tesco	Tesco
+TESCO PFS 2471 LEEDS GB	tesco	Tesco
+CARD PAYMENT TO SAINSBURYS S/MKTS 0123 LONDON	sainsburys	Sainsbury's
+SAINSBURY'S LOCAL 2311	sainsburys	Sainsbury's
+ASDA STORES 4567 BIRMINGHAM GB	asda	Asda
+ASDA SUPERSTORE	asda	Asda
+M&S SIMPLY FOOD - BRISTOL	marks and spencer	M&S
+MARKS & SPENCER PLC 0412	marks and spencer	M&S
+WAITROSE & PARTNERS 712 OXFORD GB	waitrose	Waitrose
+LIDL GB 1234 LIVERPOOL	lidl	Lidl
+ALDI STORES 112 GLASGOW GB	aldi	Aldi
+CO-OP GROUP FOOD 0291	coop	Co-op
+ICELAND FOODS 0912	iceland foods	Iceland Foods
+MORRISONS 0281 SHEFFIELD GB	morrisons	Morrisons
+POS VISA CONTACTLESS PRET A MANGER 123 LONDON	pret a manger	Pret A Manger
+PRET A MANGER (UK) LTD LONDON GB	pret a manger	Pret A Manger
+COSTA COFFEE 43012 LONDON GB	costa coffee	Costa Coffee
+STARBUCKS COFFEE 12345 LONDON GB	starbucks	Starbucks
+CAFFE NERO 0233 LONDON	caffe nero	Caffe Nero
+GREGGS 1234 NEWCASTLE GB	greggs	Greggs
+MCDONALDS 1234 LONDON GB	mcdonalds	McDonald's
+McDonald's Restaurant 0451	mcdonalds	McDonald's
+KFC UK LONDON	kfc	KFC
+NANDOS EDINBURGH	nandos	Nandos
+WAGAMAMA 12 BRISTOL GB	wagamama	Wagamama
+PIZZA EXPRESS 2234	pizza express	Pizza Express
+DELIVEROO.CO.UK LONDON GB	deliveroo	Deliveroo
+DELIVEROO PLUS	deliveroo	Deliveroo
+UBER *EATS HELP.UBER.COM	uber eats	Uber Eats
+UBER *TRIP HELP.UBER.COM	uber	Uber
+UBER TRIP 7XK2PQ HELP.UBER.COM GB	uber	Uber
+TFL TRAVEL CH TFL.GOV.UK/CP	transport for london	TfL
+TFL TRAVEL CHARGE	transport for london	TfL
+TRAINLINE.COM LONDON GB	trainline	Trainline
+NATIONAL RAIL ENQUIRIES	national rail enquiries	National Rail Enquiries
+SHELL BURTON 2341 GB	shell	Shell
+BP CONNECT 0123 READING GB	bp	BP
+ESSO MOTORWAY SERVICES	esso motorway services	Esso Motorway Services
+TESLA SUPERCHARGER GB	tesla supercharger	Tesla Supercharger
+NCP CAR PARK 23 LONDON	ncp car park	NCP Car Park
+RINGGO PARKING	ringgo parking	Ringgo Parking
+BOOTS THE CHEMIST 1123 LONDON GB	boots	Boots
+BOOTS 0423	boots	Boots
+SUPERDRUG 1203	superdrug	Superdrug
+SPECSAVERS OPTICIANS LONDON	specsavers opticians	Specsavers Opticians
+PUREGYM LTD LEEDS GB	puregym	PureGym
+THE GYM GROUP 0082	the gym group	The Gym Group
+DIRECT DEBIT TO BRITISH GAS	british gas	British Gas
+DIRECT DEBIT OCTOPUS ENERGY	octopus energy	Octopus Energy
+DD THAMES WATER UTILITIES	thames water utilities	Thames Water Utilities
+DIRECT DEBIT COUNCIL TAX LONDON BOROUGH	council tax london borough	Council Tax London Borough
+DIRECT DEBIT VODAFONE LTD	vodafone	Vodafone
+SKY DIGITAL	sky digital	Sky Digital
+BT GROUP PLC	bt group	BT Group
+VIRGIN MEDIA PYMTS	virgin media	Virgin Media
+EE LIMITED	ee	EE
+NETFLIX.COM	netflix	Netflix
+NETFLIX INTERNATIONAL B.V.	netflix	Netflix
+SPOTIFY UK	spotify	Spotify
+SPOTIFY AB	spotify	Spotify
+DISNEY PLUS	disney plus	Disney Plus
+AMAZON PRIME MEMBERSHIP	amazon prime	Amazon Prime
+PRIME VIDEO	amazon prime	Amazon Prime
+AMZN MKTP UK*2K3XX4 AMAZON.CO.UK	amazon	Amazon
+AMZN MKTP US*2K3XX4 AMZN.COM/BILL WA	amazon	Amazon
+AMAZON.CO.UK*MK1234567 AMAZON.CO.UK LU	amazon	Amazon
+WWW.AMAZON.CO.UK	amazon	Amazon
+APPLE.COM/BILL	apple	Apple
+APPLE STORE REGENT STREET LONDON	apple	Apple
+ITUNES.COM/BILL	apple	Apple
+GOOGLE *GOOGLE STORAGE	google	Google
+GOOGLE PLAY APPS	google	Google
+YOUTUBEPREMIUM G.CO/HELPPAY	youtube premium	YouTube Premium
+MICROSOFT*XBOX	microsoft	Microsoft
+STEAMGAMES.COM 4259522985	steamgames	Steamgames
+PAYPAL *SPOTIFY 35314369001 GB	spotify	Spotify
+PAYPAL *EBAY UK 35314369001	ebay	eBay
+PAYPAL *NINTENDO	nintendo	Nintendo
+SQ *BLUE BOTTLE COFFEE SAN FRANCISCO CA	blue bottle coffee	Blue Bottle Coffee
+SQ * THE COFFEE CART	the coffee cart	The Coffee Cart
+SUMUP *FARMERS MARKET STALL	farmers market stall	Farmers Market Stall
+IZ *THE BAKERY	the bakery	The Bakery
+ZETTLE_*LOCAL FLORIST	local florist	Local Florist
+TST* SHAKE SHACK 1234 NEW YORK NY	shake shack	Shake Shack
+SP * GYMSHARK	gymshark	Gymshark
+SHOPIFY*ALLBIRDS	allbirds	Allbirds
+STRIPE*NOTION LABS	notion labs	Notion Labs
+PADDLE.NET* SETAPP	setapp	Setapp
+IKEA LTD 0123 WEMBLEY GB	ikea	IKEA
+IKEA STORE	ikea	IKEA
+H&M 0123 LONDON GB	h&m	H&M
+H & M HENNES	h&m	H&M
+ZARA UK 3321 LONDON	zara	Zara
+PRIMARK STORES LTD	primark	Primark
+JOHN LEWIS 0123	john lewis	John Lewis
+ARGOS LTD	argos	Argos
+CURRYS 0412	currys	Currys
+SCREWFIX DIRECT	screwfix direct	Screwfix Direct
+B&Q 1234 CROYDON	b&q	B&Q
+WICKES 0332	wickes	Wickes
+RYANAIR LTD DUBLIN IE	ryanair	Ryanair
+EASYJET AIRLINE LUTON GB	easyjet	easyJet
+EASYJET.COM	easyjet	easyJet
+BRITISH AIRWAYS 1252352345	british airways	British Airways
+AIRBNB HMQ	airbnb	Airbnb
+BOOKING.COM HOTEL	booking com	Booking.com
+HOTELS.COM 123456789	hotels com	Hotels.com
+EXPEDIA 7234234	expedia	Expedia
+CINEWORLD 0123	cineworld	Cineworld
+ODEON CINEMAS 041	odeon cinemas	Odeon Cinemas
+VUE CINEMAS	vue cinemas	Vue Cinemas
+PURCHASE 13JUL STARBUCKS 4412	starbucks	Starbucks
+CHECKCARD 0714 WHOLE FOODS MARKET 10273 AUSTIN TX	whole foods market	Whole Foods Market
+DEBIT CARD PURCHASE TARGET 00012345 MINNEAPOLIS MN	target	Target
+POS DEBIT WALMART SUPERCENTER #1234	walmart supercenter	Walmart Supercenter
+CHIPOTLE 1234 BOSTON MA	chipotle	Chipotle
+7-ELEVEN #33421	7eleven	7-Eleven
+99 CENTS ONLY 0123	99 cents only	99 Cents Only
+TRADER JOE'S #552	trader joes	Trader Joe's
+CVS/PHARMACY #01234	cvs pharmacy	CVS Pharmacy
+WALGREENS #12345	walgreens	Walgreens
+HOME DEPOT #4312	home depot	Home Depot
+LYFT *RIDE TUE 8PM	lyft	Lyft
+UBER TRIP SAN FRANCISCO	uber	Uber
+DOORDASH*CHIPOTLE	doordash	DoorDash
+GRUBHUB*JOESPIZZA	grubhub	Grubhub
+COMCAST CABLE COMM	comcast cable comm	Comcast Cable Comm
+VERIZON WIRELESS PAYMENTS	verizon wireless	Verizon Wireless
+AT&T BILL PAYMENT	at&t	AT&T
+CON EDISON	con edison	Con Edison
+KARTENZAHLUNG REWE MARKT GMBH 14.07.2025 BERLIN DE	rewe markt	Rewe Markt
+KARTENZAHLUNG EDEKA CENTER	edeka center	Edeka Center
+LASTSCHRIFT DM-DROGERIE MARKT	dm	dm-drogerie markt
+SEPA-LASTSCHRIFT VODAFONE GMBH	vodafone	Vodafone
+LIDL DIENSTLEISTUNG GMBH	lidl	Lidl
+ALDI SUED	aldi	Aldi
+ROSSMANN 1234 MUENCHEN	rossmann	Rossmann
+DB VERTRIEB GMBH FRANKFURT AM MAIN DE	deutsche bahn	Deutsche Bahn
+MVG MUENCHEN	mvg	MVG
+LIEFERANDO.DE	lieferando	Lieferando
+PAIEMENT PAR CARTE CARREFOUR CITY PARIS 12/07	carrefour	Carrefour
+CB MONOPRIX 12/07 PARIS	monoprix	Monoprix
+ACHAT CB FRANPRIX 14.07.25	franprix	Franprix
+PRLV SEPA EDF CLIENTS PARTICULIERS	edf clients particuliers	Edf Clients Particuliers
+PRLV SEPA FREE MOBILE	free mobile	Free Mobile
+SNCF INTERNET	sncf internet	Sncf Internet
+RATP PARIS	ratp	Ratp
+COMPRA TARJETA MERCADONA VALENCIA ES	mercadona	Mercadona
+COMPRA EN EL CORTE INGLES	el corte ingles	El Corte Ingles
+PAGO CON TARJETA ZARA ESPANA SA	zara	Zara
+PAGAMENTO POS ESSELUNGA MILANO	esselunga	Esselunga
+PINBETALING ALBERT HEIJN 1234 AMSTERDAM	albert heijn	Albert Heijn
+BETAALAUTOMAAT JUMBO UTRECHT	jumbo	Jumbo
+NS GROEP IZ ZTL NS	ns	NS
+ОПЛАТА ПЯТЕРОЧКА МОСКВА RU	пятерочка	Пятерочка
+ПОКУПКА ВКУСВИЛЛ 12.07.2025	вкусвилл	Вкусвилл
+ООО РОМАШКА МОСКВА RU	ромашка	Ромашка
+ОПЛАТА ТОВАРОВ И УСЛУГ YANDEX.TAXI	yandex go	Yandex Go
+ИП ИВАНОВ А.А.	иванов аа	Иванов А.А.
+Tesco	tesco	Tesco
+Tesco Express	tesco	Tesco
+tesco metro	tesco	Tesco
+Blue Bottle Coffee	blue bottle coffee	Blue Bottle Coffee
+Cafe London	cafe	Cafe
+the corner shop	the corner shop	The Corner Shop
+Joe's Pizza	joes pizza	Joe's Pizza
+Sainsbury's	sainsburys	Sainsbury's
+Boots	boots	Boots
+Uber	uber	Uber
+Yerevan City	yerevan city	Yerevan City
+Bar B.Q.	bar bq	Bar B.Q.
+Glovo	glovo	Glovo
+gym	gym	Gym
+Rent	rent	Rent
+ACME TRADING LTD.	acme trading	Acme Trading
+GLOBEX CORPORATION	globex	Globex
+INITECH LLC	initech	Initech
+UMBRELLA CORP.	umbrella	Umbrella
+STARK INDUSTRIES INC	stark industries	Stark Industries
+WAYNE ENTERPRISES S.A.	wayne enterprises	Wayne Enterprises
+HOOLI GMBH	hooli	Hooli
+VANDELAY INDUSTRIES CO	vandelay industries	Vandelay Industries
+1234567		
+**** **** **** 1234		
+APPLE PAY	apple	Apple

@@ -24,10 +24,11 @@ const (
 // ErrUnknownMigrateCommand is returned by Migrate for any other command.
 var ErrUnknownMigrateCommand = errors.New("unknown migrate command")
 
-// Migrate runs a goose command against the embedded migrations and reports
-// what it did on out. Up applies everything pending, down rolls back the
-// latest migration, status lists each migration's state.
-func Migrate(ctx context.Context, databaseURL, command string, out io.Writer) error {
+// Migrate runs a goose command against the embedded SQL migrations and the
+// given Go migrations (backfill.Migrations), and reports what it did on out.
+// Up applies everything pending, down rolls back the latest migration,
+// status lists each migration's state.
+func Migrate(ctx context.Context, databaseURL, command string, out io.Writer, goMigrations ...*goose.Migration) error {
 	switch command {
 	case MigrateUp, MigrateDown, MigrateStatus:
 	default:
@@ -41,7 +42,7 @@ func Migrate(ctx context.Context, databaseURL, command string, out io.Writer) er
 	}
 	defer sqlDB.Close()
 
-	provider, err := goose.NewProvider(goose.DialectPostgres, sqlDB, migrations.FS)
+	provider, err := goose.NewProvider(goose.DialectPostgres, sqlDB, migrations.FS, goose.WithGoMigrations(goMigrations...))
 	if err != nil {
 		return fmt.Errorf("db: load migrations: %w", err)
 	}
@@ -85,5 +86,9 @@ func Migrate(ctx context.Context, databaseURL, command string, out io.Writer) er
 }
 
 func name(source *goose.Source) string {
+	if source.Path == "" {
+		// A Go migration has no file.
+		return fmt.Sprintf("%05d (go)", source.Version)
+	}
 	return filepath.Base(source.Path)
 }

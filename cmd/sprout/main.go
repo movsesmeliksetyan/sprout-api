@@ -16,6 +16,7 @@ import (
 
 	"github.com/movsesmeliksetyan/sprout-api/api"
 	"github.com/movsesmeliksetyan/sprout-api/internal/auth"
+	"github.com/movsesmeliksetyan/sprout-api/internal/backfill"
 	"github.com/movsesmeliksetyan/sprout-api/internal/categories"
 	"github.com/movsesmeliksetyan/sprout-api/internal/config"
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
@@ -236,5 +237,5 @@ func runMigrate(c cli, args []string) error {
 	if err != nil {
 		return err
 	}
-	return db.Migrate(c.ctx, databaseURL.Reveal(), args[0], c.stdout)
+	return db.Migrate(c.ctx, databaseURL.Reveal(), args[0], c.stdout, backfill.Migrations()...)
 }

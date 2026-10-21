@@ -1,0 +1,6 @@
+# Country codes banks write at the end of a card description, stripped when
+# they are the last word. ISO 3166 alpha-2, and the alpha-3 forms seen.
+AM GB UK US IE FR DE ES IT NL BE LU PT AT CH SE NO DK FI PL CZ SK HU RO BG
+GR CY MT EE LV LT SI HR RS GE AZ RU UA BY KZ TR AE IL IN CN JP KR SG HK AU
+NZ CA MX BR AR CL
+USA GBR ARM IRL FRA DEU ESP ITA NLD CAN AUS RUS
