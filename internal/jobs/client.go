@@ -67,7 +67,8 @@ func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, err
 	river.AddWorker(workers, &processReceipt{pool: pool, logger: logger, processor: receipts.NewProcessor(pool, deps.Store, deps.LLM, deps.Engine)})
 	river.AddWorker(workers, &promoteDictionary{pool: pool, logger: logger})
 	river.AddWorker(workers, &purgeIdempotencyKeys{pool: pool, logger: logger})
-	river.AddWorker(workers, &purgeStatementFiles{pool: pool, store: deps.Store, logger: logger})
+	river.AddWorker(workers, &purgeUploadFiles{pool: pool, store: deps.Store, logger: logger})
+	river.AddWorker(workers, &purgeReceipts{pool: pool, logger: logger})
 
 	client, err := river.NewClient(riverpgxv5.New(pool), &river.Config{
 		Logger:       logger,
@@ -82,7 +83,10 @@ func NewWorker(pool *pgxpool.Pool, logger *slog.Logger, deps Deps) (*Client, err
 				func() (river.JobArgs, *river.InsertOpts) { return PurgeIdempotencyKeysArgs{}, nil },
 				&river.PeriodicJobOpts{RunOnStart: true}),
 			river.NewPeriodicJob(river.PeriodicInterval(purgeEvery),
-				func() (river.JobArgs, *river.InsertOpts) { return PurgeStatementFilesArgs{}, nil },
+				func() (river.JobArgs, *river.InsertOpts) { return PurgeUploadFilesArgs{}, nil },
+				&river.PeriodicJobOpts{RunOnStart: true}),
+			river.NewPeriodicJob(river.PeriodicInterval(purgeEvery),
+				func() (river.JobArgs, *river.InsertOpts) { return PurgeReceiptsArgs{}, nil },
 				&river.PeriodicJobOpts{RunOnStart: true}),
 		},
 	})

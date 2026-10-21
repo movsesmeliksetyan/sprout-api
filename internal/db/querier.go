@@ -40,6 +40,7 @@ type Querier interface {
 	// Stores the response to replay. locked_until tells the owner apart from a
 	// request that took the key over.
 	CompleteIdempotencyKey(ctx context.Context, arg CompleteIdempotencyKeyParams) (int64, error)
+	ConfirmReceipt(ctx context.Context, arg ConfirmReceiptParams) error
 	// Returns no row unless the upload is the user's and still pending.
 	ConsumeUpload(ctx context.Context, arg ConsumeUploadParams) (Upload, error)
 	// What the user's goals gained on the calendar days from_date to to_date,
@@ -80,6 +81,9 @@ type Querier interface {
 	// Removes the seed merchants the seed file no longer has.
 	DeleteSeedDictionaryExcept(ctx context.Context, merchantKeys []string) (int64, error)
 	DeleteTransaction(ctx context.Context, arg DeleteTransactionParams) (int64, error)
+	// Receipts never confirmed within their time; their photos go with the
+	// uploads' own retention.
+	DeleteUnconfirmedReceipts(ctx context.Context, before time.Time) (int64, error)
 	// Removes learned and llm rows that too few voters agree with: under 60 %
 	// of at least @min_voters votes for the key.
 	DemoteDictionaryEntries(ctx context.Context, minVoters int64) (int64, error)

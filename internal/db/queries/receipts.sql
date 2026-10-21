@@ -47,3 +47,13 @@ SET status              = 'ready',
     raw_extraction      = @raw_extraction,
     failure             = NULL
 WHERE id = @id AND status = 'processing';
+
+-- name: ConfirmReceipt :exec
+UPDATE receipts
+SET status = 'confirmed', transaction_id = @transaction_id, confirmed_at = @confirmed_at
+WHERE id = @id;
+
+-- name: DeleteUnconfirmedReceipts :execrows
+-- Receipts never confirmed within their time; their photos go with the
+-- uploads' own retention.
+DELETE FROM receipts WHERE status <> 'confirmed' AND created_at < @before;

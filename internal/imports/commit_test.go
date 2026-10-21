@@ -21,6 +21,7 @@ import (
 	"github.com/movsesmeliksetyan/sprout-api/internal/summary"
 	"github.com/movsesmeliksetyan/sprout-api/internal/testutil"
 	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
+	"github.com/movsesmeliksetyan/sprout-api/internal/uploads"
 )
 
 func (f fixture) commitImport(t *testing.T, user testutil.TestUser, id uuid.UUID) *httptest.ResponseRecorder {
@@ -149,11 +150,11 @@ func TestPurgeFiles(t *testing.T) {
 	require.Equal(t, http.StatusNoContent, f.do(t, user, http.MethodDelete, "/imports/"+discarded.ID.String(), nil).Code)
 	abandonedKey, committedKey := objectKey(abandoned.ID), objectKey(committed.ID)
 
-	purged, err := imports.PurgeFiles(ctx, q, f.store, time.Now().Add(imports.ClosedFileTTL-time.Hour))
+	purged, err := uploads.PurgeFiles(ctx, q, f.store, time.Now().Add(imports.ClosedFileTTL-time.Hour))
 	require.NoError(t, err)
 	assert.Zero(t, purged, "nothing is due within a day")
 
-	purged, err = imports.PurgeFiles(ctx, q, f.store, time.Now().Add(imports.ClosedFileTTL+time.Hour))
+	purged, err = uploads.PurgeFiles(ctx, q, f.store, time.Now().Add(imports.ClosedFileTTL+time.Hour))
 	require.NoError(t, err)
 	assert.Equal(t, 2, purged, "the committed and the discarded file")
 	assert.True(t, gone(committedKey))
@@ -162,7 +163,7 @@ func TestPurgeFiles(t *testing.T) {
 	assert.Zero(t, f.count(t, `SELECT count(*) FROM import_rows WHERE import_id = $1 AND raw IS NOT NULL`, committed.ID))
 	assert.Equal(t, 4, f.count(t, `SELECT count(*) FROM import_rows WHERE import_id = $1 AND raw IS NOT NULL`, abandoned.ID))
 
-	purged, err = imports.PurgeFiles(ctx, q, f.store, time.Now().Add(imports.AbandonedFileTTL+time.Hour))
+	purged, err = uploads.PurgeFiles(ctx, q, f.store, time.Now().Add(imports.AbandonedFileTTL+time.Hour))
 	require.NoError(t, err)
 	assert.Equal(t, 1, purged, "the abandoned one after a week; the others only once")
 	assert.True(t, gone(abandonedKey))
