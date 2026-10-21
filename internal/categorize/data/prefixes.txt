@@ -1,0 +1,85 @@
+# Bank boilerplate at the start of a card or payment description, stripped
+# before anything else. One per line, upper case; the longest that matches
+# is stripped first, and stripping repeats ("POS VISA CONTACTLESS TESCO").
+# A prefix matches when the next character is a space or the prefix ends in
+# punctuation.
+
+# English
+CARD PAYMENT TO
+CARD PAYMENT AT
+CARD PAYMENT
+CARD PURCHASE AT
+CARD PURCHASE
+DEBIT CARD PURCHASE AT
+DEBIT CARD PURCHASE
+DEBIT CARD PAYMENT
+CREDIT CARD PURCHASE
+POS PURCHASE
+POS TRANSACTION
+POS DEBIT
+POINT OF SALE
+PURCHASE AT
+PURCHASE
+PAYMENT TO
+PAYMENT AT
+CONTACTLESS PAYMENT
+CONTACTLESS
+APPLE PAY
+GOOGLE PAY
+DIRECT DEBIT TO
+DIRECT DEBIT
+DD
+BILL PAYMENT TO
+BILL PAYMENT
+RECURRING PAYMENT
+ONLINE PAYMENT
+VISA DEBIT
+VISA PURCHASE
+VISA
+MASTERCARD
+MAESTRO
+DEBIT
+POS
+CHECKCARD
+CHECK CARD
+
+# German
+KARTENZAHLUNG
+KARTENZAHLUNG BEI
+LASTSCHRIFT
+SEPA-LASTSCHRIFT
+SEPA LASTSCHRIFT
+EC-KARTE
+GIROCARD
+
+# French
+PAIEMENT PAR CARTE
+PAIEMENT CB
+ACHAT CB
+CARTE
+CB
+PRLV SEPA
+PRLV
+
+# Spanish and Italian
+COMPRA TARJETA
+COMPRA EN
+PAGO CON TARJETA
+PAGO TARJETA
+PAGAMENTO POS
+PAGAMENTO CARTA
+
+# Dutch
+BETAALAUTOMAAT
+PINBETALING
+
+# Russian
+ОПЛАТА ТОВАРОВ И УСЛУГ
+ОПЛАТА ПОКУПКИ
+ОПЛАТА
+ПОКУПКА
+
+# Armenian (Ameriabank and others: "Ք:" marks a card transaction)
+Ք:
+ՔԱՐՏԱՅԻՆ ԳՈՐԾԱՐՔ
+ԳՆՈՒՄ

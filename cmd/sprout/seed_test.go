@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 
 	"github.com/movsesmeliksetyan/sprout-api/internal/db"
 	"github.com/movsesmeliksetyan/sprout-api/internal/testutil"
+	"github.com/movsesmeliksetyan/sprout-api/internal/transactions"
 )
 
 func TestMain(m *testing.M) { os.Exit(testutil.Main(m)) }
@@ -119,4 +121,22 @@ func TestSeed_IsNotInTheUsage(t *testing.T) {
 	usage(&stdout)
 
 	assert.NotContains(t, stdout.String(), "seed")
+}
+
+func TestSeedMerchant(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "Merchant Aec", seedMerchant(42))
+	assert.Equal(t, "Merchant Caa", seedMerchant(200))
+
+	keys := map[string]bool{}
+	searched := 0
+	for n := range seedMerchants {
+		name := seedMerchant(n)
+		keys[transactions.MerchantKey(name)] = true
+		if strings.Contains(strings.ToLower(name), "merchant ab") {
+			searched++
+		}
+	}
+	assert.Len(t, keys, seedMerchants, "every seeded merchant has a key of its own")
+	assert.Equal(t, 10, searched, "the performance search matches ten merchants")
 }

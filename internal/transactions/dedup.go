@@ -3,15 +3,17 @@ package transactions
 import (
 	"crypto/sha256"
 	"fmt"
-	"strings"
 	"time"
+
+	"github.com/movsesmeliksetyan/sprout-api/internal/categorize"
 )
 
 // MerchantKey returns merchant in the form used for matching: the same key
-// for every spelling of one merchant. Until the normaliser exists it only
-// trims and lower-cases.
+// for every spelling of one merchant, typed by hand or read from a
+// statement (categorize.Normalize). It is empty for a merchant that is only
+// codes.
 func MerchantKey(merchant string) string {
-	return strings.ToLower(strings.TrimSpace(merchant))
+	return categorize.Normalize(merchant).Key
 }
 
 // DedupHash identifies what a statement row is compared with to find

@@ -1,6 +1,6 @@
 # Sprout — Backend task tracker
 
-**Progress: 28 / 63**
+**Progress: 29 / 63**
 
 Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PRD says *what* each task is and when it counts as done; this file only records *where things stand*.
 
@@ -69,7 +69,8 @@ Status board for the tasks specified in [PRD-backend.md](PRD-backend.md). The PR
 
 - [x] BE-28 · LLM client abstraction — 2026-10-16, 7ce1ea3
   - 2026-10-21: Groq (`qwen/qwen3.8-27b`, over its OpenAI-compatible HTTP API) became the v1 provider; the Anthropic provider stays as `LLM_PROVIDER=anthropic`. The PRD's BE-28 notes describe both.
-- [ ] BE-29 · Merchant normaliser
+- [x] BE-29 · Merchant normaliser — 2026-10-21, 746366c
+  - Five data files beyond the three named (countries, regions, suffixes, legal forms, aliases); aliases come from `aliases.tsv`, not the dictionary, which does not exist until BE-30. The backfill is goose Go migration 00012 in `internal/backfill`. The PRD's BE-29 notes have the details.
 - [ ] BE-30 · Rule stores and seeds
 - [ ] BE-31 · Engine pipeline (deterministic layers)
 - [ ] BE-32 · LLM classification layer

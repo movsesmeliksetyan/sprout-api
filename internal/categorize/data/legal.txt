@@ -1,0 +1,37 @@
+# Company-form words removed from the end of a merchant's name. Compared
+# without punctuation, so "S.A." matches SA and "LTD." matches LTD.
+LTD
+LIMITED
+PLC
+LLP
+LLC
+INC
+INCORPORATED
+CORP
+CORPORATION
+CO
+GMBH
+AG
+KG
+UG
+SA
+SAS
+SARL
+SRL
+SPA
+SL
+BV
+NV
+OY
+AB
+AS
+APS
+ՍՊԸ
+ՓԲԸ
+ԲԲԸ
+ООО
+ОАО
+ЗАО
+ПАО
+АО
+ИП

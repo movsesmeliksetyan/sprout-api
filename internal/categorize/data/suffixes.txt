@@ -1,0 +1,19 @@
+# Billing boilerplate after the merchant's name, stripped from the end as
+# long as a name is left. Upper case; several words are fine.
+BILL PAYMENT
+BILL PAY
+ONLINE PAYMENT
+PAYMENTS
+PAYMENT
+PYMTS
+PYMT
+PMTS
+PMT
+AUTOPAY
+AUTO PAY
+RECURRING
+SUBSCRIPTION
+SUBSCR
+SUB
+DIRECT DEBIT
+STORES
