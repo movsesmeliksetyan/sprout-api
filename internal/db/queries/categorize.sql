@@ -106,3 +106,12 @@ RETURNING (xmax = 0)::boolean AS inserted;
 
 -- name: DeleteKeywordRulesExcept :execrows
 DELETE FROM keyword_rules WHERE NOT pattern = ANY(@patterns::text[]);
+
+-- name: ListTypedCategories :many
+-- The user's active categories that have a type, each with how many
+-- transactions it holds, in display order.
+SELECT c.id, c.category_type::text AS category_type,
+       (SELECT count(*) FROM transactions t WHERE t.user_id = c.user_id AND t.category_id = c.id)::bigint AS transactions
+FROM categories c
+WHERE c.user_id = @user_id AND c.archived_at IS NULL AND c.category_type IS NOT NULL
+ORDER BY c.sort_order, c.id;

@@ -103,6 +103,9 @@ type Querier interface {
 	// A page of the user's transactions, newest first. A null filter is not
 	// applied. The cursor is the last row of the previous page.
 	ListTransactions(ctx context.Context, arg ListTransactionsParams) ([]Transaction, error)
+	// The user's active categories that have a type, each with how many
+	// transactions it holds, in display order.
+	ListTypedCategories(ctx context.Context, userID uuid.UUID) ([]ListTypedCategoriesRow, error)
 	// The position after the user's last active category.
 	NextCategorySortOrder(ctx context.Context, userID uuid.UUID) (int32, error)
 	// The position after the user's last goal.

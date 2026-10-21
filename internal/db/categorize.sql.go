@@ -188,6 +188,42 @@ func (q *Queries) ListMerchantRules(ctx context.Context, arg ListMerchantRulesPa
 	return items, nil
 }
 
+const listTypedCategories = `-- name: ListTypedCategories :many
+SELECT c.id, c.category_type::text AS category_type,
+       (SELECT count(*) FROM transactions t WHERE t.user_id = c.user_id AND t.category_id = c.id)::bigint AS transactions
+FROM categories c
+WHERE c.user_id = $1 AND c.archived_at IS NULL AND c.category_type IS NOT NULL
+ORDER BY c.sort_order, c.id
+`
+
+type ListTypedCategoriesRow struct {
+	ID           uuid.UUID
+	CategoryType string
+	Transactions int64
+}
+
+// The user's active categories that have a type, each with how many
+// transactions it holds, in display order.
+func (q *Queries) ListTypedCategories(ctx context.Context, userID uuid.UUID) ([]ListTypedCategoriesRow, error) {
+	rows, err := q.db.Query(ctx, listTypedCategories, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListTypedCategoriesRow
+	for rows.Next() {
+		var i ListTypedCategoriesRow
+		if err := rows.Scan(&i.ID, &i.CategoryType, &i.Transactions); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const saveLLMDictionaryEntries = `-- name: SaveLLMDictionaryEntries :exec
 INSERT INTO merchant_dictionary (id, merchant_key, category_type, display_name, source, confidence, model, expires_at)
 SELECT e.id, e.merchant_key, NULLIF(e.category_type, ''), e.display_name, 'llm', e.confidence, e.model,
